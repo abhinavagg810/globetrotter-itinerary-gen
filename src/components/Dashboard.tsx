@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Plus, BookOpen, User, Bell, Plane } from "lucide-react";
+import { MapPin, Plus, BookOpen, User, Bell, Plane, Star, Globe, Award, TrendingUp } from "lucide-react";
+import premiumDashboardBg from "@/assets/premium-dashboard-bg.jpg";
 
 interface DashboardProps {
   onCreateItinerary: () => void;

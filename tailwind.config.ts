@@ -26,7 +26,9 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					light: 'hsl(var(--primary-light))',
+					dark: 'hsl(var(--primary-dark))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -61,12 +63,34 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Travel-specific colors
+				ocean: 'hsl(var(--ocean))',
+				sky: 'hsl(var(--sky))',
+				sunset: 'hsl(var(--sunset))',
+				coral: 'hsl(var(--coral))',
+				mint: 'hsl(var(--mint))',
+				sand: 'hsl(var(--sand))',
+				gold: 'hsl(var(--gold))',
+				'deep-blue': 'hsl(var(--deep-blue))',
+				sage: 'hsl(var(--sage))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			boxShadow: {
+				'premium': 'var(--shadow-premium)',
+				'soft': '0 2px 8px -2px rgba(0, 0, 0, 0.1), 0 4px 16px -4px rgba(0, 0, 0, 0.1)',
+				'glow': '0 0 20px rgba(59, 130, 246, 0.3)'
+			},
+			backgroundImage: {
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-ocean': 'var(--gradient-ocean)',
+				'gradient-sunset': 'var(--gradient-sunset)',
+				'gradient-premium': 'var(--gradient-premium)'
 			},
 			keyframes: {
 				'accordion-down': {

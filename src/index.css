@@ -8,8 +8,8 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Travel-themed color palette */
-    --background: 210 100% 98%;
+    /* Premium travel-themed color palette */
+    --background: 210 20% 98%;
     --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
@@ -18,38 +18,55 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Ocean blue primary */
-    --primary: 205 87% 45%;
+    /* Deep ocean blue primary */
+    --primary: 214 84% 56%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 205 87% 65%;
-    --primary-dark: 205 87% 35%;
+    --primary-light: 214 84% 70%;
+    --primary-dark: 214 84% 42%;
 
-    /* Coral secondary for warm accents */
-    --secondary: 15 85% 65%;
+    /* Warm coral secondary */
+    --secondary: 14 100% 57%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Soft sky background tones */
+    /* Soft neutral tones */
     --muted: 210 40% 96%;
     --muted-foreground: 215 15% 55%;
 
-    /* Sunset accent */
-    --accent: 25 95% 70%;
+    /* Golden accent */
+    --accent: 43 96% 56%;
     --accent-foreground: 215 25% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 88%;
-    --input: 215 20% 94%;
-    --ring: 205 87% 45%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 214 84% 56%;
 
-    /* Travel-specific colors */
-    --ocean: 205 87% 45%;
-    --sky: 210 100% 85%;
-    --sunset: 25 95% 70%;
-    --coral: 15 85% 65%;
-    --mint: 165 55% 75%;
-    --sand: 45 60% 85%;
+    /* Premium travel colors */
+    --ocean: 214 84% 56%;
+    --sky: 197 71% 73%;
+    --sunset: 14 100% 57%;
+    --coral: 14 100% 57%;
+    --mint: 158 64% 52%;
+    --sand: 45 29% 97%;
+    --gold: 43 96% 56%;
+    --deep-blue: 214 84% 42%;
+    --sage: 158 25% 50%;
+
+    /* Premium gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(197 71% 73%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(214 32% 97%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(214 84% 42%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(14 100% 57%) 0%, hsl(43 96% 56%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(158 64% 52%) 50%, hsl(43 96% 56%) 100%);
+
+    /* Premium shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(214 84% 56% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(214 84% 56% / 0.1), 0 2px 4px -2px hsl(214 84% 56% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(214 84% 56% / 0.1), 0 4px 6px -4px hsl(214 84% 56% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(214 84% 56% / 0.1), 0 8px 10px -6px hsl(214 84% 56% / 0.1);
+    --shadow-premium: 0 25px 50px -12px hsl(214 84% 56% / 0.25);
 
     --radius: 0.75rem;
 
@@ -64,7 +81,7 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Travel-themed dark mode colors */
+    /* Premium dark mode colors */
     --background: 215 25% 15%;
     --foreground: 210 40% 98%;
 
@@ -74,18 +91,18 @@ All colors MUST be HSL.
     --popover: 215 25% 18%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 205 87% 55%;
+    --primary: 214 84% 70%;
     --primary-foreground: 215 25% 15%;
-    --primary-light: 205 87% 70%;
-    --primary-dark: 205 87% 40%;
+    --primary-light: 214 84% 80%;
+    --primary-dark: 214 84% 60%;
 
-    --secondary: 15 85% 55%;
+    --secondary: 14 100% 67%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 25% 25%;
     --muted-foreground: 215 15% 65%;
 
-    --accent: 25 95% 60%;
+    --accent: 43 96% 66%;
     --accent-foreground: 215 25% 15%;
 
     --destructive: 0 84% 60%;
@@ -93,15 +110,32 @@ All colors MUST be HSL.
 
     --border: 215 20% 30%;
     --input: 215 20% 25%;
-    --ring: 205 87% 55%;
+    --ring: 214 84% 70%;
 
-    /* Travel-specific dark colors */
-    --ocean: 205 87% 55%;
-    --sky: 210 100% 75%;
-    --sunset: 25 95% 60%;
-    --coral: 15 85% 55%;
-    --mint: 165 55% 65%;
-    --sand: 45 60% 75%;
+    /* Premium dark colors */
+    --ocean: 214 84% 70%;
+    --sky: 197 71% 83%;
+    --sunset: 14 100% 67%;
+    --coral: 14 100% 67%;
+    --mint: 158 64% 62%;
+    --sand: 45 29% 85%;
+    --gold: 43 96% 66%;
+    --deep-blue: 214 84% 60%;
+    --sage: 158 25% 60%;
+
+    /* Premium dark gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(214 84% 70%) 0%, hsl(197 71% 83%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(215 25% 18%) 0%, hsl(214 32% 22%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(214 84% 70%) 0%, hsl(214 84% 60%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(14 100% 67%) 0%, hsl(43 96% 66%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(214 84% 70%) 0%, hsl(158 64% 62%) 50%, hsl(43 96% 66%) 100%);
+
+    /* Premium dark shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+    --shadow-premium: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -120,6 +154,43 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .bg-gradient-ocean {
+    background: var(--gradient-ocean);
+  }
+  
+  .bg-gradient-sunset {
+    background: var(--gradient-sunset);
+  }
+  
+  .bg-gradient-premium {
+    background: var(--gradient-premium);
+  }
+  
+  .shadow-premium {
+    box-shadow: var(--shadow-premium);
+  }
+  
+  .text-gradient-premium {
+    background: var(--gradient-premium);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
