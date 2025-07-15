@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, MapPin, Sparkles } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ArrowLeft, MapPin, Sparkles, CalendarIcon, Plus, X } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface CreateItineraryProps {
   onBack: () => void;
@@ -28,7 +32,35 @@ export function CreateItinerary({ onBack, onGenerate }: CreateItineraryProps) {
   });
 
   const handleSubmit = () => {
+    if (formData.fromDate && formData.toDate && formData.fromDate > formData.toDate) {
+      alert("End date must be after start date");
+      return;
+    }
     onGenerate(formData);
+  };
+
+  const addDestination = () => {
+    setFormData(prev => ({ ...prev, destinations: [...prev.destinations, ""] }));
+  };
+
+  const removeDestination = (index: number) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      destinations: prev.destinations.filter((_, i) => i !== index) 
+    }));
+  };
+
+  const updateDestination = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      destinations: prev.destinations.map((dest, i) => i === index ? value : dest)
+    }));
+  };
+
+  const getDaysDifference = () => {
+    if (!formData.fromDate || !formData.toDate) return 0;
+    const timeDiff = formData.toDate.getTime() - formData.fromDate.getTime();
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
   };
 
   const travelTypes = [
@@ -41,51 +73,80 @@ export function CreateItinerary({ onBack, onGenerate }: CreateItineraryProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b p-4">
+      <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-bold text-lg">Create Itinerary</h1>
+          <div>
+            <h1 className="font-bold text-lg text-deep-blue">Create Itinerary</h1>
+            <p className="text-sm text-muted-foreground">Plan your perfect journey</p>
+          </div>
         </div>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 pb-24">
         {/* Locations */}
-        <Card>
+        <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-blue-500" />
+            <CardTitle className="flex items-center gap-2 text-deep-blue">
+              <MapPin className="h-5 w-5 text-primary" />
               Where are you traveling?
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>From (Starting Location)</Label>
+              <Label className="text-deep-blue font-medium">From (Starting Location)</Label>
               <Input
                 placeholder="e.g., New York, USA"
                 value={formData.fromLocation}
                 onChange={(e) => setFormData(prev => ({ ...prev, fromLocation: e.target.value }))}
+                className="mt-2 bg-white/70 border-border/50"
               />
             </div>
             <div>
-              <Label>To (Destination)</Label>
-              <Input
-                placeholder="e.g., Paris, France"
-                value={formData.destinations[0]}
-                onChange={(e) => setFormData(prev => ({ ...prev, destinations: [e.target.value] }))}
-              />
+              <Label className="text-deep-blue font-medium">Destinations</Label>
+              <div className="space-y-3 mt-2">
+                {formData.destinations.map((destination, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      placeholder={`Destination ${index + 1}`}
+                      value={destination}
+                      onChange={(e) => updateDestination(index, e.target.value)}
+                      className="bg-white/70 border-border/50"
+                    />
+                    {formData.destinations.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeDestination(index)}
+                        className="shrink-0 hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={addDestination}
+                  className="w-full border-dashed border-2 hover:bg-primary/10"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Destination
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Travel Type */}
-        <Card>
+        <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-orange-500" />
+            <CardTitle className="flex items-center gap-2 text-deep-blue">
+              <Sparkles className="h-5 w-5 text-accent" />
               What's your travel style?
             </CardTitle>
           </CardHeader>
@@ -94,15 +155,15 @@ export function CreateItinerary({ onBack, onGenerate }: CreateItineraryProps) {
               {travelTypes.map((type) => (
                 <div
                   key={type.id}
-                  className={`p-4 rounded-lg border-2 cursor-pointer text-center transition-all ${
+                  className={`p-4 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105 ${
                     formData.travelType === type.id
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-blue-300"
+                      ? "border-primary bg-primary/10 shadow-lg"
+                      : "border-border/50 hover:border-primary/50 bg-white/70"
                   }`}
                   onClick={() => setFormData(prev => ({ ...prev, travelType: type.id }))}
                 >
                   <div className="text-2xl mb-1">{type.emoji}</div>
-                  <div className="font-semibold text-sm">{type.label}</div>
+                  <div className="font-semibold text-sm text-deep-blue">{type.label}</div>
                 </div>
               ))}
             </div>
@@ -110,32 +171,91 @@ export function CreateItinerary({ onBack, onGenerate }: CreateItineraryProps) {
         </Card>
 
         {/* Dates */}
-        <Card>
+        <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
-            <CardTitle>Travel Dates</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-deep-blue">
+              <CalendarIcon className="h-5 w-5 text-primary" />
+              Travel Dates
+              {getDaysDifference() > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({getDaysDifference()} days)
+                </span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>From Date</Label>
-              <Input type="date" />
-            </div>
-            <div>
-              <Label>To Date</Label>
-              <Input type="date" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-deep-blue font-medium">From Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal mt-2 bg-white/70 border-border/50",
+                        !formData.fromDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.fromDate ? format(formData.fromDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.fromDate}
+                      onSelect={(date) => setFormData(prev => ({ ...prev, fromDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label className="text-deep-blue font-medium">To Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal mt-2 bg-white/70 border-border/50",
+                        !formData.toDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.toDate ? format(formData.toDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.toDate}
+                      onSelect={(date) => setFormData(prev => ({ ...prev, toDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                      disabled={(date) =>
+                        formData.fromDate ? date < formData.fromDate : false
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Generate Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 p-4 z-10">
         <Button 
           onClick={handleSubmit}
-          className="w-full h-12 bg-gradient-to-r from-blue-500 to-orange-500 text-white"
-          disabled={!formData.fromLocation || !formData.destinations[0]}
+          className="w-full h-12"
+          variant="premium"
+          size="lg"
+          disabled={!formData.fromLocation || !formData.destinations[0] || !formData.fromDate || !formData.toDate}
         >
           <Sparkles className="h-4 w-4 mr-2" />
-          Generate Itinerary
+          Generate {getDaysDifference()} Day Itinerary
           <Sparkles className="h-4 w-4 ml-2" />
         </Button>
       </div>
