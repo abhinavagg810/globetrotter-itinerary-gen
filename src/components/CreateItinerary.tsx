@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ArrowLeft, MapPin, Sparkles, CalendarIcon, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PlaceSuggestions } from "./PlaceSuggestions";
 
 interface CreateItineraryProps {
   onBack: () => void;
@@ -99,10 +100,10 @@ export function CreateItinerary({ onBack, onGenerate }: CreateItineraryProps) {
           <CardContent className="space-y-4">
             <div>
               <Label className="text-deep-blue font-medium">From (Starting Location)</Label>
-              <Input
-                placeholder="e.g., New York, USA"
+              <PlaceSuggestions
                 value={formData.fromLocation}
-                onChange={(e) => setFormData(prev => ({ ...prev, fromLocation: e.target.value }))}
+                onChange={(value) => setFormData(prev => ({ ...prev, fromLocation: value }))}
+                placeholder="e.g., Mumbai, India"
                 className="mt-2 bg-white/70 border-border/50"
               />
             </div>
@@ -111,10 +112,10 @@ export function CreateItinerary({ onBack, onGenerate }: CreateItineraryProps) {
               <div className="space-y-3 mt-2">
                 {formData.destinations.map((destination, index) => (
                   <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder={`Destination ${index + 1}`}
+                    <PlaceSuggestions
                       value={destination}
-                      onChange={(e) => updateDestination(index, e.target.value)}
+                      onChange={(value) => updateDestination(index, value)}
+                      placeholder={`Destination ${index + 1}`}
                       className="bg-white/70 border-border/50"
                     />
                     {formData.destinations.length > 1 && (

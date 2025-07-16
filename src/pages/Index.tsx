@@ -4,18 +4,39 @@ import { Dashboard } from "@/components/Dashboard";
 import { CreateItinerary, ItineraryData } from "@/components/CreateItinerary";
 import { ItineraryView } from "@/components/ItineraryView";
 import { MyItineraries } from "@/components/MyItineraries";
+import { DocumentUpload, BookingDetails } from "@/components/DocumentUpload";
+import { ExpenseTracker } from "@/components/ExpenseTracker";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
-type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries';
+type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker';
 
 const Index = () => {
   const [appState, setAppState] = useState<AppState>('auth');
   const [currentItinerary, setCurrentItinerary] = useState<ItineraryData | null>(null);
+  const [documentUploadData, setDocumentUploadData] = useState<{ itemType: 'flight' | 'hotel' | 'activity' | 'restaurant'; itemTitle: string; itemId: string } | null>(null);
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails[]>([]);
 
   const handleLogin = () => setAppState('dashboard');
   const handleCreateItinerary = () => setAppState('create');
   const handleBackToDashboard = () => setAppState('dashboard');
   const handleViewItineraries = () => setAppState('my-itineraries');
   const handleProfile = () => console.log('Profile clicked');
+  const handleViewExpenses = () => setAppState('expense-tracker');
+
+  const handleAddDetails = (itemType: 'flight' | 'hotel' | 'activity' | 'restaurant', itemTitle: string, itemId: string) => {
+    setDocumentUploadData({ itemType, itemTitle, itemId });
+    setAppState('document-upload');
+  };
+
+  const handleSaveBookingDetails = (details: BookingDetails) => {
+    setBookingDetails(prev => [...prev, details]);
+    setAppState('itinerary');
+  };
+
+  const handleViewBookingDetails = (details: BookingDetails) => {
+    // In a real app, you might want to open a modal or navigate to a detail view
+    console.log('Viewing booking details:', details);
+  };
 
   const handleGenerateItinerary = (data: ItineraryData) => {
     setCurrentItinerary(data);
@@ -34,20 +55,63 @@ const Index = () => {
     setAppState('itinerary');
   };
 
-  switch (appState) {
-    case 'auth':
-      return <AuthPage onLogin={handleLogin} />;
-    case 'dashboard':
-      return <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
-    case 'create':
-      return <CreateItinerary onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
-    case 'itinerary':
-      return currentItinerary ? <ItineraryView onBack={handleBackToDashboard} itineraryData={currentItinerary} onBookingComplete={() => {}} /> : <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
-    case 'my-itineraries':
-      return <MyItineraries onBack={handleBackToDashboard} onViewItinerary={handleViewItinerary} onCreateNew={handleCreateItinerary} />;
-    default:
-      return <AuthPage onLogin={handleLogin} />;
-  }
+  return (
+    <CurrencyProvider>
+      {(() => {
+        switch (appState) {
+          case 'auth':
+            return <AuthPage onLogin={handleLogin} />;
+          case 'dashboard':
+            return <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
+          case 'create':
+            return <CreateItinerary onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
+          case 'itinerary':
+            return currentItinerary ? (
+              <ItineraryView 
+                onBack={handleBackToDashboard} 
+                itineraryData={currentItinerary} 
+                onAddDetails={handleAddDetails}
+                onViewExpenses={handleViewExpenses}
+                bookingDetails={bookingDetails}
+              />
+            ) : (
+              <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
+            );
+          case 'my-itineraries':
+            return <MyItineraries onBack={handleBackToDashboard} onViewItinerary={handleViewItinerary} onCreateNew={handleCreateItinerary} />;
+          case 'document-upload':
+            return documentUploadData ? (
+              <DocumentUpload
+                onBack={() => setAppState('itinerary')}
+                onSave={handleSaveBookingDetails}
+                itemType={documentUploadData.itemType}
+                itemTitle={documentUploadData.itemTitle}
+              />
+            ) : (
+              <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
+            );
+          case 'expense-tracker':
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
+                <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4 sticky top-0 z-10">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setAppState('itinerary')} className="p-2 hover:bg-gray-100 rounded-lg">
+                      ←
+                    </button>
+                    <h1 className="font-bold text-lg text-deep-blue">Expense Tracker</h1>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
+                </div>
+              </div>
+            );
+          default:
+            return <AuthPage onLogin={handleLogin} />;
+        }
+      })()}
+    </CurrencyProvider>
+  );
 };
 
 export default Index;

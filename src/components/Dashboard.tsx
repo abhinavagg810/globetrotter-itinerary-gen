@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Plus, BookOpen, User, Bell, Plane, Star, Globe, Award, TrendingUp } from "lucide-react";
+import { CurrencySelector } from "./CurrencySelector";
 import premiumDashboardBg from "@/assets/premium-dashboard-bg.jpg";
 
 interface DashboardProps {
@@ -17,9 +18,10 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Plane className="h-8 w-8" />
-            <h1 className="text-2xl font-bold">TravelPlan</h1>
+            <h1 className="text-2xl font-bold">VoyageAI</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <CurrencySelector />
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
               <Bell className="h-5 w-5" />
             </Button>
