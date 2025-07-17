@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { AuthPage } from "@/components/AuthPage";
 import { Dashboard } from "@/components/Dashboard";
-import { CreateItinerary, ItineraryData } from "@/components/CreateItinerary";
+import { CreateItinerarySteps, ItineraryData } from "@/components/CreateItinerarySteps";
 import { ItineraryView } from "@/components/ItineraryView";
 import { MyItineraries } from "@/components/MyItineraries";
 import { DocumentUpload, BookingDetails } from "@/components/DocumentUpload";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
+import { Profile } from "@/components/Profile";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
-type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker';
+type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker' | 'profile';
 
 const Index = () => {
   const [appState, setAppState] = useState<AppState>('auth');
@@ -20,7 +21,7 @@ const Index = () => {
   const handleCreateItinerary = () => setAppState('create');
   const handleBackToDashboard = () => setAppState('dashboard');
   const handleViewItineraries = () => setAppState('my-itineraries');
-  const handleProfile = () => console.log('Profile clicked');
+  const handleProfile = () => setAppState('profile');
   const handleViewExpenses = () => setAppState('expense-tracker');
 
   const handleAddDetails = (itemType: 'flight' | 'hotel' | 'activity' | 'restaurant', itemTitle: string, itemId: string) => {
@@ -64,7 +65,7 @@ const Index = () => {
           case 'dashboard':
             return <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
           case 'create':
-            return <CreateItinerary onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
+            return <CreateItinerarySteps onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
           case 'itinerary':
             return currentItinerary ? (
               <ItineraryView 
@@ -106,6 +107,8 @@ const Index = () => {
                 </div>
               </div>
             );
+          case 'profile':
+            return <Profile onBack={handleBackToDashboard} />;
           default:
             return <AuthPage onLogin={handleLogin} />;
         }
