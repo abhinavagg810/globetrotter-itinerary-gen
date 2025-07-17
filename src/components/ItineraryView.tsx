@@ -237,10 +237,10 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
+    <div className="w-full min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={onBack}>
               <ArrowLeft className="h-5 w-5" />
@@ -258,7 +258,7 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
       </div>
 
       {/* Trip Summary */}
-      <div className="p-4">
+      <div className="max-w-7xl mx-auto p-4">
         <Card className="bg-gradient-ocean text-white mb-6 shadow-premium border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -287,8 +287,8 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
               💡 Tip: Drag activities between days to rearrange (except first and last day)
             </p>
 
-            {/* Multi-Day Itinerary */}
-            <div className="space-y-6">
+            {/* Multi-Day Itinerary - Premium Format */}
+            <div className="space-y-8">
               {Array.from(new Set(items.map(item => item.day))).map((day) => {
                 const dayItems = items.filter(item => item.day === day);
                 const dayDate = dayItems[0]?.date;
@@ -301,87 +301,121 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, day)}
                   >
-                    {/* Day Header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className={`w-12 h-12 bg-gradient-premium rounded-full flex items-center justify-center text-white font-bold ${isFirstOrLastDay ? 'opacity-75' : ''}`}>
-                        {day}
+                    {/* Day Header - Premium Style */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 bg-gradient-premium rounded-full flex items-center justify-center text-white font-bold shadow-lg ${isFirstOrLastDay ? 'opacity-75' : ''}`}>
+                          {day}
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-bold text-deep-blue">
+                            📅 Day {day} – {dayDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: {itineraryData.destinations[0]}
+                          </h3>
+                          <p className="text-muted-foreground">
+                            {dayDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-deep-blue">Day {day}</h3>
-                        <p className="text-muted-foreground">
-                          {dayDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                        </p>
-                        {isFirstOrLastDay && (
-                          <p className="text-xs text-muted-foreground">Fixed day (cannot rearrange)</p>
-                        )}
-                      </div>
+                      {isFirstOrLastDay && (
+                        <Badge variant="outline" className="text-xs">
+                          Fixed day (cannot rearrange)
+                        </Badge>
+                      )}
                     </div>
 
-                    {/* Day Items */}
-                    <div className="space-y-3 pl-6 border-l-2 border-primary/20">
-                      {dayItems.map((item) => {
+                    {/* Day Items - Clean Timeline Format */}
+                    <div className="space-y-4 pl-4">
+                      {dayItems.map((item, index) => {
                         const Icon = getIcon(item.type);
                         const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
                         
                         return (
-                          <Card 
+                          <div 
                             key={item.id} 
-                            className={`bg-gradient-card backdrop-blur-sm border-0 shadow-soft hover:shadow-lg transition-all duration-300 ${
-                              !isFirstOrLastDay ? 'cursor-move' : ''
-                            }`}
+                            className={`group relative ${!isFirstOrLastDay ? 'cursor-move' : ''}`}
                             draggable={!isFirstOrLastDay}
                             onDragStart={(e) => handleDragStart(e, item)}
                           >
-                            <CardContent className="p-4">
-                              <div className="flex gap-4">
-                                {!isFirstOrLastDay && (
-                                  <div className="flex items-center">
-                                    <GripVertical className="h-4 w-4 text-muted-foreground" />
-                                  </div>
-                                )}
-                                <div className="flex flex-col items-center">
-                                  <div className="p-2 rounded-lg bg-primary/10">
-                                    <Icon className="h-5 w-5 text-primary" />
-                                  </div>
-                                  <div className="text-sm font-medium text-deep-blue mt-1">
-                                    {item.time}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex-1">
-                                  <h4 className="font-semibold mb-1 text-deep-blue">{item.title}</h4>
-                                  <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
-                                  
-                                  {hasBookingDetails && (
-                                    <Badge className="bg-mint/20 text-mint border-0 mb-2">
-                                      <CheckCircle className="h-3 w-3 mr-1" />
-                                      Details Added
-                                    </Badge>
+                            <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-soft hover:shadow-lg transition-all duration-300 hover:bg-white/80">
+                              <CardContent className="p-6">
+                                <div className="flex gap-4">
+                                  {!isFirstOrLastDay && (
+                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                                    </div>
                                   )}
                                   
-                                  <div className="flex items-center justify-between">
-                                    {item.price && (
-                                      <span className="text-sm font-medium text-primary">
-                                        {item.price}
-                                      </span>
+                                  <div className="flex flex-col items-center min-w-[80px]">
+                                    <div className="p-3 rounded-full bg-gradient-premium/10 backdrop-blur-sm">
+                                      <Icon className="h-6 w-6 text-primary" />
+                                    </div>
+                                    <div className="text-sm font-bold text-deep-blue mt-2 text-center">
+                                      {item.time}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex-1">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h4 className="font-bold text-lg text-deep-blue">{item.title}</h4>
+                                      {hasBookingDetails && (
+                                        <Badge className="bg-mint/20 text-mint border-0">
+                                          <CheckCircle className="h-3 w-3 mr-1" />
+                                          Details Added
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                                      {item.description}
+                                    </p>
+                                    
+                                    {/* Example additional details like the user's sample */}
+                                    {item.type === 'flight' && (
+                                      <div className="text-sm text-muted-foreground mb-3">
+                                        <p>Transfer: Pick up a private taxi/car to destination (~2 hrs)</p>
+                                        <div className="flex gap-2 mt-2">
+                                          <Badge variant="outline" className="text-xs">Trip.com +15</Badge>
+                                          <Badge variant="outline" className="text-xs">Rome2Rio +15</Badge>
+                                        </div>
+                                      </div>
                                     )}
                                     
-                                    <div className="flex gap-2">
-                                      {item.price && (
-                                        <Button 
-                                          size="sm"
-                                          onClick={() => onAddDetails(item.type, item.title, item.id)}
-                                          variant="coral"
-                                        >
-                                          {hasBookingDetails ? 'Update Details' : 'Add Details'}
-                                        </Button>
-                                      )}
+                                    {item.type === 'hotel' && (
+                                      <div className="text-sm text-muted-foreground mb-3">
+                                        <p>Check-in at premium resort, settle in & relax</p>
+                                      </div>
+                                    )}
+                                    
+                                    {item.type === 'activity' && (
+                                      <div className="text-sm text-muted-foreground mb-3">
+                                        <p>Full-day tour—choose from multiple options:</p>
+                                        <ul className="list-disc list-inside mt-1 text-xs">
+                                          <li>4-islands tour (Chicken, Poda, Tub, and Phra Nang Cave Beach)</li>
+                                          <li>Kayaking in mangroves</li>
+                                          <li>Hot springs & Emerald Pool</li>
+                                        </ul>
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex items-center justify-between">
+                                      <div className="text-sm text-muted-foreground">
+                                        {index === 0 ? 'Morning:' : index === 1 ? 'Afternoon:' : 'Evening:'} {item.description}
+                                      </div>
+                                      
+                                      <Button 
+                                        size="sm"
+                                        onClick={() => onAddDetails(item.type, item.title, item.id)}
+                                        variant="coral"
+                                        className="ml-4"
+                                      >
+                                        {hasBookingDetails ? 'Update Details' : 'Add Details'}
+                                      </Button>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            </CardContent>
-                          </Card>
+                              </CardContent>
+                            </Card>
+                          </div>
                         );
                       })}
                     </div>
@@ -395,7 +429,7 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
             <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
           </TabsContent>
         </Tabs>
-        </div>
       </div>
-    );
+    </div>
+  );
   }

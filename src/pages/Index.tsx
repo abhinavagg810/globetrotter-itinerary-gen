@@ -58,61 +58,63 @@ const Index = () => {
 
   return (
     <CurrencyProvider>
-      {(() => {
-        switch (appState) {
-          case 'auth':
-            return <AuthPage onLogin={handleLogin} />;
-          case 'dashboard':
-            return <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
-          case 'create':
-            return <CreateItinerarySteps onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
-          case 'itinerary':
-            return currentItinerary ? (
-              <ItineraryView 
-                onBack={handleBackToDashboard} 
-                itineraryData={currentItinerary} 
-                onAddDetails={handleAddDetails}
-                onViewExpenses={handleViewExpenses}
-                bookingDetails={bookingDetails}
-              />
-            ) : (
-              <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
-            );
-          case 'my-itineraries':
-            return <MyItineraries onBack={handleBackToDashboard} onViewItinerary={handleViewItinerary} onCreateNew={handleCreateItinerary} />;
-          case 'document-upload':
-            return documentUploadData ? (
-              <DocumentUpload
-                onBack={() => setAppState('itinerary')}
-                onSave={handleSaveBookingDetails}
-                itemType={documentUploadData.itemType}
-                itemTitle={documentUploadData.itemTitle}
-              />
-            ) : (
-              <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
-            );
-          case 'expense-tracker':
-            return (
-              <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
-                <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4 sticky top-0 z-10">
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => setAppState('itinerary')} className="p-2 hover:bg-gray-100 rounded-lg">
-                      ←
-                    </button>
-                    <h1 className="font-bold text-lg text-deep-blue">Expense Tracker</h1>
+      <div className="w-full min-h-screen">
+        {(() => {
+          switch (appState) {
+            case 'auth':
+              return <AuthPage onLogin={handleLogin} />;
+            case 'dashboard':
+              return <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
+            case 'create':
+              return <CreateItinerarySteps onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
+            case 'itinerary':
+              return currentItinerary ? (
+                <ItineraryView 
+                  onBack={handleBackToDashboard} 
+                  itineraryData={currentItinerary} 
+                  onAddDetails={handleAddDetails}
+                  onViewExpenses={handleViewExpenses}
+                  bookingDetails={bookingDetails}
+                />
+              ) : (
+                <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
+              );
+            case 'my-itineraries':
+              return <MyItineraries onBack={handleBackToDashboard} onViewItinerary={handleViewItinerary} onCreateNew={handleCreateItinerary} />;
+            case 'document-upload':
+              return documentUploadData ? (
+                <DocumentUpload
+                  onBack={() => setAppState('itinerary')}
+                  onSave={handleSaveBookingDetails}
+                  itemType={documentUploadData.itemType}
+                  itemTitle={documentUploadData.itemTitle}
+                />
+              ) : (
+                <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
+              );
+            case 'expense-tracker':
+              return (
+                <div className="w-full min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
+                  <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4 sticky top-0 z-10">
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => setAppState('itinerary')} className="p-2 hover:bg-gray-100 rounded-lg">
+                        ←
+                      </button>
+                      <h1 className="font-bold text-lg text-deep-blue">Expense Tracker</h1>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
                   </div>
                 </div>
-                <div className="p-4">
-                  <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
-                </div>
-              </div>
-            );
-          case 'profile':
-            return <Profile onBack={handleBackToDashboard} />;
-          default:
-            return <AuthPage onLogin={handleLogin} />;
-        }
-      })()}
+              );
+            case 'profile':
+              return <Profile onBack={handleBackToDashboard} />;
+            default:
+              return <AuthPage onLogin={handleLogin} />;
+          }
+        })()}
+      </div>
     </CurrencyProvider>
   );
 };

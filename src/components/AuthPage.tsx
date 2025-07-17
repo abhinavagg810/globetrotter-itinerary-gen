@@ -9,13 +9,14 @@ interface AuthPageProps {
 
 export function AuthPage({ onLogin }: AuthPageProps) {
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="w-full min-h-screen relative overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${luxuryBeachHero})` }}
       />
       <div className="absolute inset-0 bg-gradient-ocean/80" />
       
+      {/* Floating Travel Icons */}
       <div className="absolute top-20 left-10 text-white/20 animate-pulse">
         <Plane className="h-8 w-8" />
       </div>
@@ -26,12 +27,28 @@ export function AuthPage({ onLogin }: AuthPageProps) {
         <Star className="h-7 w-7" />
       </div>
       
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-white mb-4">Wanderlog</h1>
-          <p className="text-white/90 text-xl mb-8">Your AI-Powered Travel Companion</p>
+      {/* Travel Destination Images */}
+      <div className="absolute top-32 right-32 w-24 h-24 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
+        <span className="text-2xl">🏝️</span>
+      </div>
+      <div className="absolute bottom-32 right-20 w-20 h-20 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
+        <span className="text-xl">🗼</span>
+      </div>
+      <div className="absolute top-48 left-32 w-28 h-28 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
+        <span className="text-2xl">🏖️</span>
+      </div>
+      
+      <div className="relative z-10 w-full min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-2xl">
+          <h1 className="text-6xl font-bold text-white mb-4 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+            VoyageAI
+          </h1>
+          <p className="text-white/90 text-2xl mb-4">Your AI-Powered Travel Companion</p>
+          <p className="text-white/70 text-lg mb-8">
+            Discover amazing destinations • Plan perfect itineraries • Create unforgettable memories
+          </p>
           
-          <Card className="w-full max-w-md bg-white/95 backdrop-blur-xl border-0 shadow-premium">
+          <Card className="w-full max-w-md mx-auto bg-white/95 backdrop-blur-xl border-0 shadow-premium">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 bg-gradient-premium rounded-full flex items-center justify-center">
                 <Plane className="h-8 w-8 text-white" />
