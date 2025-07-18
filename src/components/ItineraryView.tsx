@@ -369,33 +369,6 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                                       {item.description}
                                     </p>
                                     
-                                    {/* Example additional details like the user's sample */}
-                                    {item.type === 'flight' && (
-                                      <div className="text-sm text-muted-foreground mb-3">
-                                        <p>Transfer: Pick up a private taxi/car to destination (~2 hrs)</p>
-                                        <div className="flex gap-2 mt-2">
-                                          <Badge variant="outline" className="text-xs">Trip.com +15</Badge>
-                                          <Badge variant="outline" className="text-xs">Rome2Rio +15</Badge>
-                                        </div>
-                                      </div>
-                                    )}
-                                    
-                                    {item.type === 'hotel' && (
-                                      <div className="text-sm text-muted-foreground mb-3">
-                                        <p>Check-in at premium resort, settle in & relax</p>
-                                      </div>
-                                    )}
-                                    
-                                    {item.type === 'activity' && (
-                                      <div className="text-sm text-muted-foreground mb-3">
-                                        <p>Full-day tour—choose from multiple options:</p>
-                                        <ul className="list-disc list-inside mt-1 text-xs">
-                                          <li>4-islands tour (Chicken, Poda, Tub, and Phra Nang Cave Beach)</li>
-                                          <li>Kayaking in mangroves</li>
-                                          <li>Hot springs & Emerald Pool</li>
-                                        </ul>
-                                      </div>
-                                    )}
                                     
                                     <div className="flex items-center justify-between">
                                       <div className="text-sm text-muted-foreground">
