@@ -20,7 +20,7 @@ export interface ItineraryData {
   toDate: Date | undefined;
 }
 
-type Step = 'destination' | 'month' | 'dates' | 'departure' | 'style';
+type Step = 'destination' | 'dates' | 'departure' | 'style';
 
 export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStepsProps) {
   const [currentStep, setCurrentStep] = useState<Step>('destination');
@@ -35,7 +35,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
 
   const steps = [
     { id: 'destination', title: 'Destination', icon: MapPin },
-    { id: 'month', title: 'Month', icon: CalendarIcon },
     { id: 'dates', title: 'Dates', icon: CalendarIcon },
     { id: 'departure', title: 'Departure', icon: Plane },
     { id: 'style', title: 'Style', icon: Sparkles },
@@ -56,8 +55,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
 
   const handleNext = () => {
     if (currentStep === 'destination' && formData.destinations[0]) {
-      setCurrentStep('month');
-    } else if (currentStep === 'month' && selectedMonth) {
       setCurrentStep('dates');
     } else if (currentStep === 'dates' && formData.fromDate && formData.toDate) {
       setCurrentStep('departure');
@@ -71,10 +68,8 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
   const handleBack = () => {
     if (currentStep === 'destination') {
       onBack();
-    } else if (currentStep === 'month') {
-      setCurrentStep('destination');
     } else if (currentStep === 'dates') {
-      setCurrentStep('month');
+      setCurrentStep('destination');
     } else if (currentStep === 'departure') {
       setCurrentStep('dates');
     } else if (currentStep === 'style') {
@@ -85,7 +80,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
   const canProceed = () => {
     switch (currentStep) {
       case 'destination': return formData.destinations[0];
-      case 'month': return selectedMonth;
       case 'dates': return formData.fromDate && formData.toDate;
       case 'departure': return formData.fromLocation;
       case 'style': return formData.travelType;
@@ -170,8 +164,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
                 return IconComponent ? <IconComponent className="h-5 w-5 text-primary" /> : null;
               })()}
               {currentStep === 'destination' && 'Where do you want to go?'}
-              {currentStep === 'month' && 'Which month?'}
-              {currentStep === 'dates' && 'Select your travel dates'}
+              {currentStep === 'dates' && 'Select month and travel dates'}
               {currentStep === 'departure' && 'Where are you traveling from?'}
               {currentStep === 'style' && 'What\'s your travel style?'}
             </CardTitle>
@@ -186,47 +179,55 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               />
             )}
 
-            {currentStep === 'month' && (
-              <div className="grid grid-cols-3 gap-3">
-                {nextMonths.map((month) => (
-                  <div
-                    key={month.toISOString()}
-                    className={cn(
-                      "p-4 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
-                      selectedMonth && format(selectedMonth, 'yyyy-MM') === format(month, 'yyyy-MM')
-                        ? "border-primary bg-primary/10 shadow-lg"
-                        : "border-border/50 hover:border-primary/50 bg-white/70"
-                    )}
-                    onClick={() => setSelectedMonth(month)}
-                  >
-                    <div className="font-semibold text-deep-blue">{format(month, 'MMM')}</div>
-                    <div className="text-xs text-muted-foreground">{format(month, 'yyyy')}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {currentStep === 'dates' && (
-              <div className="space-y-4">
-                <div className="bg-white/70 rounded-lg p-4">
-                  <Calendar
-                    mode="range"
-                    selected={{
-                      from: formData.fromDate,
-                      to: formData.toDate,
-                    }}
-                    onSelect={(range) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        fromDate: range?.from,
-                        toDate: range?.to,
-                      }));
-                    }}
-                    month={selectedMonth}
-                    disabled={(date) => date < new Date() || date.getMonth() !== selectedMonth.getMonth()}
-                    className="pointer-events-auto"
-                  />
+              <div className="space-y-6">
+                {/* Month Selection */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-deep-blue">Select Month</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {nextMonths.map((month) => (
+                      <div
+                        key={month.toISOString()}
+                        className={cn(
+                          "p-3 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
+                          selectedMonth && format(selectedMonth, 'yyyy-MM') === format(month, 'yyyy-MM')
+                            ? "border-primary bg-primary/10 shadow-lg"
+                            : "border-border/50 hover:border-primary/50 bg-white/70"
+                        )}
+                        onClick={() => setSelectedMonth(month)}
+                      >
+                        <div className="font-semibold text-deep-blue text-sm">{format(month, 'MMM')}</div>
+                        <div className="text-xs text-muted-foreground">{format(month, 'yyyy')}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Date Selection */}
+                {selectedMonth && (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-deep-blue">Select Travel Dates</h3>
+                    <div className="bg-white/70 rounded-lg p-4">
+                      <Calendar
+                        mode="range"
+                        selected={{
+                          from: formData.fromDate,
+                          to: formData.toDate,
+                        }}
+                        onSelect={(range) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            fromDate: range?.from,
+                            toDate: range?.to,
+                          }));
+                        }}
+                        month={selectedMonth}
+                        disabled={(date) => date < new Date() || date.getMonth() !== selectedMonth.getMonth()}
+                        className="pointer-events-auto"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
