@@ -37,6 +37,30 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
   const [activeTab, setActiveTab] = useState("itinerary");
   const { formatPrice } = useCurrency();
 
+  const getActivityImage = (type: string, index: number) => {
+    const images = {
+      flight: [
+        'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1469899908283-0c3fbe949d6e?w=600&h=400&fit=crop'
+      ],
+      hotel: [
+        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&h=400&fit=crop'
+      ],
+      activity: [
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=600&h=400&fit=crop'
+      ],
+      restaurant: [
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop'
+      ]
+    };
+    return images[type as keyof typeof images]?.[index % images[type as keyof typeof images].length] || images.activity[0];
+  };
+
   useEffect(() => {
     const generateItinerary = async () => {
       setIsLoading(true);
@@ -318,11 +342,12 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                       </div>
                     </div>
 
-                    {/* Clean Timeline Items */}
-                    <div className="space-y-3">
-                      {dayItems.map((item) => {
+                    {/* Modern Photo Timeline Items */}
+                    <div className="space-y-4">
+                      {dayItems.map((item, itemIndex) => {
                         const Icon = getIcon(item.type);
                         const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
+                        const imageUrl = getActivityImage(item.type, itemIndex);
                         
                         return (
                           <div 
@@ -331,36 +356,54 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                             draggable={!isFirstOrLastDay}
                             onDragStart={(e) => handleDragStart(e, item)}
                           >
-                            <Card className="bg-card border hover:shadow-md transition-all duration-200">
-                              <CardContent className="p-4">
-                                <div className="flex items-start gap-4">
-                                  {/* Time & Icon */}
-                                  <div className="flex flex-col items-center min-w-[60px]">
-                                    <div className="text-xs font-medium text-muted-foreground mb-2">
+                            <Card className="bg-card border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                              <div className="relative">
+                                {/* Beautiful Activity Image */}
+                                <div className="relative h-48 overflow-hidden">
+                                  <img 
+                                    src={imageUrl} 
+                                    alt={item.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                  
+                                  {/* Time Badge */}
+                                  <div className="absolute top-4 left-4">
+                                    <Badge className="bg-white/90 text-gray-800 font-medium px-3 py-1">
                                       {item.time}
-                                    </div>
-                                    <div className="p-2 rounded-lg bg-primary/10">
+                                    </Badge>
+                                  </div>
+                                  
+                                  {/* Activity Type Badge */}
+                                  <div className="absolute top-4 right-4">
+                                    <div className="p-2 rounded-full bg-white/90 backdrop-blur-sm">
                                       <Icon className="h-4 w-4 text-primary" />
                                     </div>
                                   </div>
                                   
-                                  {/* Content */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between mb-1">
-                                      <h4 className="font-semibold text-foreground truncate pr-2">
-                                        {item.title}
-                                      </h4>
-                                      <div className="flex items-center gap-2 flex-shrink-0">
-                                        {hasBookingDetails && (
-                                          <CheckCircle className="h-4 w-4 text-green-600" />
-                                        )}
-                                        {!isFirstOrLastDay && (
-                                          <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        )}
+                                  {/* Status Icons */}
+                                  <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                                    {hasBookingDetails && (
+                                      <div className="p-1 rounded-full bg-green-500">
+                                        <CheckCircle className="h-4 w-4 text-white" />
                                       </div>
-                                    </div>
+                                    )}
+                                    {!isFirstOrLastDay && (
+                                      <div className="p-1 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <GripVertical className="h-4 w-4 text-white" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Content Section */}
+                                <CardContent className="p-6">
+                                  <div className="space-y-3">
+                                    <h4 className="font-bold text-lg text-foreground">
+                                      {item.title}
+                                    </h4>
                                     
-                                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                    <p className="text-sm text-muted-foreground leading-relaxed">
                                       {item.description}
                                     </p>
                                     
@@ -369,13 +412,13 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                                       variant="outline" 
                                       size="sm"
                                       onClick={() => onAddDetails(item.type, item.title, item.id)}
-                                      className="h-8 text-xs"
+                                      className="w-full mt-4 bg-primary/5 hover:bg-primary/10 border-primary/20"
                                     >
                                       {hasBookingDetails ? 'View Details' : 'Add Details'}
                                     </Button>
                                   </div>
-                                </div>
-                              </CardContent>
+                                </CardContent>
+                              </div>
                             </Card>
                           </div>
                         );
