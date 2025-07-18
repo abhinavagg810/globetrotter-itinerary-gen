@@ -282,12 +282,14 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="itinerary" className="space-y-0">
-            <p className="text-sm text-muted-foreground mb-4 px-2">
-              💡 Tip: Drag activities between days to rearrange (except first and last day)
-            </p>
+          <TabsContent value="itinerary" className="space-y-6">
+            <div className="text-center mb-6">
+              <p className="text-sm text-muted-foreground">
+                💡 Drag activities between days to rearrange your schedule
+              </p>
+            </div>
 
-            {/* Multi-Day Itinerary - Premium Format */}
+            {/* Clean Day-by-Day Layout */}
             <div className="space-y-8">
               {Array.from(new Set(items.map(item => item.day))).map((day) => {
                 const dayItems = items.filter(item => item.day === day);
@@ -301,89 +303,76 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, day)}
                   >
-                    {/* Day Header - Premium Style */}
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 bg-gradient-premium rounded-full flex items-center justify-center text-white font-bold shadow-lg ${isFirstOrLastDay ? 'opacity-75' : ''}`}>
-                          {day}
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-deep-blue">
-                            📅 Day {day} – {dayDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: {itineraryData.destinations[0]}
-                          </h3>
-                          <p className="text-muted-foreground">
-                            {dayDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                          </p>
-                        </div>
+                    {/* Clean Day Header */}
+                    <div className="flex items-center gap-4 mb-6 pb-4 border-b">
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                        {day}
                       </div>
-                      {isFirstOrLastDay && (
-                        <Badge variant="outline" className="text-xs">
-                          Fixed day (cannot rearrange)
-                        </Badge>
-                      )}
+                      <div>
+                        <h3 className="text-xl font-bold text-foreground">
+                          Day {day} - {dayDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {dayDate?.toLocaleDateString('en-US', { weekday: 'long' })}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Day Items - Clean Timeline Format */}
-                    <div className="space-y-4 pl-4">
-                      {dayItems.map((item, index) => {
+                    {/* Clean Timeline Items */}
+                    <div className="space-y-3">
+                      {dayItems.map((item) => {
                         const Icon = getIcon(item.type);
                         const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
                         
                         return (
                           <div 
                             key={item.id} 
-                            className={`group relative ${!isFirstOrLastDay ? 'cursor-move' : ''}`}
+                            className={`group ${!isFirstOrLastDay ? 'cursor-move' : ''}`}
                             draggable={!isFirstOrLastDay}
                             onDragStart={(e) => handleDragStart(e, item)}
                           >
-                            <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-soft hover:shadow-lg transition-all duration-300 hover:bg-white/80">
-                              <CardContent className="p-6">
-                                <div className="flex gap-4">
-                                  {!isFirstOrLastDay && (
-                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <GripVertical className="h-4 w-4 text-muted-foreground" />
-                                    </div>
-                                  )}
-                                  
-                                  <div className="flex flex-col items-center min-w-[80px]">
-                                    <div className="p-3 rounded-full bg-gradient-premium/10 backdrop-blur-sm">
-                                      <Icon className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <div className="text-sm font-bold text-deep-blue mt-2 text-center">
+                            <Card className="bg-card border hover:shadow-md transition-all duration-200">
+                              <CardContent className="p-4">
+                                <div className="flex items-start gap-4">
+                                  {/* Time & Icon */}
+                                  <div className="flex flex-col items-center min-w-[60px]">
+                                    <div className="text-xs font-medium text-muted-foreground mb-2">
                                       {item.time}
+                                    </div>
+                                    <div className="p-2 rounded-lg bg-primary/10">
+                                      <Icon className="h-4 w-4 text-primary" />
                                     </div>
                                   </div>
                                   
-                                  <div className="flex-1">
-                                    <div className="flex items-start justify-between mb-2">
-                                      <h4 className="font-bold text-lg text-deep-blue">{item.title}</h4>
-                                      {hasBookingDetails && (
-                                        <Badge className="bg-mint/20 text-mint border-0">
-                                          <CheckCircle className="h-3 w-3 mr-1" />
-                                          Details Added
-                                        </Badge>
-                                      )}
+                                  {/* Content */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between mb-1">
+                                      <h4 className="font-semibold text-foreground truncate pr-2">
+                                        {item.title}
+                                      </h4>
+                                      <div className="flex items-center gap-2 flex-shrink-0">
+                                        {hasBookingDetails && (
+                                          <CheckCircle className="h-4 w-4 text-green-600" />
+                                        )}
+                                        {!isFirstOrLastDay && (
+                                          <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        )}
+                                      </div>
                                     </div>
                                     
-                                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                                       {item.description}
                                     </p>
                                     
-                                    
-                                    <div className="flex items-center justify-between">
-                                      <div className="text-sm text-muted-foreground">
-                                        {index === 0 ? 'Morning:' : index === 1 ? 'Afternoon:' : 'Evening:'} {item.description}
-                                      </div>
-                                      
-                                      <Button 
-                                        size="sm"
-                                        onClick={() => onAddDetails(item.type, item.title, item.id)}
-                                        variant="coral"
-                                        className="ml-4"
-                                      >
-                                        {hasBookingDetails ? 'Update Details' : 'Add Details'}
-                                      </Button>
-                                    </div>
+                                    {/* Action Button */}
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => onAddDetails(item.type, item.title, item.id)}
+                                      className="h-8 text-xs"
+                                    >
+                                      {hasBookingDetails ? 'View Details' : 'Add Details'}
+                                    </Button>
                                   </div>
                                 </div>
                               </CardContent>
@@ -398,7 +387,7 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
             </div>
           </TabsContent>
           
-          <TabsContent value="expenses" className="space-y-0">
+          <TabsContent value="expenses" className="space-y-4">
             <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
           </TabsContent>
         </Tabs>
