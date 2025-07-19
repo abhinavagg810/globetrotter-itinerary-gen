@@ -35,7 +35,7 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
             <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
               <Plane className="h-8 w-8" />
             </div>
-            <h1 className="text-2xl font-bold">VoyageAI</h1>
+            <h1 className="text-2xl font-bold">Travel Globe AI</h1>
           </div>
           <div className="flex gap-2 items-center">
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 backdrop-blur-sm">

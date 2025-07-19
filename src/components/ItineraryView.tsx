@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3 } from "lucide-react";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
@@ -327,18 +327,34 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, day)}
                   >
-                    {/* Clean Day Header */}
-                    <div className="flex items-center gap-4 mb-6 pb-4 border-b">
-                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
-                        {day}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-foreground">
-                          Day {day} - {dayDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {dayDate?.toLocaleDateString('en-US', { weekday: 'long' })}
-                        </p>
+                    {/* Sticky Day Header with Regenerate Button */}
+                    <div className="sticky top-16 z-20 bg-white/95 backdrop-blur-md rounded-lg shadow-lg border border-border/20 p-4 mb-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                            {day}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground">
+                              Day {day} - {dayDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {dayDate?.toLocaleDateString('en-US', { weekday: 'long' })}
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
+                          onClick={() => {
+                            // TODO: Implement regenerate day functionality
+                            console.log(`Regenerating Day ${day}`);
+                          }}
+                        >
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Regenerate Day
+                        </Button>
                       </div>
                     </div>
 

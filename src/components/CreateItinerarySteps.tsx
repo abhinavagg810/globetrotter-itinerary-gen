@@ -164,7 +164,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
                 return IconComponent ? <IconComponent className="h-5 w-5 text-primary" /> : null;
               })()}
               {currentStep === 'destination' && 'Where do you want to go?'}
-              {currentStep === 'dates' && 'Select month and travel dates'}
+              {currentStep === 'dates' && 'Select travel dates'}
               {currentStep === 'departure' && 'Where are you traveling from?'}
               {currentStep === 'style' && 'What\'s your travel style?'}
             </CardTitle>
@@ -180,54 +180,26 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
             )}
 
             {currentStep === 'dates' && (
-              <div className="space-y-6">
-                {/* Month Selection */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-deep-blue">Select Month</h3>
-                  <div className="grid grid-cols-3 gap-3">
-                    {nextMonths.map((month) => (
-                      <div
-                        key={month.toISOString()}
-                        className={cn(
-                          "p-3 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
-                          selectedMonth && format(selectedMonth, 'yyyy-MM') === format(month, 'yyyy-MM')
-                            ? "border-primary bg-primary/10 shadow-lg"
-                            : "border-border/50 hover:border-primary/50 bg-white/70"
-                        )}
-                        onClick={() => setSelectedMonth(month)}
-                      >
-                        <div className="font-semibold text-deep-blue text-sm">{format(month, 'MMM')}</div>
-                        <div className="text-xs text-muted-foreground">{format(month, 'yyyy')}</div>
-                      </div>
-                    ))}
-                  </div>
+              <div className="space-y-4">
+                <h3 className="font-semibold text-deep-blue">Select Travel Dates</h3>
+                <div className="bg-white/70 rounded-lg p-4">
+                  <Calendar
+                    mode="range"
+                    selected={{
+                      from: formData.fromDate,
+                      to: formData.toDate,
+                    }}
+                    onSelect={(range) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        fromDate: range?.from,
+                        toDate: range?.to,
+                      }));
+                    }}
+                    disabled={(date) => date < new Date()}
+                    className="pointer-events-auto"
+                  />
                 </div>
-
-                {/* Date Selection */}
-                {selectedMonth && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-deep-blue">Select Travel Dates</h3>
-                    <div className="bg-white/70 rounded-lg p-4">
-                      <Calendar
-                        mode="range"
-                        selected={{
-                          from: formData.fromDate,
-                          to: formData.toDate,
-                        }}
-                        onSelect={(range) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            fromDate: range?.from,
-                            toDate: range?.to,
-                          }));
-                        }}
-                        month={selectedMonth}
-                        disabled={(date) => date < new Date() || date.getMonth() !== selectedMonth.getMonth()}
-                        className="pointer-events-auto"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
