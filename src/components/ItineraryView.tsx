@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
@@ -35,6 +36,7 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
   const [items, setItems] = useState<ItineraryItem[]>([]);
   const [draggedItem, setDraggedItem] = useState<ItineraryItem | null>(null);
   const [activeTab, setActiveTab] = useState("itinerary");
+  const [selectedItem, setSelectedItem] = useState<ItineraryItem | null>(null);
   const { formatPrice } = useCurrency();
 
   const getActivityImage = (type: string, index: number) => {
@@ -358,85 +360,188 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                       </div>
                     </div>
 
-                    {/* Modern Photo Timeline Items */}
-                    <div className="space-y-4">
+                    {/* Compact Card Items */}
+                    <div className="space-y-3">
                       {dayItems.map((item, itemIndex) => {
                         const Icon = getIcon(item.type);
                         const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
                         const imageUrl = getActivityImage(item.type, itemIndex);
                         
                         return (
-                          <div 
-                            key={item.id} 
-                            className={`group ${!isFirstOrLastDay ? 'cursor-move' : ''}`}
-                            draggable={!isFirstOrLastDay}
-                            onDragStart={(e) => handleDragStart(e, item)}
-                          >
-                            <Card className="bg-card border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                              <div className="relative">
-                                {/* Beautiful Activity Image */}
-                                <div className="relative h-48 overflow-hidden">
+                          <Dialog key={item.id}>
+                            <DialogTrigger asChild>
+                              <div 
+                                className={`group cursor-pointer ${!isFirstOrLastDay ? 'hover:cursor-move' : ''}`}
+                                draggable={!isFirstOrLastDay}
+                                onDragStart={(e) => handleDragStart(e, item)}
+                                onClick={() => setSelectedItem(item)}
+                              >
+                                <Card className="bg-white/80 backdrop-blur-sm border border-border/20 hover:shadow-md transition-all duration-200 overflow-hidden">
+                                  <CardContent className="p-3">
+                                    <div className="flex items-center gap-3">
+                                      {/* Circular Number/Icon */}
+                                      <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                          <span className="text-sm font-semibold text-primary">{itemIndex + 1}</span>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Content */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1">
+                                            <h4 className="font-semibold text-sm text-foreground truncate">{item.title}</h4>
+                                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
+                                            
+                                            <div className="flex items-center gap-3 mt-2">
+                                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Clock className="h-3 w-3" />
+                                                {item.time}
+                                              </div>
+                                              
+                                              {item.type === 'activity' && (
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                  <MapPin className="h-3 w-3" />
+                                                  15 mins • 0.5 mi
+                                                </div>
+                                              )}
+                                              
+                                              {item.price && (
+                                                <span className="text-xs font-medium text-primary">{item.price}</span>
+                                              )}
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Small Thumbnail Image */}
+                                          <div className="flex-shrink-0 ml-3">
+                                            <div className="w-16 h-12 rounded-lg overflow-hidden bg-muted">
+                                              <img 
+                                                src={imageUrl} 
+                                                alt={item.title}
+                                                className="w-full h-full object-cover"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Status and Actions */}
+                                      <div className="flex-shrink-0 flex items-center gap-2">
+                                        {hasBookingDetails && (
+                                          <div className="p-1 rounded-full bg-green-100">
+                                            <CheckCircle className="h-3 w-3 text-green-600" />
+                                          </div>
+                                        )}
+                                        {!isFirstOrLastDay && (
+                                          <div className="p-1 rounded-full bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <GripVertical className="h-3 w-3 text-muted-foreground" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </DialogTrigger>
+                            
+                            {/* Detail Modal */}
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-3">
+                                  <div className="p-2 rounded-full bg-primary/10">
+                                    <Icon className="h-5 w-5 text-primary" />
+                                  </div>
+                                  {item.title}
+                                </DialogTitle>
+                              </DialogHeader>
+                              
+                              <div className="space-y-4">
+                                {/* Large Image */}
+                                <div className="relative h-64 rounded-lg overflow-hidden">
                                   <img 
                                     src={imageUrl} 
                                     alt={item.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    className="w-full h-full object-cover"
                                   />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                  
-                                  {/* Time Badge */}
                                   <div className="absolute top-4 left-4">
-                                    <Badge className="bg-white/90 text-gray-800 font-medium px-3 py-1">
+                                    <Badge className="bg-white/90 text-gray-800 font-medium">
                                       {item.time}
                                     </Badge>
                                   </div>
-                                  
-                                  {/* Activity Type Badge */}
-                                  <div className="absolute top-4 right-4">
-                                    <div className="p-2 rounded-full bg-white/90 backdrop-blur-sm">
-                                      <Icon className="h-4 w-4 text-primary" />
-                                    </div>
+                                </div>
+                                
+                                {/* Details */}
+                                <div className="space-y-3">
+                                  <div>
+                                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Description</h4>
+                                    <p className="text-foreground mt-1">{item.description}</p>
                                   </div>
                                   
-                                  {/* Status Icons */}
-                                  <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                                    {hasBookingDetails && (
-                                      <div className="p-1 rounded-full bg-green-500">
-                                        <CheckCircle className="h-4 w-4 text-white" />
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Time</h4>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <span>{item.time}</span>
+                                      </div>
+                                    </div>
+                                    
+                                    {item.price && (
+                                      <div>
+                                        <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Price</h4>
+                                        <span className="text-lg font-semibold text-primary mt-1 block">{item.price}</span>
                                       </div>
                                     )}
-                                    {!isFirstOrLastDay && (
-                                      <div className="p-1 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <GripVertical className="h-4 w-4 text-white" />
+                                  </div>
+                                  
+                                  {item.type === 'activity' && (
+                                    <div>
+                                      <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Location Details</h4>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                                        <span>15 minutes walk • 0.5 miles</span>
                                       </div>
-                                    )}
+                                    </div>
+                                  )}
+                                  
+                                  <div>
+                                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Rating</h4>
+                                    <div className="flex items-center gap-1 mt-1">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                      ))}
+                                      <span className="ml-2 text-sm text-muted-foreground">4.8 (324 reviews)</span>
+                                    </div>
                                   </div>
                                 </div>
                                 
-                                {/* Content Section */}
-                                <CardContent className="p-6">
-                                  <div className="space-y-3">
-                                    <h4 className="font-bold text-lg text-foreground">
-                                      {item.title}
-                                    </h4>
-                                    
-                                    <p className="text-sm text-muted-foreground leading-relaxed">
-                                      {item.description}
-                                    </p>
-                                    
-                                    {/* Action Button */}
+                                {/* Action Buttons */}
+                                <div className="flex gap-3 pt-4">
+                                  {hasBookingDetails ? (
                                     <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => onAddDetails(item.type, item.title, item.id)}
-                                      className="w-full mt-4 bg-primary/5 hover:bg-primary/10 border-primary/20"
+                                      className="flex-1"
+                                      variant="outline"
+                                      onClick={() => {
+                                        const details = bookingDetails.find(bd => bd.title === item.title);
+                                        if (details) handleViewBookingDetails(details);
+                                      }}
                                     >
-                                      {hasBookingDetails ? 'View Details' : 'Add Details'}
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      View Booking Details
                                     </Button>
-                                  </div>
-                                </CardContent>
+                                  ) : (
+                                    <Button 
+                                      className="flex-1"
+                                      onClick={() => onAddDetails(item.type, item.title, item.id)}
+                                    >
+                                      <Receipt className="h-4 w-4 mr-2" />
+                                      Add Booking Details
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
-                            </Card>
-                          </div>
+                            </DialogContent>
+                          </Dialog>
                         );
                       })}
                     </div>
@@ -453,4 +558,4 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
       </div>
     </div>
   );
-  }
+}
