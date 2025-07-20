@@ -70,26 +70,26 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
 
       {/* Main Actions */}
       <div className="p-6 space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <Card 
-            className="cursor-pointer bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-lg transition-all transform hover:scale-105 border-0"
+            className="cursor-pointer bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-lg transition-all transform hover:scale-[1.02] border-0"
             onClick={onCreateItinerary}
           >
-            <CardContent className="p-6 text-center">
-              <Plus className="h-12 w-12 mx-auto mb-3" />
-              <CardTitle className="text-lg mb-1">Create Itinerary</CardTitle>
-              <p className="text-white/80 text-sm">Plan your perfect trip</p>
+            <CardContent className="p-4 text-center">
+              <Plus className="h-8 w-8 mx-auto mb-2" />
+              <CardTitle className="text-sm mb-1">Create Itinerary</CardTitle>
+              <p className="text-white/80 text-xs">Plan your perfect trip</p>
             </CardContent>
           </Card>
           
           <Card 
-            className="cursor-pointer bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:shadow-lg transition-all transform hover:scale-105 border-0"
+            className="cursor-pointer bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:shadow-lg transition-all transform hover:scale-[1.02] border-0"
             onClick={onViewItineraries}
           >
-            <CardContent className="p-6 text-center">
-              <BookOpen className="h-12 w-12 mx-auto mb-3" />
-              <CardTitle className="text-lg mb-1">My Itineraries</CardTitle>
-              <p className="text-white/80 text-sm">View your trips</p>
+            <CardContent className="p-4 text-center">
+              <BookOpen className="h-8 w-8 mx-auto mb-2" />
+              <CardTitle className="text-sm mb-1">My Itineraries</CardTitle>
+              <p className="text-white/80 text-xs">View your trips</p>
             </CardContent>
           </Card>
         </div>

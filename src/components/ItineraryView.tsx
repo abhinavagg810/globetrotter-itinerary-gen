@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
@@ -35,8 +36,16 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<ItineraryItem[]>([]);
   const [draggedItem, setDraggedItem] = useState<ItineraryItem | null>(null);
-  const [activeTab, setActiveTab] = useState("itinerary");
+  const [activeTab, setActiveTab] = useState("overview");
   const [selectedItem, setSelectedItem] = useState<ItineraryItem | null>(null);
+  const [openSections, setOpenSections] = useState({
+    budget: true,
+    info: false,
+    weather: false,
+    visa: false,
+    flights: false,
+    hotels: false
+  });
   const { formatPrice } = useCurrency();
 
   const getActivityImage = (type: string, index: number) => {
@@ -303,10 +312,310 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="overview" className="space-y-4">
+            {/* Estimated Budget */}
+            <Collapsible 
+              open={openSections.budget} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, budget: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                        </div>
+                        <CardTitle className="text-lg">Estimated Budget</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.budget ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-primary">{formatPrice(150000)} - {formatPrice(200000)}</div>
+                          <p className="text-sm text-muted-foreground mt-1">For {Math.ceil((itineraryData.toDate!.getTime() - itineraryData.fromDate!.getTime()) / (1000 * 3600 * 24))} days</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-3 bg-muted/30 rounded-lg">
+                          <div className="text-lg font-semibold">{formatPrice(75000)}</div>
+                          <div className="text-xs text-muted-foreground">Flights</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/30 rounded-lg">
+                          <div className="text-lg font-semibold">{formatPrice(80000)}</div>
+                          <div className="text-xs text-muted-foreground">Accommodation</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/30 rounded-lg">
+                          <div className="text-lg font-semibold">{formatPrice(25000)}</div>
+                          <div className="text-xs text-muted-foreground">Activities</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/30 rounded-lg">
+                          <div className="text-lg font-semibold">{formatPrice(20000)}</div>
+                          <div className="text-xs text-muted-foreground">Food & Dining</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Important Info */}
+            <Collapsible 
+              open={openSections.info} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, info: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Info className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <CardTitle className="text-lg">Important Info</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.info ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                        <MapPin className="h-4 w-4 text-primary mt-0.5" />
+                        <div className="text-sm">
+                          <div className="font-medium">Local Currency</div>
+                          <div className="text-muted-foreground">Best to carry some local cash for small vendors</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                        <Clock className="h-4 w-4 text-primary mt-0.5" />
+                        <div className="text-sm">
+                          <div className="font-medium">Time Zone</div>
+                          <div className="text-muted-foreground">Plan for jet lag and adjust activities accordingly</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                        <Star className="h-4 w-4 text-primary mt-0.5" />
+                        <div className="text-sm">
+                          <div className="font-medium">Local Customs</div>
+                          <div className="text-muted-foreground">Respect local traditions and dress codes</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Weather Info */}
+            <Collapsible 
+              open={openSections.weather} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, weather: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <CloudSun className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <CardTitle className="text-lg">Weather Info</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.weather ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-2xl font-bold">28°C</div>
+                            <div className="text-sm text-muted-foreground">Average Temperature</div>
+                          </div>
+                          <div className="text-4xl">☀️</div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center p-3 bg-muted/30 rounded-lg">
+                          <div className="text-lg font-semibold">15%</div>
+                          <div className="text-xs text-muted-foreground">Rain Chance</div>
+                        </div>
+                        <div className="text-center p-3 bg-muted/30 rounded-lg">
+                          <div className="text-lg font-semibold">65%</div>
+                          <div className="text-xs text-muted-foreground">Humidity</div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <div className="text-sm font-medium text-blue-800">Packing Recommendations</div>
+                        <div className="text-xs text-blue-600 mt-1">Light cotton clothes, sunscreen, hat, comfortable walking shoes</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Visa Info */}
+            <Collapsible 
+              open={openSections.visa} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, visa: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <CardTitle className="text-lg">Visa Info</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.visa ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <div className="font-medium text-green-800">Visa on Arrival Available</div>
+                        </div>
+                        <div className="text-sm text-green-700">
+                          30-day tourist visa available at airport for eligible countries
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">Required Documents:</div>
+                        <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                          <li>• Valid passport (6+ months remaining)</li>
+                          <li>• Return ticket confirmation</li>
+                          <li>• Proof of accommodation</li>
+                          <li>• Sufficient funds proof</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Flights */}
+            <Collapsible 
+              open={openSections.flights} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, flights: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center">
+                          <Plane className="h-5 w-5 text-sky-600" />
+                        </div>
+                        <CardTitle className="text-lg">Flights</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.flights ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="p-4 border border-border/30 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="text-lg font-semibold">DEL</div>
+                            <div className="text-sm text-muted-foreground">→</div>
+                            <div className="text-lg font-semibold">{itineraryData.destinations[0]?.substring(0, 3).toUpperCase()}</div>
+                          </div>
+                          <Badge variant="secondary">{formatPrice(37500)}</Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {itineraryData.fromDate?.toLocaleDateString()} • 6:30 AM - 3:04 PM
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">INDIGO AI 295</div>
+                      </div>
+                      <div className="p-4 border border-border/30 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="text-lg font-semibold">{itineraryData.destinations[0]?.substring(0, 3).toUpperCase()}</div>
+                            <div className="text-sm text-muted-foreground">→</div>
+                            <div className="text-lg font-semibold">DEL</div>
+                          </div>
+                          <Badge variant="secondary">{formatPrice(37500)}</Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {itineraryData.toDate?.toLocaleDateString()} • 8:15 PM - 11:30 PM
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">INDIGO AI 298</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Hotels */}
+            <Collapsible 
+              open={openSections.hotels} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, hotels: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
+                          <Hotel className="h-5 w-5 text-rose-600" />
+                        </div>
+                        <CardTitle className="text-lg">Hotels & Lodging</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.hotels ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="p-4 border border-border/30 rounded-lg">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="font-semibold">The Luxury Resort</div>
+                            <div className="text-sm text-muted-foreground">
+                              {itineraryData.destinations[0]} • 4.8 ★
+                            </div>
+                          </div>
+                          <Badge variant="secondary">{formatPrice(23000)}/night</Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {itineraryData.fromDate?.toLocaleDateString()} - {itineraryData.toDate?.toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-green-600 mt-1 font-medium">✓ Free cancellation</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          </TabsContent>
           
           <TabsContent value="itinerary" className="space-y-6">
             <div className="text-center mb-6">
@@ -399,12 +708,12 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                                                 {item.time}
                                               </div>
                                               
-                                              {item.type === 'activity' && (
-                                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                                  <MapPin className="h-3 w-3" />
-                                                  15 mins • 0.5 mi
-                                                </div>
-                                              )}
+                                               {item.type === 'activity' && (
+                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                   <Car className="h-3 w-3" />
+                                                   <span>15 mins • 2.5 km</span>
+                                                 </div>
+                                               )}
                                               
                                               {item.price && (
                                                 <span className="text-xs font-medium text-primary">{item.price}</span>
