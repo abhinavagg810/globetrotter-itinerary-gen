@@ -85,33 +85,6 @@ export function AuthPage({ onLogin }: AuthPageProps) {
           </h1>
           <p className="text-white/90 text-xl mb-8">Your AI-Powered Travel Companion</p>
           
-          {/* Top Destinations */}
-          <div className="w-full max-w-4xl mx-auto mb-8">
-            <h2 className="text-2xl font-semibold text-white/90 mb-6 text-center">Discover Amazing Destinations</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {[
-                { name: "Bali", emoji: "🏝️", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=300&fit=crop&crop=center" },
-                { name: "Paris", emoji: "🗼", image: "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop&crop=center" },
-                { name: "Tokyo", emoji: "🏮", image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop&crop=center" },
-                { name: "Dubai", emoji: "🕌", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop&crop=center" }
-              ].map((dest, index) => (
-                <div key={index} className="group cursor-pointer">
-                  <div className="relative overflow-hidden rounded-xl">
-                    <img 
-                      src={dest.image} 
-                      alt={dest.name}
-                      className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-2 left-2 text-white">
-                      <div className="text-lg">{dest.emoji}</div>
-                      <div className="text-xs font-medium">{dest.name}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
           
         </div>
       </div>
