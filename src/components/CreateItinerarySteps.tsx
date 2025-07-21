@@ -46,7 +46,20 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     { id: 'style', title: 'Style', icon: Sparkles },
   ];
 
-  const currentStepIndex = steps.findIndex(s => s.id === currentStep);
+  const helpSteps = [
+    { id: 'help-dates', title: 'Travel dates', icon: CalendarIcon },
+    { id: 'help-departure', title: 'Departure', icon: Plane },
+    { id: 'help-preferences', title: 'Preferences', icon: Sparkles },
+    { id: 'help-companions', title: 'Companions', icon: MapPin },
+    { id: 'help-budget', title: 'Budget', icon: Sparkles },
+  ];
+
+  const isHelpFlow = currentStep.startsWith('help-');
+  const activeSteps = isHelpFlow ? helpSteps : steps;
+  const currentStepIndex = activeSteps.findIndex(s => s.id === currentStep);
+  
+  // For destination step in help flow, show as step 1
+  const displayStepIndex = currentStep === 'destination' && formData.needsDestinationHelp ? 0 : currentStepIndex;
 
   const nextMonths = Array.from({ length: 9 }, (_, i) => addMonths(new Date(), i));
 
@@ -148,19 +161,19 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
           <div className="flex-1">
             <h1 className="font-bold text-lg text-deep-blue">Create Itinerary</h1>
             <p className="text-sm text-muted-foreground">
-              Step {currentStepIndex + 1} of {steps.length}
+              Step {displayStepIndex + 1} of {activeSteps.length}
             </p>
           </div>
         </div>
         
         {/* Progress Bar */}
         <div className="mt-4 flex gap-2">
-          {steps.map((step, index) => (
+          {activeSteps.map((step, index) => (
             <div
               key={step.id}
               className={cn(
                 "flex-1 h-2 rounded-full",
-                index <= currentStepIndex ? "bg-primary" : "bg-gray-200"
+                index <= displayStepIndex ? "bg-primary" : "bg-gray-200"
               )}
             />
           ))}
@@ -210,7 +223,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-deep-blue">
               {(() => {
-                const IconComponent = steps[currentStepIndex].icon;
+                const IconComponent = activeSteps[displayStepIndex]?.icon;
                 return IconComponent ? <IconComponent className="h-5 w-5 text-primary" /> : null;
               })()}
               {currentStep === 'destination' && 'Where do you want to go?'}
