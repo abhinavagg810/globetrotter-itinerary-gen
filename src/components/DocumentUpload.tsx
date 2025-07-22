@@ -23,6 +23,7 @@ export interface BookingDetails {
   cost: number;
   details: string;
   documentUrl?: string;
+  address?: string;
   confirmationNumber?: string;
   checkIn?: string;
   checkOut?: string;
@@ -85,10 +86,7 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
       flightNumber: details.flightNumber,
       departure: details.departure,
       arrival: details.arrival,
-      departureAirport: details.departureAirport,
-      arrivalAirport: details.arrivalAirport,
-      departureTime: details.departureTime,
-      arrivalTime: details.arrivalTime,
+      address: details.address,
       notes: details.notes,
     };
 
@@ -274,9 +272,28 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
             
             {itemType === 'hotel' && (
               <>
+                <div>
+                  <Label className="text-deep-blue font-medium">Hotel Name</Label>
+                  <Input
+                    placeholder="e.g., Marriott Grand Hotel"
+                    value={details.provider}
+                    onChange={(e) => setDetails(prev => ({ ...prev, provider: e.target.value }))}
+                    className="mt-2 bg-white/70 border-border/50"
+                  />
+                </div>
+                <div>
+                  <Label className="text-deep-blue font-medium">Address</Label>
+                  <Textarea
+                    placeholder="Full hotel address..."
+                    value={details.address}
+                    onChange={(e) => setDetails(prev => ({ ...prev, address: e.target.value }))}
+                    className="mt-2 bg-white/70 border-border/50"
+                    rows={2}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-deep-blue font-medium">Check-in</Label>
+                    <Label className="text-deep-blue font-medium">Check-in Date & Time</Label>
                     <Input
                       type="datetime-local"
                       value={details.checkIn}
@@ -285,7 +302,7 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
                     />
                   </div>
                   <div>
-                    <Label className="text-deep-blue font-medium">Check-out</Label>
+                    <Label className="text-deep-blue font-medium">Check-out Date & Time</Label>
                     <Input
                       type="datetime-local"
                       value={details.checkOut}

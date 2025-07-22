@@ -72,6 +72,11 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
     return images[type as keyof typeof images]?.[index % images[type as keyof typeof images].length] || images.activity[0];
   };
 
+  const handleSave = (details: BookingDetails) => {
+    setBookingDetailsDialogOpen(false);
+    // Add logic to save edited booking details
+  };
+
   useEffect(() => {
     const generateItinerary = async () => {
       setIsLoading(true);
@@ -397,8 +402,102 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
             </div>
           )}
           
-          {/* Render other booking types with their respective fields */}
-          {selectedBookingDetails?.type !== 'flight' && (
+          {selectedBookingDetails?.type === 'hotel' && (
+            <div className="space-y-5">
+              {/* Upload Button at Top */}
+              <div className="flex justify-end">
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  onClick={() => onAddDetails('hotel', selectedBookingDetails.title, selectedBookingDetails.id)}
+                  className="text-xs"
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Upload Documents
+                </Button>
+              </div>
+              
+              {/* Hotel Details */}
+              <div className="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-deep-blue text-lg">{selectedBookingDetails.provider}</h3>
+                    {selectedBookingDetails.address && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {selectedBookingDetails.address}
+                      </p>
+                    )}
+                  </div>
+                  <Badge variant="outline" className="bg-white/80">
+                    Confirmation: {selectedBookingDetails.bookingReference}
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/80 p-3 rounded-lg">
+                    <div className="text-sm text-muted-foreground">Check-in</div>
+                    <div className="font-bold text-deep-blue">
+                      {selectedBookingDetails.checkIn 
+                        ? new Date(selectedBookingDetails.checkIn).toLocaleDateString()
+                        : 'Date not specified'}
+                    </div>
+                    <div className="text-sm text-primary">
+                      {selectedBookingDetails.checkIn 
+                        ? new Date(selectedBookingDetails.checkIn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        : 'Time not specified'}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white/80 p-3 rounded-lg">
+                    <div className="text-sm text-muted-foreground">Check-out</div>
+                    <div className="font-bold text-deep-blue">
+                      {selectedBookingDetails.checkOut
+                        ? new Date(selectedBookingDetails.checkOut).toLocaleDateString()
+                        : 'Date not specified'}
+                    </div>
+                    <div className="text-sm text-primary">
+                      {selectedBookingDetails.checkOut
+                        ? new Date(selectedBookingDetails.checkOut).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        : 'Time not specified'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Cost */}
+              <div className="p-4 border border-border/30 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Total Cost</div>
+                <div className="text-xl font-bold text-primary">{formatPrice(selectedBookingDetails.cost)}</div>
+              </div>
+              
+              {/* Additional Notes */}
+              {selectedBookingDetails.notes && (
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Additional Notes</div>
+                  <div className="text-sm text-deep-blue">{selectedBookingDetails.notes}</div>
+                </div>
+              )}
+              
+              {/* Document Preview */}
+              {selectedBookingDetails.documentUrl && (
+                <div className="border border-border/30 rounded-lg overflow-hidden">
+                  <div className="bg-muted/20 p-3 border-b border-border/30">
+                    <div className="text-sm font-medium">Uploaded Document</div>
+                  </div>
+                  <div className="p-4 flex justify-center">
+                    <img 
+                      src={selectedBookingDetails.documentUrl} 
+                      alt="Document preview" 
+                      className="max-h-64 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Other booking types except flight and hotel */}
+          {selectedBookingDetails && selectedBookingDetails.type !== 'flight' && selectedBookingDetails.type !== 'hotel' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 border border-border/30 rounded-lg">
@@ -413,25 +512,8 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
               
               <div className="p-4 border border-border/30 rounded-lg">
                 <div className="text-sm text-muted-foreground mb-1">Cost</div>
-                <div className="text-xl font-bold text-primary">{selectedBookingDetails && formatPrice(selectedBookingDetails.cost)}</div>
+                <div className="text-xl font-bold text-primary">{formatPrice(selectedBookingDetails.cost)}</div>
               </div>
-              
-              {selectedBookingDetails?.type === 'hotel' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 border border-border/30 rounded-lg">
-                    <div className="text-sm text-muted-foreground mb-1">Check-in</div>
-                    <div className="font-semibold text-deep-blue">
-                      {selectedBookingDetails.checkIn && new Date(selectedBookingDetails.checkIn).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div className="p-4 border border-border/30 rounded-lg">
-                    <div className="text-sm text-muted-foreground mb-1">Check-out</div>
-                    <div className="font-semibold text-deep-blue">
-                      {selectedBookingDetails.checkOut && new Date(selectedBookingDetails.checkOut).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              )}
               
               {selectedBookingDetails?.notes && (
                 <div className="p-4 border border-border/30 rounded-lg">
