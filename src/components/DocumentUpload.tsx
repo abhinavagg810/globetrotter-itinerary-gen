@@ -29,6 +29,10 @@ export interface BookingDetails {
   flightNumber?: string;
   departure?: string;
   arrival?: string;
+  departureAirport?: string;
+  arrivalAirport?: string;
+  departureTime?: string;
+  arrivalTime?: string;
   notes?: string;
 }
 
@@ -81,6 +85,10 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
       flightNumber: details.flightNumber,
       departure: details.departure,
       arrival: details.arrival,
+      departureAirport: details.departureAirport,
+      arrivalAirport: details.arrivalAirport,
+      departureTime: details.departureTime,
+      arrivalTime: details.arrivalTime,
       notes: details.notes,
     };
 
@@ -202,6 +210,15 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
             {itemType === 'flight' && (
               <>
                 <div>
+                  <Label className="text-deep-blue font-medium">Airline Name</Label>
+                  <Input
+                    placeholder="e.g., Air India, IndiGo, Vistara"
+                    value={details.provider}
+                    onChange={(e) => setDetails(prev => ({ ...prev, provider: e.target.value }))}
+                    className="mt-2 bg-white/70 border-border/50"
+                  />
+                </div>
+                <div>
                   <Label className="text-deep-blue font-medium">Flight Number</Label>
                   <Input
                     placeholder="e.g., AI101"
@@ -210,22 +227,44 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
                     className="mt-2 bg-white/70 border-border/50"
                   />
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-deep-blue font-medium">Departure</Label>
+                    <Label className="text-deep-blue font-medium">Departure Airport</Label>
                     <Input
-                      placeholder="e.g., DEL 14:30"
-                      value={details.departure}
-                      onChange={(e) => setDetails(prev => ({ ...prev, departure: e.target.value }))}
+                      placeholder="e.g., DEL"
+                      value={details.departureAirport}
+                      onChange={(e) => setDetails(prev => ({ ...prev, departureAirport: e.target.value }))}
                       className="mt-2 bg-white/70 border-border/50"
                     />
                   </div>
                   <div>
-                    <Label className="text-deep-blue font-medium">Arrival</Label>
+                    <Label className="text-deep-blue font-medium">Arrival Airport</Label>
                     <Input
-                      placeholder="e.g., BOM 16:45"
-                      value={details.arrival}
-                      onChange={(e) => setDetails(prev => ({ ...prev, arrival: e.target.value }))}
+                      placeholder="e.g., BOM"
+                      value={details.arrivalAirport}
+                      onChange={(e) => setDetails(prev => ({ ...prev, arrivalAirport: e.target.value }))}
+                      className="mt-2 bg-white/70 border-border/50"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-deep-blue font-medium">Departure Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      value={details.departureTime}
+                      onChange={(e) => setDetails(prev => ({ ...prev, departureTime: e.target.value }))}
+                      className="mt-2 bg-white/70 border-border/50"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-deep-blue font-medium">Arrival Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      value={details.arrivalTime}
+                      onChange={(e) => setDetails(prev => ({ ...prev, arrivalTime: e.target.value }))}
                       className="mt-2 bg-white/70 border-border/50"
                     />
                   </div>

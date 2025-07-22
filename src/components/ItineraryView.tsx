@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car } from "lucide-react";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
@@ -241,8 +241,12 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
     setDraggedItem(null);
   };
 
+  const [selectedBookingDetails, setSelectedBookingDetails] = useState<BookingDetails | null>(null);
+  const [bookingDetailsDialogOpen, setBookingDetailsDialogOpen] = useState(false);
+
   const handleViewBookingDetails = (details: BookingDetails) => {
-    console.log('Viewing booking details:', details);
+    setSelectedBookingDetails(details);
+    setBookingDetailsDialogOpen(true);
   };
 
   const getIcon = (type: string) => {
@@ -273,6 +277,188 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
+      {/* Booking Details Dialog */}
+      <Dialog open={bookingDetailsDialogOpen} onOpenChange={setBookingDetailsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                {selectedBookingDetails?.type === 'flight' && <Plane className="h-5 w-5 text-primary" />}
+                {selectedBookingDetails?.type === 'hotel' && <Hotel className="h-5 w-5 text-primary" />}
+                {selectedBookingDetails?.type === 'activity' && <Camera className="h-5 w-5 text-primary" />}
+                {selectedBookingDetails?.type === 'restaurant' && <Utensils className="h-5 w-5 text-primary" />}
+              </div>
+              Booking Details
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedBookingDetails?.type === 'flight' && (
+            <div className="space-y-5">
+              {/* Upload Button at Top */}
+              <div className="flex justify-end">
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  onClick={() => onAddDetails('flight', selectedBookingDetails.title, selectedBookingDetails.id)}
+                  className="text-xs"
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Upload Documents
+                </Button>
+              </div>
+              
+              {/* Airline Details */}
+              <div className="bg-sky-50 p-4 rounded-lg border border-sky-100">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-deep-blue text-lg">{selectedBookingDetails.provider}</h3>
+                  <Badge variant="outline" className="bg-white/80">
+                    {selectedBookingDetails.flightNumber || 'Flight Number N/A'}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <div className="text-center flex-1">
+                    <div className="text-sm text-muted-foreground">Departure</div>
+                    <div className="font-bold text-xl text-deep-blue">
+                      {selectedBookingDetails.departureAirport || selectedBookingDetails.departure?.split(' ')[0] || 'N/A'}
+                    </div>
+                    <div className="text-sm font-medium">
+                      {selectedBookingDetails.departureTime 
+                        ? new Date(selectedBookingDetails.departureTime).toLocaleDateString() 
+                        : selectedBookingDetails.departure?.split(' ')[1] || 'Date N/A'}
+                    </div>
+                    <div className="text-sm text-primary">
+                      {selectedBookingDetails.departureTime 
+                        ? new Date(selectedBookingDetails.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+                        : 'Time N/A'}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="w-24 h-0.5 bg-primary/20 relative">
+                      <Plane className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 text-primary h-5 w-5" />
+                    </div>
+                  </div>
+                  
+                  <div className="text-center flex-1">
+                    <div className="text-sm text-muted-foreground">Arrival</div>
+                    <div className="font-bold text-xl text-deep-blue">
+                      {selectedBookingDetails.arrivalAirport || selectedBookingDetails.arrival?.split(' ')[0] || 'N/A'}
+                    </div>
+                    <div className="text-sm font-medium">
+                      {selectedBookingDetails.arrivalTime 
+                        ? new Date(selectedBookingDetails.arrivalTime).toLocaleDateString() 
+                        : selectedBookingDetails.arrival?.split(' ')[1] || 'Date N/A'}
+                    </div>
+                    <div className="text-sm text-primary">
+                      {selectedBookingDetails.arrivalTime 
+                        ? new Date(selectedBookingDetails.arrivalTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+                        : 'Time N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Cost and Reference */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Cost</div>
+                  <div className="text-xl font-bold text-primary">{formatPrice(selectedBookingDetails.cost)}</div>
+                </div>
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Booking Reference</div>
+                  <div className="font-semibold text-deep-blue">{selectedBookingDetails.bookingReference}</div>
+                </div>
+              </div>
+              
+              {/* Additional Notes */}
+              {selectedBookingDetails.notes && (
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Additional Notes</div>
+                  <div className="text-sm text-deep-blue">{selectedBookingDetails.notes}</div>
+                </div>
+              )}
+              
+              {/* Document Preview */}
+              {selectedBookingDetails.documentUrl && (
+                <div className="border border-border/30 rounded-lg overflow-hidden">
+                  <div className="bg-muted/20 p-3 border-b border-border/30">
+                    <div className="text-sm font-medium">Uploaded Document</div>
+                  </div>
+                  <div className="p-4 flex justify-center">
+                    <img 
+                      src={selectedBookingDetails.documentUrl} 
+                      alt="Document preview" 
+                      className="max-h-64 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Render other booking types with their respective fields */}
+          {selectedBookingDetails?.type !== 'flight' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Provider</div>
+                  <div className="font-semibold text-deep-blue">{selectedBookingDetails?.provider}</div>
+                </div>
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Booking Reference</div>
+                  <div className="font-semibold text-deep-blue">{selectedBookingDetails?.bookingReference}</div>
+                </div>
+              </div>
+              
+              <div className="p-4 border border-border/30 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-1">Cost</div>
+                <div className="text-xl font-bold text-primary">{selectedBookingDetails && formatPrice(selectedBookingDetails.cost)}</div>
+              </div>
+              
+              {selectedBookingDetails?.type === 'hotel' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 border border-border/30 rounded-lg">
+                    <div className="text-sm text-muted-foreground mb-1">Check-in</div>
+                    <div className="font-semibold text-deep-blue">
+                      {selectedBookingDetails.checkIn && new Date(selectedBookingDetails.checkIn).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="p-4 border border-border/30 rounded-lg">
+                    <div className="text-sm text-muted-foreground mb-1">Check-out</div>
+                    <div className="font-semibold text-deep-blue">
+                      {selectedBookingDetails.checkOut && new Date(selectedBookingDetails.checkOut).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {selectedBookingDetails?.notes && (
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Notes</div>
+                  <div className="text-sm text-deep-blue">{selectedBookingDetails.notes}</div>
+                </div>
+              )}
+              
+              {selectedBookingDetails?.documentUrl && (
+                <div className="border border-border/30 rounded-lg overflow-hidden">
+                  <div className="bg-muted/20 p-3 border-b border-border/30">
+                    <div className="text-sm font-medium">Uploaded Document</div>
+                  </div>
+                  <div className="p-4 flex justify-center">
+                    <img 
+                      src={selectedBookingDetails.documentUrl} 
+                      alt="Document preview" 
+                      className="max-h-64 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
