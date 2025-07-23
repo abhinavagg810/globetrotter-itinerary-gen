@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload } from "lucide-react";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload, Plus, X, Route, FootprintsIcon } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
@@ -30,6 +30,14 @@ interface ItineraryItem {
   day: number;
   date: Date;
   basePrice: number; // Price in INR
+  location?: string;
+  coordinates?: { lat: number; lng: number };
+}
+
+interface TransportationInfo {
+  mode: 'flight' | 'car' | 'walk' | 'train' | 'bus';
+  duration: string;
+  distance: string;
 }
 
 export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpenses, bookingDetails }: ItineraryViewProps) {
@@ -262,6 +270,57 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
       case 'restaurant': return Utensils;
       default: return Camera;
     }
+  };
+
+  const getTransportIcon = (mode: string) => {
+    switch (mode) {
+      case 'flight': return Plane;
+      case 'car': return Car;
+      case 'walk': return FootprintsIcon;
+      case 'train': return Route;
+      case 'bus': return Navigation;
+      default: return Car;
+    }
+  };
+
+  const getTransportationBetween = (item1: ItineraryItem, item2: ItineraryItem): TransportationInfo => {
+    // Simple logic to determine transportation mode
+    if (item1.type === 'flight' || item2.type === 'flight') {
+      return { mode: 'flight', duration: '2h 30m', distance: '450 km' };
+    }
+    
+    // Random duration and distance for demo
+    const durations = ['5 mins', '10 mins', '15 mins', '20 mins', '30 mins'];
+    const distances = ['0.5 km', '1.2 km', '2.5 km', '3.8 km', '5.1 km'];
+    const modes: ('car' | 'walk' | 'train' | 'bus')[] = ['car', 'walk', 'train', 'bus'];
+    
+    const mode = modes[Math.floor(Math.random() * modes.length)];
+    const duration = durations[Math.floor(Math.random() * durations.length)];
+    const distance = distances[Math.floor(Math.random() * distances.length)];
+    
+    return { mode, duration, distance };
+  };
+
+  const addNewPlace = (day: number) => {
+    const newPlace: ItineraryItem = {
+      id: `day-${day}-new-${Date.now()}`,
+      time: "12:00",
+      title: "New Activity",
+      description: "Exciting new place to explore",
+      type: "activity",
+      price: "₹3,000",
+      bookingStatus: "available",
+      day: day,
+      date: new Date(itineraryData.fromDate!.getTime() + (day - 1) * 24 * 60 * 60 * 1000),
+      basePrice: 3000,
+      location: "City Center"
+    };
+    
+    setItems(prev => [...prev, newPlace]);
+  };
+
+  const removePlace = (itemId: string) => {
+    setItems(prev => prev.filter(item => item.id !== itemId));
   };
 
   if (isLoading) {
@@ -922,30 +981,45 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                             </p>
                           </div>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
-                          onClick={() => {
-                            // TODO: Implement regenerate day functionality
-                            console.log(`Regenerating Day ${day}`);
-                          }}
-                        >
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          Regenerate Day
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
+                            onClick={() => addNewPlace(day)}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Place
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
+                            onClick={() => {
+                              // TODO: Implement regenerate day functionality
+                              console.log(`Regenerating Day ${day}`);
+                            }}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Regenerate Day
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
                     {/* Compact Card Items */}
                     <div className="space-y-3">
-                      {dayItems.map((item, itemIndex) => {
-                        const Icon = getIcon(item.type);
-                        const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
-                        const imageUrl = getActivityImage(item.type, itemIndex);
-                        
-                        return (
-                          <Dialog key={item.id}>
+                       {dayItems.map((item, itemIndex) => {
+                         const Icon = getIcon(item.type);
+                         const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
+                         const imageUrl = getActivityImage(item.type, itemIndex);
+                         const nextItem = dayItems[itemIndex + 1];
+                         const transportInfo = nextItem ? getTransportationBetween(item, nextItem) : null;
+                         const TransportIcon = transportInfo ? getTransportIcon(transportInfo.mode) : null;
+                         
+                         return (
+                           <div key={item.id} className="space-y-3">
+                             <Dialog>
                             <DialogTrigger asChild>
                               <div 
                                 className={`group cursor-pointer ${!isFirstOrLastDay ? 'hover:cursor-move' : ''}`}
@@ -1002,19 +1076,32 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                                         </div>
                                       </div>
                                       
-                                      {/* Status and Actions */}
-                                      <div className="flex-shrink-0 flex items-center gap-2">
-                                        {hasBookingDetails && (
-                                          <div className="p-1 rounded-full bg-green-100">
-                                            <CheckCircle className="h-3 w-3 text-green-600" />
-                                          </div>
-                                        )}
-                                        {!isFirstOrLastDay && (
-                                          <div className="p-1 rounded-full bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <GripVertical className="h-3 w-3 text-muted-foreground" />
-                                          </div>
-                                        )}
-                                      </div>
+                                       {/* Status and Actions */}
+                                       <div className="flex-shrink-0 flex items-center gap-2">
+                                         {hasBookingDetails && (
+                                           <div className="p-1 rounded-full bg-green-100">
+                                             <CheckCircle className="h-3 w-3 text-green-600" />
+                                           </div>
+                                         )}
+                                         {!isFirstOrLastDay && (
+                                           <>
+                                             <Button
+                                               variant="ghost"
+                                               size="sm"
+                                               className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700"
+                                               onClick={(e) => {
+                                                 e.stopPropagation();
+                                                 removePlace(item.id);
+                                               }}
+                                             >
+                                               <X className="h-3 w-3" />
+                                             </Button>
+                                             <div className="p-1 rounded-full bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                               <GripVertical className="h-3 w-3 text-muted-foreground" />
+                                             </div>
+                                           </>
+                                         )}
+                                       </div>
                                     </div>
                                   </CardContent>
                                 </Card>
@@ -1118,8 +1205,23 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                                 </div>
                               </div>
                             </DialogContent>
-                          </Dialog>
-                        );
+                           </Dialog>
+                           
+                           {/* Transportation to Next Place */}
+                           {transportInfo && TransportIcon && (
+                             <div className="flex items-center justify-center py-3">
+                               <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm border border-border/30 rounded-full px-4 py-2 shadow-sm">
+                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                   <TransportIcon className="h-4 w-4 text-primary" />
+                                   <span className="font-medium">{transportInfo.duration}</span>
+                                   <span>•</span>
+                                   <span>{transportInfo.distance}</span>
+                                 </div>
+                               </div>
+                             </div>
+                           )}
+                           </div>
+                         );
                       })}
                     </div>
                   </div>
