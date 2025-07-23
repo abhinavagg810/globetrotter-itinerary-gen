@@ -981,29 +981,18 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                             </p>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
-                            onClick={() => addNewPlace(day)}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Add Place
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
-                            onClick={() => {
-                              // TODO: Implement regenerate day functionality
-                              console.log(`Regenerating Day ${day}`);
-                            }}
-                          >
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Regenerate Day
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
+                          onClick={() => {
+                            // TODO: Implement regenerate day functionality
+                            console.log(`Regenerating Day ${day}`);
+                          }}
+                        >
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Regenerate Day
+                        </Button>
                       </div>
                     </div>
 
@@ -1044,23 +1033,16 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
                                             <h4 className="font-semibold text-sm text-foreground truncate">{item.title}</h4>
                                             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
                                             
-                                            <div className="flex items-center gap-3 mt-2">
-                                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                                <Clock className="h-3 w-3" />
-                                                {item.time}
-                                              </div>
-                                              
-                                               {item.type === 'activity' && (
-                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                                   <Car className="h-3 w-3" />
-                                                   <span>15 mins • 2.5 km</span>
-                                                 </div>
+                                             <div className="flex items-center gap-3 mt-2">
+                                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                 <Clock className="h-3 w-3" />
+                                                 {item.time}
+                                               </div>
+                                               
+                                               {item.price && (
+                                                 <span className="text-xs font-medium text-primary">{item.price}</span>
                                                )}
-                                              
-                                              {item.price && (
-                                                <span className="text-xs font-medium text-primary">{item.price}</span>
-                                              )}
-                                            </div>
+                                             </div>
                                           </div>
                                           
                                           {/* Small Thumbnail Image */}
