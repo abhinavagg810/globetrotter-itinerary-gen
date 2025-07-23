@@ -50,7 +50,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     { id: 'help-dates', title: 'Travel dates', icon: CalendarIcon },
     { id: 'help-departure', title: 'Departure', icon: Plane },
     { id: 'help-preferences', title: 'Preferences', icon: Sparkles },
-    { id: 'help-companions', title: 'Companions', icon: MapPin },
     { id: 'help-budget', title: 'Budget', icon: Sparkles },
   ];
 
@@ -91,7 +90,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     if (currentStep === 'destination') {
       if (formData.needsDestinationHelp) {
         setCurrentStep('help-dates');
-      } else if (formData.destinations[0]) {
+      } else if (formData.destinations.some(d => d)) {
         setCurrentStep('dates');
       }
     } else if (currentStep === 'dates' && formData.fromDate && formData.toDate) {
@@ -105,8 +104,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     } else if (currentStep === 'help-departure' && formData.fromLocation) {
       setCurrentStep('help-preferences');
     } else if (currentStep === 'help-preferences' && formData.travelType) {
-      setCurrentStep('help-companions');
-    } else if (currentStep === 'help-companions' && formData.travelingWith) {
       setCurrentStep('help-budget');
     } else if (currentStep === 'help-budget' && formData.budget) {
       onGenerate(formData);
@@ -128,23 +125,20 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
       setCurrentStep('help-dates');
     } else if (currentStep === 'help-preferences') {
       setCurrentStep('help-departure');
-    } else if (currentStep === 'help-companions') {
-      setCurrentStep('help-preferences');
     } else if (currentStep === 'help-budget') {
-      setCurrentStep('help-companions');
+      setCurrentStep('help-preferences');
     }
   };
 
   const canProceed = () => {
     switch (currentStep) {
-      case 'destination': return formData.destinations[0] || formData.needsDestinationHelp;
+      case 'destination': return formData.destinations.some(d => d) || formData.needsDestinationHelp;
       case 'dates': return formData.fromDate && formData.toDate;
       case 'departure': return formData.fromLocation;
       case 'style': return formData.travelType;
       case 'help-dates': return formData.fromDate && formData.toDate;
       case 'help-departure': return formData.fromLocation;
       case 'help-preferences': return formData.travelType;
-      case 'help-companions': return formData.travelingWith;
       case 'help-budget': return formData.budget;
       default: return false;
     }
@@ -188,10 +182,12 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               <CardTitle className="text-sm text-deep-blue">Your Selections</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {formData.destinations[0] && (
+              {formData.destinations.filter(d => d).length > 0 && (
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-primary" />
-                  <span>Destination: {formData.destinations[0]}</span>
+                  <span>
+                    Destinations: {formData.destinations.filter(d => d).join(', ')}
+                  </span>
                 </div>
               )}
               {selectedMonth && currentStepIndex > 1 && (
@@ -233,7 +229,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               {currentStep === 'help-dates' && 'When do you want to travel?'}
               {currentStep === 'help-departure' && 'Where are you traveling from?'}
               {currentStep === 'help-preferences' && 'What\'s your travel preference?'}
-              {currentStep === 'help-companions' && 'Who are you traveling with?'}
+              
               {currentStep === 'help-budget' && 'What\'s your budget range?'}
             </CardTitle>
           </CardHeader>
@@ -257,12 +253,44 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
                   </Button>
                 </div>
                 {!formData.needsDestinationHelp && (
-                  <PlaceSuggestions
-                    value={formData.destinations[0]}
-                    onChange={(value) => setFormData(prev => ({ ...prev, destinations: [value] }))}
-                    placeholder="e.g., Bali, Indonesia"
-                    className="bg-white/70 border-border/50"
-                  />
+                  <div className="space-y-4">
+                    {formData.destinations.map((destination, index) => (
+                      <div key={index} className="flex gap-2">
+                        <PlaceSuggestions
+                          value={destination}
+                          onChange={(value) => {
+                            const newDestinations = [...formData.destinations];
+                            newDestinations[index] = value;
+                            setFormData(prev => ({ ...prev, destinations: newDestinations }));
+                          }}
+                          placeholder={`Destination ${index + 1}`}
+                          className="bg-white/70 border-border/50 flex-1"
+                        />
+                        {formData.destinations.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newDestinations = formData.destinations.filter((_, i) => i !== index);
+                              setFormData(prev => ({ ...prev, destinations: newDestinations }));
+                            }}
+                            className="bg-white/70"
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, destinations: [...prev.destinations, ""] }));
+                      }}
+                      className="w-full bg-white/70"
+                    >
+                      + Add Another Destination
+                    </Button>
+                  </div>
                 )}
                 {formData.needsDestinationHelp && (
                   <div className="text-center p-8 bg-white/70 rounded-lg">
@@ -388,33 +416,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               </div>
             )}
 
-            {currentStep === 'help-companions' && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-deep-blue">Who are you traveling with?</h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {companionOptions.map((option) => (
-                    <div
-                      key={option.id}
-                      className={cn(
-                        "p-4 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
-                        formData.travelingWith === option.id
-                          ? "border-primary bg-primary/10 shadow-lg"
-                          : "border-border/50 hover:border-primary/50 bg-white/70"
-                      )}
-                      onClick={() => setFormData(prev => ({ ...prev, travelingWith: option.id }))}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-2xl">{option.emoji}</div>
-                        <div className="text-left">
-                          <div className="font-semibold text-sm text-deep-blue">{option.label}</div>
-                          <div className="text-xs text-muted-foreground">{option.description}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {currentStep === 'help-budget' && (
               <div className="space-y-4">

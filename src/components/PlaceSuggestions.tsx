@@ -11,26 +11,31 @@ interface PlaceSuggestionsProps {
 }
 
 const popularDestinations = [
-  { name: "Mumbai, India", type: "city", rating: 4.5 },
-  { name: "Delhi, India", type: "city", rating: 4.2 },
-  { name: "Bangalore, India", type: "city", rating: 4.3 },
-  { name: "Goa, India", type: "beach", rating: 4.7 },
-  { name: "Dubai, UAE", type: "city", rating: 4.8 },
-  { name: "Singapore", type: "city", rating: 4.6 },
-  { name: "Bangkok, Thailand", type: "city", rating: 4.4 },
-  { name: "Bali, Indonesia", type: "beach", rating: 4.9 },
-  { name: "London, UK", type: "city", rating: 4.5 },
-  { name: "Paris, France", type: "city", rating: 4.6 },
-  { name: "New York, USA", type: "city", rating: 4.4 },
-  { name: "Tokyo, Japan", type: "city", rating: 4.7 },
-  { name: "Sydney, Australia", type: "city", rating: 4.5 },
-  { name: "Rome, Italy", type: "city", rating: 4.6 },
-  { name: "Barcelona, Spain", type: "city", rating: 4.5 },
-  { name: "Amsterdam, Netherlands", type: "city", rating: 4.4 },
-  { name: "Maldives", type: "beach", rating: 4.9 },
-  { name: "Santorini, Greece", type: "beach", rating: 4.8 },
-  { name: "Phuket, Thailand", type: "beach", rating: 4.6 },
-  { name: "Mauritius", type: "beach", rating: 4.7 },
+  { name: "Thailand", location: "Thailand", type: "Country", rating: 4.6 },
+  { name: "Bangkok", location: "Thailand", type: "City", rating: 4.4 },
+  { name: "Phuket", location: "Thailand", type: "Island", rating: 4.6 },
+  { name: "Chiang Mai", location: "Chiang Mai Province, Thailand", type: "City", rating: 4.5 },
+  { name: "Pattaya", location: "Chonburi Province, Thailand", type: "City", rating: 4.2 },
+  { name: "Hua Hin", location: "Prachuap Khiri Khan Province, Thailand", type: "City", rating: 4.3 },
+  { name: "Chiang Rai", location: "Chiang Rai Province, Thailand", type: "City", rating: 4.4 },
+  { name: "Mumbai", location: "India", type: "City", rating: 4.5 },
+  { name: "Delhi", location: "India", type: "City", rating: 4.2 },
+  { name: "Bangalore", location: "India", type: "City", rating: 4.3 },
+  { name: "Goa", location: "India", type: "City", rating: 4.7 },
+  { name: "Dubai", location: "UAE", type: "City", rating: 4.8 },
+  { name: "Singapore", location: "Singapore", type: "Country", rating: 4.6 },
+  { name: "Bali", location: "Indonesia", type: "Island", rating: 4.9 },
+  { name: "London", location: "UK", type: "City", rating: 4.5 },
+  { name: "Paris", location: "France", type: "City", rating: 4.6 },
+  { name: "New York", location: "USA", type: "City", rating: 4.4 },
+  { name: "Tokyo", location: "Japan", type: "City", rating: 4.7 },
+  { name: "Sydney", location: "Australia", type: "City", rating: 4.5 },
+  { name: "Rome", location: "Italy", type: "City", rating: 4.6 },
+  { name: "Barcelona", location: "Spain", type: "City", rating: 4.5 },
+  { name: "Amsterdam", location: "Netherlands", type: "City", rating: 4.4 },
+  { name: "Maldives", location: "Maldives", type: "Country", rating: 4.9 },
+  { name: "Santorini", location: "Greece", type: "Island", rating: 4.8 },
+  { name: "Mauritius", location: "Mauritius", type: "Country", rating: 4.7 },
 ];
 
 export function PlaceSuggestions({ value, onChange, placeholder, className }: PlaceSuggestionsProps) {
@@ -59,11 +64,12 @@ export function PlaceSuggestions({ value, onChange, placeholder, className }: Pl
     setShowSuggestions(false);
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeColor = (type: string) => {
     switch (type) {
-      case 'beach': return '🏖️';
-      case 'city': return '🏙️';
-      default: return '📍';
+      case 'Country': return 'bg-blue-100 text-blue-800';
+      case 'City': return 'bg-green-100 text-green-800';
+      case 'Island': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -85,20 +91,26 @@ export function PlaceSuggestions({ value, onChange, placeholder, className }: Pl
               {filteredSuggestions.map((place, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
                   onClick={() => handleSuggestionClick(place.name)}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="text-lg">{getTypeIcon(place.type)}</div>
-                    <div>
-                      <p className="font-medium text-deep-blue text-sm">{place.name}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>{place.rating}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-deep-blue text-sm">{place.name}</p>
+                        <p className="text-xs text-muted-foreground">{place.location}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(place.type)}`}>
+                          {place.type}
+                        </span>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span>{place.rating}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
                 </div>
               ))}
             </div>
