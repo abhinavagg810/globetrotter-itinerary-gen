@@ -35,6 +35,12 @@ export interface BookingDetails {
   departureTime?: string;
   arrivalTime?: string;
   notes?: string;
+  // Restaurant specific fields
+  restaurantName?: string;
+  billUrl?: string;
+  totalBill?: number;
+  currency?: string;
+  dateTime?: string;
 }
 
 export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: DocumentUploadProps) {
@@ -62,7 +68,17 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
   };
 
   const handleSave = () => {
-    if (!details.provider || !details.bookingReference || !details.cost) {
+    // Validate required fields based on item type
+    const commonFieldsValid = details.bookingReference && details.cost;
+    let typeSpecificValid = true;
+    
+    if (itemType === 'restaurant') {
+      typeSpecificValid = !!(details.restaurantName && details.totalBill && details.dateTime);
+    } else {
+      typeSpecificValid = !!details.provider;
+    }
+    
+    if (!commonFieldsValid || !typeSpecificValid) {
       toast({
         title: "Missing information",
         description: "Please fill in all required fields",
@@ -88,6 +104,12 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
       arrival: details.arrival,
       address: details.address,
       notes: details.notes,
+      // Restaurant specific fields
+      restaurantName: details.restaurantName,
+      billUrl: details.billUrl,
+      totalBill: details.totalBill,
+      currency: details.currency,
+      dateTime: details.dateTime,
     };
 
     onSave(bookingDetails);
@@ -168,15 +190,6 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
             <CardTitle className="text-deep-blue">Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label className="text-deep-blue font-medium">Provider/Company *</Label>
-              <Input
-                placeholder="e.g., Air India, Marriott, Local Tour Guide"
-                value={details.provider}
-                onChange={(e) => setDetails(prev => ({ ...prev, provider: e.target.value }))}
-                className="mt-2 bg-white/70 border-border/50"
-              />
-            </div>
             <div>
               <Label className="text-deep-blue font-medium">Booking Reference *</Label>
               <Input
@@ -309,6 +322,94 @@ export function DocumentUpload({ onBack, onSave, itemType, itemTitle }: Document
                       onChange={(e) => setDetails(prev => ({ ...prev, checkOut: e.target.value }))}
                       className="mt-2 bg-white/70 border-border/50"
                     />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {itemType === 'restaurant' && (
+              <>
+                <div>
+                  <Label className="text-deep-blue font-medium">Restaurant Name *</Label>
+                  <Input
+                    placeholder="e.g., The Royal Palace Restaurant"
+                    value={details.restaurantName}
+                    onChange={(e) => setDetails(prev => ({ ...prev, restaurantName: e.target.value }))}
+                    className="mt-2 bg-white/70 border-border/50"
+                  />
+                </div>
+                <div>
+                  <Label className="text-deep-blue font-medium">Address</Label>
+                  <Textarea
+                    placeholder="Full restaurant address..."
+                    value={details.address}
+                    onChange={(e) => setDetails(prev => ({ ...prev, address: e.target.value }))}
+                    className="mt-2 bg-white/70 border-border/50"
+                    rows={2}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-deep-blue font-medium">Total Bill (Currency)</Label>
+                    <Input
+                      placeholder="e.g., USD, INR, EUR"
+                      value={details.currency}
+                      onChange={(e) => setDetails(prev => ({ ...prev, currency: e.target.value }))}
+                      className="mt-2 bg-white/70 border-border/50"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-deep-blue font-medium">Total Bill (Amount) *</Label>
+                    <Input
+                      type="number"
+                      placeholder="Enter bill amount"
+                      value={details.totalBill}
+                      onChange={(e) => setDetails(prev => ({ ...prev, totalBill: Number(e.target.value) }))}
+                      className="mt-2 bg-white/70 border-border/50"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-deep-blue font-medium">Date & Time *</Label>
+                  <Input
+                    type="datetime-local"
+                    value={details.dateTime}
+                    onChange={(e) => setDetails(prev => ({ ...prev, dateTime: e.target.value }))}
+                    className="mt-2 bg-white/70 border-border/50"
+                  />
+                </div>
+                
+                {/* Upload Bill */}
+                <div>
+                  <Label className="text-deep-blue font-medium">Upload Bill</Label>
+                  <div className="border-2 border-dashed border-border/50 rounded-lg p-4 text-center mt-2">
+                    <FileText className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Upload your restaurant bill or receipt
+                    </p>
+                    <Input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const mockUrl = URL.createObjectURL(file);
+                          setDetails(prev => ({ ...prev, billUrl: mockUrl }));
+                        }
+                      }}
+                      className="hidden"
+                      id="bill-upload"
+                    />
+                    <Label
+                      htmlFor="bill-upload"
+                      className="cursor-pointer inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-2 rounded-md hover:bg-secondary/90 transition-colors text-sm"
+                    >
+                      <Upload className="h-3 w-3" />
+                      Choose File
+                    </Label>
+                    {details.billUrl && (
+                      <p className="text-sm text-mint mt-2">✓ Bill uploaded</p>
+                    )}
                   </div>
                 </div>
               </>

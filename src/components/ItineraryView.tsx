@@ -555,8 +555,113 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
             </div>
           )}
           
-          {/* Other booking types except flight and hotel */}
-          {selectedBookingDetails && selectedBookingDetails.type !== 'flight' && selectedBookingDetails.type !== 'hotel' && (
+          {/* Restaurant booking details */}
+          {selectedBookingDetails?.type === 'restaurant' && (
+            <div className="space-y-5">
+              {/* Upload Button at Top */}
+              <div className="flex justify-end">
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  onClick={() => onAddDetails('restaurant', selectedBookingDetails.title, selectedBookingDetails.id)}
+                  className="text-xs"
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Upload Documents
+                </Button>
+              </div>
+              
+              {/* Restaurant Details */}
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-deep-blue text-lg">{selectedBookingDetails.restaurantName || selectedBookingDetails.provider}</h3>
+                  <Badge variant="outline" className="bg-white/80">
+                    Restaurant
+                  </Badge>
+                </div>
+                
+                {selectedBookingDetails.address && (
+                  <div className="text-sm text-muted-foreground mb-3">
+                    📍 {selectedBookingDetails.address}
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Date & Time</div>
+                    <div className="font-semibold text-deep-blue">
+                      {selectedBookingDetails.dateTime 
+                        ? new Date(selectedBookingDetails.dateTime).toLocaleDateString() 
+                        : 'Not specified'}
+                    </div>
+                    <div className="text-sm text-primary">
+                      {selectedBookingDetails.dateTime 
+                        ? new Date(selectedBookingDetails.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+                        : ''}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Total Bill</div>
+                    <div className="font-bold text-xl text-deep-blue">
+                      {selectedBookingDetails.currency ? `${selectedBookingDetails.currency} ` : ''}
+                      {selectedBookingDetails.totalBill || 'Not specified'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Booking Reference</div>
+                  <div className="font-semibold text-deep-blue">{selectedBookingDetails?.bookingReference}</div>
+                </div>
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">System Cost</div>
+                  <div className="text-xl font-bold text-primary">{formatPrice(selectedBookingDetails.cost)}</div>
+                </div>
+              </div>
+              
+              {selectedBookingDetails?.notes && (
+                <div className="p-4 border border-border/30 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Notes</div>
+                  <div className="text-sm text-deep-blue">{selectedBookingDetails.notes}</div>
+                </div>
+              )}
+              
+              {selectedBookingDetails?.billUrl && (
+                <div className="border border-border/30 rounded-lg overflow-hidden">
+                  <div className="bg-muted/20 p-3 border-b border-border/30">
+                    <div className="text-sm font-medium">Uploaded Bill</div>
+                  </div>
+                  <div className="p-4 flex justify-center">
+                    <img 
+                      src={selectedBookingDetails.billUrl} 
+                      alt="Bill preview" 
+                      className="max-h-64 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {selectedBookingDetails?.documentUrl && (
+                <div className="border border-border/30 rounded-lg overflow-hidden">
+                  <div className="bg-muted/20 p-3 border-b border-border/30">
+                    <div className="text-sm font-medium">Uploaded Document</div>
+                  </div>
+                  <div className="p-4 flex justify-center">
+                    <img 
+                      src={selectedBookingDetails.documentUrl} 
+                      alt="Document preview" 
+                      className="max-h-64 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Activity booking details */}
+          {selectedBookingDetails?.type === 'activity' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 border border-border/30 rounded-lg">
