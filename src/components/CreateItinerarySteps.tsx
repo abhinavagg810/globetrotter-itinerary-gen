@@ -147,21 +147,21 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
+      <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-3 md:p-4">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="ghost" onClick={handleBack} className="h-8 w-8 md:h-10 md:w-10 p-0">
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="font-bold text-lg text-deep-blue">Create Itinerary</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="font-bold text-base md:text-lg text-deep-blue">Create Itinerary</h1>
+            <p className="text-xs md:text-sm text-muted-foreground">
               Step {displayStepIndex + 1} of {activeSteps.length}
             </p>
           </div>
         </div>
         
         {/* Progress Bar */}
-        <div className="mt-4 flex gap-2">
+        <div className="mt-3 md:mt-4 flex gap-1 md:gap-2">
           {activeSteps.map((step, index) => (
             <div
               key={step.id}
@@ -174,18 +174,18 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-3 md:p-4">
         {/* Current Selections */}
         {currentStepIndex > 0 && (
-          <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg mb-6">
-            <CardHeader>
-              <CardTitle className="text-sm text-deep-blue">Your Selections</CardTitle>
+          <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg mb-4 md:mb-6">
+            <CardHeader className="p-3 md:p-6">
+              <CardTitle className="text-xs md:text-sm text-deep-blue">Your Selections</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 p-3 md:p-6 pt-0">
               {formData.destinations.filter(d => d).length > 0 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span>
+                <div className="flex items-center gap-2 text-xs md:text-sm">
+                  <MapPin className="h-3 w-3 md:h-4 md:w-4 text-primary flex-shrink-0" />
+                  <span className="truncate">
                     Destinations: {formData.destinations.filter(d => d).join(', ')}
                   </span>
                 </div>
@@ -216,8 +216,8 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
 
         {/* Step Content */}
         <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-deep-blue">
+          <CardHeader className="p-3 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-deep-blue text-sm md:text-base">
               {(() => {
                 const IconComponent = activeSteps[displayStepIndex]?.icon;
                 return IconComponent ? <IconComponent className="h-5 w-5 text-primary" /> : null;
@@ -233,21 +233,21 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               {currentStep === 'help-budget' && 'What\'s your budget range?'}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 md:p-6 pt-0">
             {currentStep === 'destination' && (
-              <div className="space-y-4">
-                <div className="flex gap-3">
+              <div className="space-y-3 md:space-y-4">
+                <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                   <Button 
                     variant={!formData.needsDestinationHelp ? "default" : "outline"}
                     onClick={() => setFormData(prev => ({ ...prev, needsDestinationHelp: false, destinations: [""] }))}
-                    className="flex-1"
+                    className="flex-1 h-10 md:h-11 text-xs md:text-sm"
                   >
                     I know where I want to go
                   </Button>
                   <Button 
                     variant={formData.needsDestinationHelp ? "default" : "outline"}
                     onClick={() => setFormData(prev => ({ ...prev, needsDestinationHelp: true, destinations: [""] }))}
-                    className="flex-1"
+                    className="flex-1 h-10 md:h-11 text-xs md:text-sm"
                   >
                     Help me find vacation destination
                   </Button>
@@ -336,21 +336,21 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
             )}
 
             {currentStep === 'style' && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
                 {travelTypes.map((type) => (
                   <div
                     key={type.id}
                     className={cn(
-                      "p-4 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
+                      "p-3 md:p-4 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
                       formData.travelType === type.id
                         ? "border-primary bg-primary/10 shadow-lg"
                         : "border-border/50 hover:border-primary/50 bg-white/70"
                     )}
                     onClick={() => setFormData(prev => ({ ...prev, travelType: type.id }))}
                   >
-                    <div className="text-2xl mb-1">{type.emoji}</div>
-                    <div className="font-semibold text-sm text-deep-blue">{type.label}</div>
-                    <div className="text-xs text-muted-foreground">{type.description}</div>
+                    <div className="text-xl md:text-2xl mb-1">{type.emoji}</div>
+                    <div className="font-semibold text-xs md:text-sm text-deep-blue">{type.label}</div>
+                    <div className="text-xs text-muted-foreground hidden md:block">{type.description}</div>
                   </div>
                 ))}
               </div>

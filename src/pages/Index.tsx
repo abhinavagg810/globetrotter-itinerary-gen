@@ -112,15 +112,15 @@ const Index = () => {
             case 'expense-tracker':
               return (
                 <div className="w-full min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
-                  <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-4 sticky top-0 z-10">
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => setAppState('itinerary')} className="p-2 hover:bg-gray-100 rounded-lg">
+                  <div className="bg-white/80 backdrop-blur-md shadow-soft border-b border-border/50 p-3 md:p-4 sticky top-0 z-10">
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <button onClick={() => setAppState('itinerary')} className="p-2 hover:bg-gray-100 rounded-lg h-8 w-8 md:h-10 md:w-10 flex items-center justify-center">
                         ←
                       </button>
-                      <h1 className="font-bold text-lg text-deep-blue">Expense Tracker</h1>
+                      <h1 className="font-bold text-base md:text-lg text-deep-blue">Expense Tracker</h1>
                     </div>
                   </div>
-                  <div className="p-4">
+                  <div className="p-3 md:p-4">
                     <ExpenseTracker 
                       expenses={bookingDetails} 
                       onViewDetails={handleViewBookingDetails}

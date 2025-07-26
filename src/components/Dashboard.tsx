@@ -21,33 +21,33 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
-      <div className="flex justify-between items-center p-6 bg-white/80 backdrop-blur-sm border-b border-border/20">
-        <div className="flex items-center gap-3">
+      <div className="flex justify-between items-center p-4 md:p-6 bg-white/80 backdrop-blur-sm border-b border-border/20">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="p-2 bg-gradient-premium rounded-full">
-            <Plane className="h-6 w-6 text-white" />
+            <Plane className="h-5 w-5 md:h-6 md:w-6 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-deep-blue">Travel Globe AI</h1>
+          <h1 className="text-lg md:text-xl font-bold text-deep-blue">Travel Globe AI</h1>
         </div>
-        <div className="flex gap-2 items-center">
-          <Button variant="ghost" size="icon" className="hover:bg-primary/10">
-            <Bell className="h-5 w-5" />
+        <div className="flex gap-1 md:gap-2 items-center">
+          <Button variant="ghost" size="icon" className="hover:bg-primary/10 h-8 w-8 md:h-10 md:w-10">
+            <Bell className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-primary/10" onClick={onProfile}>
-            <User className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="hover:bg-primary/10 h-8 w-8 md:h-10 md:w-10" onClick={onProfile}>
+            <User className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
         </div>
       </div>
       {/* Main Actions */}
-      <div className="p-6 space-y-8">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="p-4 md:p-6 space-y-6 md:space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           <Card 
             className="cursor-pointer bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-lg transition-all transform hover:scale-[1.02] border-0 rounded-2xl"
             onClick={onCreateItinerary}
           >
-            <CardContent className="p-4 text-center">
-              <Plus className="h-6 w-6 mx-auto mb-2" />
-              <CardTitle className="text-sm mb-1">Create Itinerary</CardTitle>
-              <p className="text-white/80 text-xs">Plan your perfect trip</p>
+            <CardContent className="p-4 md:p-6 text-center">
+              <Plus className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2" />
+              <CardTitle className="text-sm md:text-base mb-1">Create Itinerary</CardTitle>
+              <p className="text-white/80 text-xs md:text-sm">Plan your perfect trip</p>
             </CardContent>
           </Card>
           
@@ -55,30 +55,30 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
             className="cursor-pointer bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:shadow-lg transition-all transform hover:scale-[1.02] border-0 rounded-2xl"
             onClick={onViewItineraries}
           >
-            <CardContent className="p-4 text-center">
-              <BookOpen className="h-6 w-6 mx-auto mb-2" />
-              <CardTitle className="text-sm mb-1">My Itineraries</CardTitle>
-              <p className="text-white/80 text-xs">View your trips</p>
+            <CardContent className="p-4 md:p-6 text-center">
+              <BookOpen className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2" />
+              <CardTitle className="text-sm md:text-base mb-1">My Itineraries</CardTitle>
+              <p className="text-white/80 text-xs md:text-sm">View your trips</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Features */}
         <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-deep-blue text-xl">
-              <Star className="h-6 w-6 text-primary" />
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-deep-blue text-lg md:text-xl">
+              <Star className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Features to replace all your other tools
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-center p-6 bg-white/50 rounded-xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl">🤖</div>
+          <CardContent className="p-4 md:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="text-center p-4 md:p-6 bg-white/50 rounded-xl">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                  <div className="text-xl md:text-2xl">🤖</div>
                 </div>
-                <h4 className="font-bold text-deep-blue text-base mb-2">AI-Powered Itinerary Planning</h4>
-                <p className="text-sm text-muted-foreground">Smart algorithms create personalized travel plans based on your preferences, budget, and interests.</p>
+                <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">AI-Powered Itinerary Planning</h4>
+                <p className="text-xs md:text-sm text-muted-foreground">Smart algorithms create personalized travel plans based on your preferences, budget, and interests.</p>
               </div>
               
               <div className="text-center p-6 bg-white/50 rounded-xl">

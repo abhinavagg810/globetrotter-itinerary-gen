@@ -131,24 +131,24 @@ export function ExpenseTracker({
   const updatedTripMates = calculateTripMateBalances();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="tripmates">Trip Mates</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-9 md:h-10">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="tripmates" className="text-xs md:text-sm">Trip Mates</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-6 mt-6">
+        <TabsContent value="overview" className="space-y-4 md:space-y-6 mt-4 md:mt-6">
       {/* Total Expenses */}
       <Card className="bg-gradient-premium text-white border-0 shadow-premium">
-        <CardContent className="p-6">
+        <CardContent className="p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold mb-1">Total Expenses</h3>
-              <p className="text-3xl font-bold">{formatPrice(totalExpenses)}</p>
+              <h3 className="text-base md:text-lg font-semibold mb-1">Total Expenses</h3>
+              <p className="text-2xl md:text-3xl font-bold">{formatPrice(totalExpenses)}</p>
             </div>
-            <div className="text-4xl opacity-80">
-              <TrendingUp className="h-12 w-12" />
+            <div className="text-3xl md:text-4xl opacity-80">
+              <TrendingUp className="h-8 w-8 md:h-12 md:w-12" />
             </div>
           </div>
         </CardContent>
@@ -156,31 +156,31 @@ export function ExpenseTracker({
 
       {/* Expense Breakdown */}
       <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-deep-blue">
-            <PieChart className="h-5 w-5 text-primary" />
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="flex items-center gap-2 text-deep-blue text-sm md:text-base">
+            <PieChart className="h-4 w-4 md:h-5 md:w-5 text-primary" />
             Expense Breakdown
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="p-4 md:p-6 pt-0">
+          <div className="space-y-2 md:space-y-3">
             {Object.entries(expensesByType).map(([type, amount]) => {
               const Icon = getIcon(type);
               const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
               
               return (
-                <div key={type} className="flex items-center justify-between p-3 rounded-lg bg-white/70">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Icon className="h-4 w-4 text-primary" />
+                <div key={type} className="flex items-center justify-between p-2 md:p-3 rounded-lg bg-white/70">
+                  <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                    <div className="p-1.5 md:p-2 rounded-lg bg-primary/10 flex-shrink-0">
+                      <Icon className="h-3 w-3 md:h-4 md:w-4 text-primary" />
                     </div>
-                    <div>
-                      <p className="font-medium text-deep-blue">{typeLabels[type as keyof typeof typeLabels]}</p>
-                      <p className="text-sm text-muted-foreground">{percentage.toFixed(1)}% of total</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-deep-blue text-xs md:text-sm truncate">{typeLabels[type as keyof typeof typeLabels]}</p>
+                      <p className="text-xs text-muted-foreground">{percentage.toFixed(1)}% of total</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-deep-blue">{formatPrice(amount)}</p>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-deep-blue text-xs md:text-sm">{formatPrice(amount)}</p>
                   </div>
                 </div>
               );

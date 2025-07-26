@@ -75,17 +75,17 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
 
   return (
     <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between text-deep-blue">
+      <CardHeader className="p-4 md:p-6">
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-deep-blue">
           <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Trip Mates ({tripMates.length})
+            <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+            <span className="text-sm md:text-base">Trip Mates ({tripMates.length})</span>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Mate
+              <Button size="sm" className="gap-2 w-full sm:w-auto">
+                <Plus className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="text-xs md:text-sm">Add Mate</span>
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -124,43 +124,43 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
           </Dialog>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 md:p-6 pt-0">
         <div className="space-y-3">
           {tripMates.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="font-medium">No trip mates added yet</p>
-              <p className="text-sm">Add friends to share and split expenses</p>
+            <div className="text-center py-6 md:py-8 text-muted-foreground">
+              <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-3 opacity-50" />
+              <p className="font-medium text-sm md:text-base">No trip mates added yet</p>
+              <p className="text-xs md:text-sm">Add friends to share and split expenses</p>
             </div>
           ) : (
             tripMates.map((mate) => {
               const balanceStatus = getBalanceStatus(mate);
               
               return (
-                <div key={mate.id} className="flex items-center justify-between p-3 rounded-lg bg-white/70 hover:bg-white/90 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                <div key={mate.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-lg bg-white/70 hover:bg-white/90 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs md:text-sm">
                         {getInitials(mate.name)}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-deep-blue">{mate.name}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-deep-blue text-sm md:text-base truncate">{mate.name}</p>
                         {mate.isOwner && (
                           <Badge variant="secondary" className="text-xs">Owner</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{mate.email}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground truncate">{mate.email}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <Badge className={`text-xs ${balanceStatus.color}`}>
+                  <div className="flex items-center justify-between sm:justify-end gap-3">
+                    <div className="text-left sm:text-right flex-1 sm:flex-initial">
+                      <Badge className={`text-xs ${balanceStatus.color} mb-1`}>
                         {balanceStatus.text}
                       </Badge>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground">
                         Paid: ${mate.totalPaid.toFixed(2)} | Owes: ${mate.totalOwed.toFixed(2)}
                       </p>
                     </div>
@@ -170,9 +170,9 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
                         variant="ghost"
                         size="sm"
                         onClick={() => onRemoveTripMate(mate.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 flex-shrink-0"
                       >
-                        <UserMinus className="h-4 w-4" />
+                        <UserMinus className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
                   </div>

@@ -151,25 +151,25 @@ export function ExpenseSplitter({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Split className="h-5 w-5 text-primary" />
-            Split Expense: {expense.title}
+          <DialogTitle className="flex items-center gap-2 text-sm md:text-base">
+            <Split className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+            <span className="truncate">Split Expense: {expense.title}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Expense Summary */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-deep-blue">{expense.title}</p>
-                  <p className="text-sm text-muted-foreground">{expense.type}</p>
+            <CardContent className="p-3 md:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-deep-blue text-sm md:text-base truncate">{expense.title}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">{expense.type}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{formatPrice(expense.cost)}</p>
+                <div className="text-left sm:text-right">
+                  <p className="text-xl md:text-2xl font-bold text-primary">{formatPrice(expense.cost)}</p>
                 </div>
               </div>
             </CardContent>
@@ -194,12 +194,13 @@ export function ExpenseSplitter({
 
           {/* Split Type */}
           <div>
-            <label className="text-sm font-medium mb-2 block">How to split?</label>
-            <div className="grid grid-cols-3 gap-2">
+            <label className="text-xs md:text-sm font-medium mb-2 block">How to split?</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <Button
                 variant={splitType === 'equal' ? 'default' : 'outline'}
                 onClick={() => setSplitType('equal')}
                 size="sm"
+                className="text-xs md:text-sm h-9 md:h-10"
               >
                 Equal Split
               </Button>
@@ -207,6 +208,7 @@ export function ExpenseSplitter({
                 variant={splitType === 'custom' ? 'default' : 'outline'}
                 onClick={() => setSplitType('custom')}
                 size="sm"
+                className="text-xs md:text-sm h-9 md:h-10"
               >
                 Custom Amount
               </Button>
@@ -214,6 +216,7 @@ export function ExpenseSplitter({
                 variant={splitType === 'percentage' ? 'default' : 'outline'}
                 onClick={() => setSplitType('percentage')}
                 size="sm"
+                className="text-xs md:text-sm h-9 md:h-10"
               >
                 Percentage
               </Button>
@@ -222,66 +225,70 @@ export function ExpenseSplitter({
 
           {/* Trip Mates Selection */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Who should pay for this expense?</label>
+            <label className="text-xs md:text-sm font-medium mb-2 block">Who should pay for this expense?</label>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {tripMates.map(mate => {
                 const isSelected = selectedMates.includes(mate.id);
                 
                 return (
-                  <div key={mate.id} className="flex items-center space-x-3 p-3 rounded-lg border">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleMate(mate.id)}
-                    />
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {getInitials(mate.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{mate.name}</p>
+                  <div key={mate.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleMate(mate.id)}
+                      />
+                      <Avatar className="h-6 w-6 md:h-8 md:w-8 flex-shrink-0">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                          {getInitials(mate.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-xs md:text-sm truncate">{mate.name}</p>
+                      </div>
                     </div>
                     
-                    {isSelected && splitType === 'custom' && (
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={customAmounts[mate.id] || ''}
-                          onChange={(e) => setCustomAmounts(prev => ({
-                            ...prev,
-                            [mate.id]: parseFloat(e.target.value) || 0
-                          }))}
-                          className="w-20 h-8"
-                          placeholder="0.00"
-                        />
-                      </div>
-                    )}
-                    
-                    {isSelected && splitType === 'percentage' && (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          step="0.1"
-                          max="100"
-                          value={percentages[mate.id] || ''}
-                          onChange={(e) => setPercentages(prev => ({
-                            ...prev,
-                            [mate.id]: parseFloat(e.target.value) || 0
-                          }))}
-                          className="w-16 h-8"
-                          placeholder="0"
-                        />
-                        <span className="text-sm text-muted-foreground">%</span>
-                      </div>
-                    )}
-                    
-                    {isSelected && splitType === 'equal' && (
-                      <Badge variant="secondary" className="text-xs">
-                        {formatPrice(expense.cost / selectedMates.length)}
-                      </Badge>
-                    )}
+                    <div className="flex items-center justify-end gap-2 ml-8 sm:ml-0">
+                      {isSelected && splitType === 'custom' && (
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={customAmounts[mate.id] || ''}
+                            onChange={(e) => setCustomAmounts(prev => ({
+                              ...prev,
+                              [mate.id]: parseFloat(e.target.value) || 0
+                            }))}
+                            className="w-16 md:w-20 h-7 md:h-8 text-xs md:text-sm"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      )}
+                      
+                      {isSelected && splitType === 'percentage' && (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            step="0.1"
+                            max="100"
+                            value={percentages[mate.id] || ''}
+                            onChange={(e) => setPercentages(prev => ({
+                              ...prev,
+                              [mate.id]: parseFloat(e.target.value) || 0
+                            }))}
+                            className="w-12 md:w-16 h-7 md:h-8 text-xs md:text-sm"
+                            placeholder="0"
+                          />
+                          <span className="text-xs md:text-sm text-muted-foreground">%</span>
+                        </div>
+                      )}
+                      
+                      {isSelected && splitType === 'equal' && (
+                        <Badge variant="secondary" className="text-xs">
+                          {formatPrice(expense.cost / selectedMates.length)}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -320,11 +327,11 @@ export function ExpenseSplitter({
           )}
 
           {/* Actions */}
-          <div className="flex gap-2 pt-4">
-            <Button onClick={handleSave} className="flex-1" disabled={selectedMates.length === 0 || !paidBy}>
+          <div className="flex flex-col sm:flex-row gap-2 pt-4">
+            <Button onClick={handleSave} className="flex-1 h-10 md:h-11 text-sm md:text-base" disabled={selectedMates.length === 0 || !paidBy}>
               Save Split
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className="sm:w-auto h-10 md:h-11 text-sm md:text-base">
               Cancel
             </Button>
           </div>

@@ -16,47 +16,47 @@ export function AuthPage({ onLogin }: AuthPageProps) {
       />
       <div className="absolute inset-0 bg-gradient-ocean/80" />
       
-      {/* Floating Travel Icons */}
-      <div className="absolute top-20 left-10 text-white/20 animate-pulse">
-        <Plane className="h-8 w-8" />
+      {/* Floating Travel Icons - Hidden on mobile */}
+      <div className="hidden md:block absolute top-20 left-10 text-white/20 animate-pulse">
+        <Plane className="h-6 w-6 lg:h-8 lg:w-8" />
       </div>
-      <div className="absolute top-40 right-20 text-white/20 animate-pulse delay-1000">
-        <MapPin className="h-6 w-6" />
+      <div className="hidden md:block absolute top-40 right-20 text-white/20 animate-pulse delay-1000">
+        <MapPin className="h-5 w-5 lg:h-6 lg:w-6" />
       </div>
-      <div className="absolute bottom-40 left-20 text-white/20 animate-pulse delay-2000">
-        <Star className="h-7 w-7" />
+      <div className="hidden md:block absolute bottom-40 left-20 text-white/20 animate-pulse delay-2000">
+        <Star className="h-6 w-6 lg:h-7 lg:w-7" />
       </div>
       
-      {/* Travel Destination Images */}
-      <div className="absolute top-32 right-32 w-24 h-24 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
-        <span className="text-2xl">🏝️</span>
+      {/* Travel Destination Images - Hidden on mobile */}
+      <div className="hidden lg:flex absolute top-32 right-32 w-20 h-20 xl:w-24 xl:h-24 bg-white/10 rounded-full backdrop-blur-sm items-center justify-center">
+        <span className="text-xl xl:text-2xl">🏝️</span>
       </div>
-      <div className="absolute bottom-32 right-20 w-20 h-20 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
-        <span className="text-xl">🗼</span>
+      <div className="hidden lg:flex absolute bottom-32 right-20 w-16 h-16 xl:w-20 xl:h-20 bg-white/10 rounded-full backdrop-blur-sm items-center justify-center">
+        <span className="text-lg xl:text-xl">🗼</span>
       </div>
-      <div className="absolute top-48 left-32 w-28 h-28 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center">
-        <span className="text-2xl">🏖️</span>
+      <div className="hidden lg:flex absolute top-48 left-32 w-20 h-20 xl:w-28 xl:h-28 bg-white/10 rounded-full backdrop-blur-sm items-center justify-center">
+        <span className="text-xl xl:text-2xl">🏖️</span>
       </div>
       
       <div className="relative z-10 w-full min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-2xl">
+        <div className="text-center max-w-2xl w-full">
           {/* Login Card First */}
-          <Card className="w-full max-w-lg mx-auto bg-white/95 backdrop-blur-xl border-0 shadow-premium rounded-2xl mb-8">
-            <CardHeader className="text-center space-y-4 pb-6">
-              <div className="mx-auto w-16 h-16 bg-gradient-premium rounded-2xl flex items-center justify-center shadow-lg">
-                <Plane className="h-8 w-8 text-white" />
+          <Card className="w-full max-w-sm md:max-w-lg mx-auto bg-white/95 backdrop-blur-xl border-0 shadow-premium rounded-2xl mb-6 md:mb-8">
+            <CardHeader className="text-center space-y-3 md:space-y-4 p-4 md:p-6 pb-4 md:pb-6">
+              <div className="mx-auto w-12 h-12 md:w-16 md:h-16 bg-gradient-premium rounded-2xl flex items-center justify-center shadow-lg">
+                <Plane className="h-6 w-6 md:h-8 md:w-8 text-white" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-deep-blue mb-2">Welcome to Travel Globe AI</CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">Your AI-powered travel companion awaits</CardDescription>
+                <CardTitle className="text-xl md:text-2xl font-bold text-deep-blue mb-2">Welcome to Travel Globe AI</CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">Your AI-powered travel companion awaits</CardDescription>
               </div>
             </CardHeader>
             
-            <CardContent className="space-y-4 pt-0">
-              <Button onClick={onLogin} variant="premium" className="w-full h-12 text-base font-semibold">
+            <CardContent className="space-y-3 md:space-y-4 p-4 md:p-6 pt-0">
+              <Button onClick={onLogin} variant="premium" className="w-full h-10 md:h-12 text-sm md:text-base font-semibold">
                 Continue with Email
               </Button>
-              <Button variant="outline" onClick={onLogin} className="w-full h-12 text-base bg-white/80 hover:bg-white border-2">
+              <Button variant="outline" onClick={onLogin} className="w-full h-10 md:h-12 text-sm md:text-base bg-white/80 hover:bg-white border-2">
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                   <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -80,10 +80,10 @@ export function AuthPage({ onLogin }: AuthPageProps) {
             </CardContent>
           </Card>
 
-          <h1 className="text-6xl font-bold text-white mb-4 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-4 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
             Travel Globe AI
           </h1>
-          <p className="text-white/90 text-xl mb-8">Your AI-Powered Travel Companion</p>
+          <p className="text-white/90 text-base md:text-lg lg:text-xl mb-6 md:mb-8">Your AI-Powered Travel Companion</p>
           
           
         </div>
