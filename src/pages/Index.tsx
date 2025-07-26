@@ -8,6 +8,8 @@ import { DocumentUpload, BookingDetails } from "@/components/DocumentUpload";
 import { ExpenseTracker } from "@/components/ExpenseTracker";
 import { Profile } from "@/components/Profile";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { TripMate } from "@/components/TripMateManager";
+import { ExpenseSplit } from "@/components/ExpenseSplitter";
 
 type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker' | 'profile';
 
@@ -16,6 +18,17 @@ const Index = () => {
   const [currentItinerary, setCurrentItinerary] = useState<ItineraryData | null>(null);
   const [documentUploadData, setDocumentUploadData] = useState<{ itemType: 'flight' | 'hotel' | 'activity' | 'restaurant'; itemTitle: string; itemId: string } | null>(null);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails[]>([]);
+  const [tripMates, setTripMates] = useState<TripMate[]>([
+    {
+      id: 'owner-1',
+      name: 'You',
+      email: 'you@example.com',
+      totalPaid: 0,
+      totalOwed: 0,
+      isOwner: true
+    }
+  ]);
+  const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([]);
 
   const handleLogin = () => setAppState('dashboard');
   const handleCreateItinerary = () => setAppState('create');
@@ -75,6 +88,10 @@ const Index = () => {
                   onAddDetails={handleAddDetails}
                   onViewExpenses={handleViewExpenses}
                   bookingDetails={bookingDetails}
+                  tripMates={tripMates}
+                  onUpdateTripMates={setTripMates}
+                  expenseSplits={expenseSplits}
+                  onUpdateExpenseSplits={setExpenseSplits}
                 />
               ) : (
                 <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
@@ -104,7 +121,14 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="p-4">
-                    <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
+                    <ExpenseTracker 
+                      expenses={bookingDetails} 
+                      onViewDetails={handleViewBookingDetails}
+                      tripMates={tripMates}
+                      onUpdateTripMates={setTripMates}
+                      expenseSplits={expenseSplits}
+                      onUpdateExpenseSplits={setExpenseSplits}
+                    />
                   </div>
                 </div>
               );

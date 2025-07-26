@@ -9,6 +9,8 @@ import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receip
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
+import { TripMate } from "./TripMateManager";
+import { ExpenseSplit } from "./ExpenseSplitter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface ItineraryViewProps {
@@ -16,6 +18,10 @@ interface ItineraryViewProps {
   itineraryData: ItineraryData;
   onAddDetails: (itemType: 'flight' | 'hotel' | 'activity' | 'restaurant', itemTitle: string, itemId: string) => void;
   onViewExpenses: () => void;
+  tripMates?: TripMate[];
+  onUpdateTripMates?: (tripMates: TripMate[]) => void;
+  expenseSplits?: ExpenseSplit[];
+  onUpdateExpenseSplits?: (splits: ExpenseSplit[]) => void;
   bookingDetails: BookingDetails[];
 }
 
@@ -40,7 +46,17 @@ interface TransportationInfo {
   distance: string;
 }
 
-export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpenses, bookingDetails }: ItineraryViewProps) {
+export function ItineraryView({ 
+  onBack, 
+  itineraryData, 
+  onAddDetails, 
+  onViewExpenses, 
+  bookingDetails,
+  tripMates,
+  onUpdateTripMates,
+  expenseSplits,
+  onUpdateExpenseSplits 
+}: ItineraryViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<ItineraryItem[]>([]);
   const [draggedItem, setDraggedItem] = useState<ItineraryItem | null>(null);
@@ -1318,7 +1334,14 @@ export function ItineraryView({ onBack, itineraryData, onAddDetails, onViewExpen
           </TabsContent>
           
           <TabsContent value="expenses" className="space-y-4">
-            <ExpenseTracker expenses={bookingDetails} onViewDetails={handleViewBookingDetails} />
+            <ExpenseTracker 
+              expenses={bookingDetails} 
+              onViewDetails={handleViewBookingDetails}
+              tripMates={tripMates}
+              onUpdateTripMates={onUpdateTripMates}
+              expenseSplits={expenseSplits}
+              onUpdateExpenseSplits={onUpdateExpenseSplits}
+            />
           </TabsContent>
         </Tabs>
       </div>
