@@ -70,7 +70,78 @@ export function ItineraryView({
     flights: false,
     hotels: false
   });
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currentCurrency } = useCurrency();
+
+  // Currency and timezone data for common destinations
+  const destinationData: Record<string, { currency: { code: string; name: string; symbol: string; rate: number }; timezone: { name: string; offset: string; offsetHours: number } }> = {
+    'Dubai': { currency: { code: 'AED', name: 'UAE Dirham', symbol: 'AED', rate: 3.67 }, timezone: { name: 'GST', offset: 'UTC+4', offsetHours: 4 } },
+    'Singapore': { currency: { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', rate: 1.35 }, timezone: { name: 'SGT', offset: 'UTC+8', offsetHours: 8 } },
+    'London': { currency: { code: 'GBP', name: 'British Pound', symbol: '£', rate: 0.79 }, timezone: { name: 'GMT', offset: 'UTC+0', offsetHours: 0 } },
+    'New York': { currency: { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.0 }, timezone: { name: 'EST', offset: 'UTC-5', offsetHours: -5 } },
+    'Paris': { currency: { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
+    'Tokyo': { currency: { code: 'JPY', name: 'Japanese Yen', symbol: '¥', rate: 110 }, timezone: { name: 'JST', offset: 'UTC+9', offsetHours: 9 } },
+    'Sydney': { currency: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', rate: 1.45 }, timezone: { name: 'AEDT', offset: 'UTC+11', offsetHours: 11 } },
+    'Bangkok': { currency: { code: 'THB', name: 'Thai Baht', symbol: '฿', rate: 33 }, timezone: { name: 'ICT', offset: 'UTC+7', offsetHours: 7 } },
+    'Mumbai': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
+    'Delhi': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
+  };
+
+  const getDestinationCurrencyInfo = () => {
+    if (!itineraryData.destinations || itineraryData.destinations.length === 0) return null;
+    
+    const destination = itineraryData.destinations[0];
+    const data = Object.keys(destinationData).find(key => 
+      destination.toLowerCase().includes(key.toLowerCase())
+    );
+    
+    if (data) {
+      const currencyInfo = destinationData[data].currency;
+      // Calculate conversion rate from user's currency to destination currency
+      const userToUsd = currentCurrency.code === 'USD' ? 1 : (1 / currentCurrency.rate);
+      const usdToDestination = currencyInfo.rate;
+      const conversionRate = (userToUsd * usdToDestination).toFixed(2);
+      
+      return {
+        ...currencyInfo,
+        rate: conversionRate
+      };
+    }
+    
+    return null;
+  };
+
+  const getTimezoneInfo = () => {
+    if (!itineraryData.destinations || itineraryData.destinations.length === 0) return null;
+    
+    const destination = itineraryData.destinations[0];
+    const data = Object.keys(destinationData).find(key => 
+      destination.toLowerCase().includes(key.toLowerCase())
+    );
+    
+    if (data) {
+      const timezoneInfo = destinationData[data].timezone;
+      // Assuming user is in IST (UTC+5:30) by default
+      const userOffsetHours = 5.5;
+      const timeDifference = timezoneInfo.offsetHours - userOffsetHours;
+      
+      let differenceText = '';
+      if (timeDifference > 0) {
+        differenceText = `${timeDifference} hours ahead`;
+      } else if (timeDifference < 0) {
+        differenceText = `${Math.abs(timeDifference)} hours behind`;
+      } else {
+        differenceText = 'Same time zone';
+      }
+      
+      return {
+        timezone: timezoneInfo.name,
+        offset: timezoneInfo.offset,
+        difference: differenceText
+      };
+    }
+    
+    return null;
+  };
 
   const getActivityImage = (type: string, index: number) => {
     const images = {
@@ -841,20 +912,38 @@ export function ItineraryView({
                 <CollapsibleContent>
                   <CardContent className="pt-0">
                     <div className="space-y-3">
-                      <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                        <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                        <div className="text-sm">
-                          <div className="font-medium">Local Currency</div>
-                          <div className="text-muted-foreground">Best to carry some local cash for small vendors</div>
+                      {getDestinationCurrencyInfo() && (
+                        <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                          <MapPin className="h-4 w-4 text-primary mt-0.5" />
+                          <div className="text-sm flex-1">
+                            <div className="font-medium">Local Currency</div>
+                            <div className="text-muted-foreground">
+                              {getDestinationCurrencyInfo()?.name} ({getDestinationCurrencyInfo()?.symbol})
+                              {getDestinationCurrencyInfo()?.code !== currentCurrency.code && (
+                                <div className="mt-1 text-xs">
+                                  1 {currentCurrency.symbol} = ~{getDestinationCurrencyInfo()?.rate} {getDestinationCurrencyInfo()?.symbol}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                        <Clock className="h-4 w-4 text-primary mt-0.5" />
-                        <div className="text-sm">
-                          <div className="font-medium">Time Zone</div>
-                          <div className="text-muted-foreground">Plan for jet lag and adjust activities accordingly</div>
+                      )}
+                      {getTimezoneInfo() && (
+                        <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                          <Clock className="h-4 w-4 text-primary mt-0.5" />
+                          <div className="text-sm flex-1">
+                            <div className="font-medium">Time Zone</div>
+                            <div className="text-muted-foreground">
+                              {getTimezoneInfo()?.timezone} ({getTimezoneInfo()?.offset})
+                              {getTimezoneInfo()?.difference && (
+                                <div className="mt-1 text-xs">
+                                  {getTimezoneInfo()?.difference} from your location
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
                         <Star className="h-4 w-4 text-primary mt-0.5" />
                         <div className="text-sm">
