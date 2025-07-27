@@ -5,7 +5,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, ArrowRight, MapPin, Calendar as CalendarIcon, Plane, Sparkles, Users, Heart } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, ArrowRight, MapPin, Calendar as CalendarIcon, Plane, Sparkles, Users, Heart, DollarSign, Globe } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PlaceSuggestions } from "./PlaceSuggestions";
@@ -26,9 +28,12 @@ export interface ItineraryData {
   tripPurpose?: string;
   travelVibes?: string[];
   budget?: string;
+  isFlexibleWithDates?: boolean;
+  tripDuration?: number;
+  destinationPreference?: string;
 }
 
-type Step = 'destinations' | 'dates' | 'companions' | 'purpose' | 'vibes' | 'help-dates' | 'help-departure' | 'help-preferences' | 'help-companions' | 'help-budget';
+type Step = 'destinations' | 'dates' | 'duration' | 'companions' | 'purpose' | 'vibes' | 'budget' | 'preferences' | 'help-departure' | 'help-dates' | 'help-duration' | 'help-companions' | 'help-purpose' | 'help-vibes' | 'help-budget' | 'help-preferences';
 
 export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStepsProps) {
   const [currentStep, setCurrentStep] = useState<Step>('destinations');
@@ -43,6 +48,9 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     tripPurpose: "",
     travelVibes: [],
     budget: "",
+    isFlexibleWithDates: false,
+    tripDuration: 7,
+    destinationPreference: "",
   });
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
 
@@ -55,10 +63,14 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
   ];
 
   const helpSteps = [
-    { id: 'help-dates', title: 'Travel dates', icon: CalendarIcon },
     { id: 'help-departure', title: 'Departure', icon: Plane },
-    { id: 'help-preferences', title: 'Preferences', icon: Sparkles },
-    { id: 'help-budget', title: 'Budget', icon: Sparkles },
+    { id: 'help-dates', title: 'Travel dates', icon: CalendarIcon },
+    { id: 'help-duration', title: 'Duration', icon: CalendarIcon },
+    { id: 'help-companions', title: 'Companions', icon: Users },
+    { id: 'help-purpose', title: 'Purpose', icon: Heart },
+    { id: 'help-vibes', title: 'Vibes', icon: Sparkles },
+    { id: 'help-budget', title: 'Budget', icon: DollarSign },
+    { id: 'help-preferences', title: 'Preferences', icon: Globe },
   ];
 
   const isHelpFlow = currentStep.startsWith('help-');
@@ -117,25 +129,41 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
   const handleNext = () => {
     if (currentStep === 'destinations') {
       if (formData.needsDestinationHelp) {
-        setCurrentStep('help-dates');
+        setCurrentStep('help-departure');
       } else if (formData.destinations.some(d => d) && formData.fromLocation) {
         setCurrentStep('dates');
       }
-    } else if (currentStep === 'dates' && formData.fromDate && formData.toDate) {
-      setCurrentStep('companions');
+    } else if (currentStep === 'dates') {
+      if (formData.fromDate && formData.toDate) {
+        setCurrentStep('companions');
+      }
     } else if (currentStep === 'companions' && formData.travelingWith) {
       setCurrentStep('purpose');
     } else if (currentStep === 'purpose' && formData.tripPurpose) {
       setCurrentStep('vibes');
     } else if (currentStep === 'vibes' && formData.travelVibes && formData.travelVibes.length > 0) {
       onGenerate(formData);
-    } else if (currentStep === 'help-dates' && formData.fromDate && formData.toDate) {
-      setCurrentStep('help-departure');
-    } else if (currentStep === 'help-departure' && formData.fromLocation) {
-      setCurrentStep('help-preferences');
-    } else if (currentStep === 'help-preferences' && formData.travelType) {
+    } 
+    // Help flow navigation
+    else if (currentStep === 'help-departure' && formData.fromLocation) {
+      setCurrentStep('help-dates');
+    } else if (currentStep === 'help-dates') {
+      if (formData.fromDate && formData.toDate) {
+        setCurrentStep('help-companions');
+      } else if (formData.isFlexibleWithDates) {
+        setCurrentStep('help-duration');
+      }
+    } else if (currentStep === 'help-duration' && formData.tripDuration) {
+      setCurrentStep('help-companions');
+    } else if (currentStep === 'help-companions' && formData.travelingWith) {
+      setCurrentStep('help-purpose');
+    } else if (currentStep === 'help-purpose' && formData.tripPurpose) {
+      setCurrentStep('help-vibes');
+    } else if (currentStep === 'help-vibes' && formData.travelVibes && formData.travelVibes.length > 0) {
       setCurrentStep('help-budget');
     } else if (currentStep === 'help-budget' && formData.budget) {
+      setCurrentStep('help-preferences');
+    } else if (currentStep === 'help-preferences' && formData.destinationPreference) {
       onGenerate(formData);
     }
   };
@@ -151,14 +179,28 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
       setCurrentStep('companions');
     } else if (currentStep === 'vibes') {
       setCurrentStep('purpose');
-    } else if (currentStep === 'help-dates') {
+    } 
+    // Help flow back navigation
+    else if (currentStep === 'help-departure') {
       setCurrentStep('destinations');
-    } else if (currentStep === 'help-departure') {
-      setCurrentStep('help-dates');
-    } else if (currentStep === 'help-preferences') {
+    } else if (currentStep === 'help-dates') {
       setCurrentStep('help-departure');
+    } else if (currentStep === 'help-duration') {
+      setCurrentStep('help-dates');
+    } else if (currentStep === 'help-companions') {
+      if (formData.isFlexibleWithDates) {
+        setCurrentStep('help-duration');
+      } else {
+        setCurrentStep('help-dates');
+      }
+    } else if (currentStep === 'help-purpose') {
+      setCurrentStep('help-companions');
+    } else if (currentStep === 'help-vibes') {
+      setCurrentStep('help-purpose');
     } else if (currentStep === 'help-budget') {
-      setCurrentStep('help-preferences');
+      setCurrentStep('help-vibes');
+    } else if (currentStep === 'help-preferences') {
+      setCurrentStep('help-budget');
     }
   };
 
@@ -169,10 +211,14 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
       case 'companions': return formData.travelingWith;
       case 'purpose': return formData.tripPurpose;
       case 'vibes': return formData.travelVibes && formData.travelVibes.length > 0;
-      case 'help-dates': return formData.fromDate && formData.toDate;
       case 'help-departure': return formData.fromLocation;
-      case 'help-preferences': return formData.travelType;
+      case 'help-dates': return (formData.fromDate && formData.toDate) || formData.isFlexibleWithDates;
+      case 'help-duration': return formData.tripDuration;
+      case 'help-companions': return formData.travelingWith;
+      case 'help-purpose': return formData.tripPurpose;
+      case 'help-vibes': return formData.travelVibes && formData.travelVibes.length > 0;
       case 'help-budget': return formData.budget;
+      case 'help-preferences': return formData.destinationPreference;
       default: return false;
     }
   };
@@ -260,10 +306,14 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               {currentStep === 'companions' && 'Who are you traveling with?'}
               {currentStep === 'purpose' && 'What\'s the purpose of your trip?'}
               {currentStep === 'vibes' && 'How would you describe your travel vibe?'}
-              {currentStep === 'help-dates' && 'When do you want to travel?'}
               {currentStep === 'help-departure' && 'Where are you traveling from?'}
-              {currentStep === 'help-preferences' && 'What\'s your travel preference?'}
-              {currentStep === 'help-budget' && 'What\'s your budget range?'}
+              {currentStep === 'help-dates' && 'Travel Dates:'}
+              {currentStep === 'help-duration' && 'Trip duration (if dates not fixed)?'}
+              {currentStep === 'help-companions' && 'Who are you traveling with?'}
+              {currentStep === 'help-purpose' && 'What\'s the purpose of your trip?'}
+              {currentStep === 'help-vibes' && 'How would you describe your travel vibe?'}
+              {currentStep === 'help-budget' && 'What\'s your approximate budget per person?'}
+              {currentStep === 'help-preferences' && 'Destination preference?'}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-6 pt-0">
@@ -466,6 +516,117 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
                     className="pointer-events-auto"
                   />
                 </div>
+                <div className="flex items-center space-x-2 p-3 bg-white/70 rounded-lg">
+                  <Checkbox
+                    id="flexible-dates"
+                    checked={formData.isFlexibleWithDates}
+                    onCheckedChange={(checked) => 
+                      setFormData(prev => ({ ...prev, isFlexibleWithDates: checked as boolean }))
+                    }
+                  />
+                  <Label htmlFor="flexible-dates" className="cursor-pointer">
+                    I'm flexible with dates
+                  </Label>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 'help-duration' && (
+              <div className="space-y-6">
+                <h3 className="font-semibold text-deep-blue">Trip duration (if dates not fixed)?</h3>
+                <div className="bg-white/70 rounded-lg p-6">
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <span className="text-2xl font-bold text-primary">{formData.tripDuration}</span>
+                      <span className="text-sm text-muted-foreground ml-1">days</span>
+                    </div>
+                    <Slider
+                      value={[formData.tripDuration || 7]}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, tripDuration: value[0] }))}
+                      max={15}
+                      min={3}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>3 days</span>
+                      <span>15+ days</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 'help-companions' && (
+              <div className="space-y-4">
+                <RadioGroup 
+                  value={formData.travelingWith} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, travelingWith: value }))}
+                  className="space-y-3"
+                >
+                  {companionOptions.map((option) => (
+                    <div key={option.id} className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                      <RadioGroupItem value={option.id} id={option.id} />
+                      <Label htmlFor={option.id} className="flex items-center gap-3 cursor-pointer flex-1">
+                        <span className="text-xl">{option.emoji}</span>
+                        <span className="font-medium text-deep-blue">{option.label}</span>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+
+            {currentStep === 'help-purpose' && (
+              <div className="space-y-4">
+                <RadioGroup 
+                  value={formData.tripPurpose} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, tripPurpose: value }))}
+                  className="space-y-3"
+                >
+                  {purposeOptions.map((option) => (
+                    <div key={option.id} className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                      <RadioGroupItem value={option.id} id={option.id} />
+                      <Label htmlFor={option.id} className="flex items-center gap-3 cursor-pointer flex-1">
+                        <span className="text-xl">{option.emoji}</span>
+                        <span className="font-medium text-deep-blue">{option.label}</span>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+
+            {currentStep === 'help-vibes' && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Select all that apply:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {vibeOptions.map((vibe) => (
+                    <div key={vibe.id} className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                      <Checkbox
+                        id={`help-${vibe.id}`}
+                        checked={formData.travelVibes?.includes(vibe.id) || false}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData(prev => ({
+                              ...prev,
+                              travelVibes: [...(prev.travelVibes || []), vibe.id]
+                            }));
+                          } else {
+                            setFormData(prev => ({
+                              ...prev,
+                              travelVibes: (prev.travelVibes || []).filter(v => v !== vibe.id)
+                            }));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`help-${vibe.id}`} className="flex items-center gap-2 cursor-pointer flex-1">
+                        <span className="text-lg">{vibe.emoji}</span>
+                        <span className="font-medium text-deep-blue text-sm">{vibe.label}</span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -533,6 +694,39 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
                 </div>
               </div>
             )}
+
+            {currentStep === 'help-preferences' && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-deep-blue">Destination preference?</h3>
+                <RadioGroup 
+                  value={formData.destinationPreference} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, destinationPreference: value }))}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                    <RadioGroupItem value="domestic" id="domestic" />
+                    <Label htmlFor="domestic" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <span className="text-xl">🏠</span>
+                      <span className="font-medium text-deep-blue">Domestic</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                    <RadioGroupItem value="international" id="international" />
+                    <Label htmlFor="international" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <span className="text-xl">🌍</span>
+                      <span className="font-medium text-deep-blue">International</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                    <RadioGroupItem value="either" id="either" />
+                    <Label htmlFor="either" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <span className="text-xl">🔀</span>
+                      <span className="font-medium text-deep-blue">Either</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -546,7 +740,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
           size="lg"
           disabled={!canProceed()}
         >
-          {(currentStep === 'vibes' || currentStep === 'help-budget') ? (
+          {(currentStep === 'vibes' || currentStep === 'help-preferences') ? (
             <>
               <Sparkles className="h-4 w-4 mr-2" />
               Generate Itinerary
