@@ -117,17 +117,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
         
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-6">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             Let AI Plan Your
-            <span className="block text-gradient-premium">Perfect Trip</span>
+            <span className="block bg-gradient-to-r from-sky-200 to-emerald-200 bg-clip-text text-transparent">Perfect Trip</span>
           </h1>
-          <p className="text-xl md:text-2xl mb-12 opacity-90 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl lg:text-2xl mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed">
             Tell us where and when — we'll build your dream itinerary in seconds.
           </p>
           <Button
             onClick={onCreateTrip}
             size="xl"
-            className="bg-gradient-sunset hover:scale-105 transition-all duration-300 shadow-premium text-lg px-12 py-6"
+            className="bg-gradient-premium hover:scale-105 transition-all duration-300 shadow-premium text-lg px-12 py-6 text-white font-semibold"
           >
             <Sparkles className="mr-3 h-6 w-6" />
             Create Your Trip
@@ -149,27 +149,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 px-6 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20 md:py-24 px-4 md:px-6 bg-muted/20">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gradient-premium">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Why Travelers Love Us
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Everything you need for the perfect trip, powered by AI
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="group hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-premium border-0 overflow-hidden">
-                <div className={`h-2 ${feature.gradient}`} />
-                <div className="p-8">
-                  <div className="flex items-center justify-center w-16 h-16 bg-gradient-premium rounded-full mb-6 mx-auto">
-                    <feature.icon className="h-8 w-8 text-white" />
+              <Card key={index} className="group hover:scale-105 transition-all duration-500 shadow-lg hover:shadow-premium border-0 overflow-hidden bg-card/80 backdrop-blur-sm">
+                <div className={`h-1 ${feature.gradient}`} />
+                <div className="p-6 md:p-8">
+                  <div className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-premium rounded-full mb-6 mx-auto shadow-lg">
+                    <feature.icon className="h-7 w-7 md:h-8 md:w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold mb-4 text-center">{feature.title}</h3>
-                  <p className="text-muted-foreground text-center leading-relaxed">
+                  <h3 className="text-lg md:text-xl font-bold mb-4 text-center">{feature.title}</h3>
+                  <p className="text-muted-foreground text-center leading-relaxed text-sm md:text-base">
                     {feature.description}
                   </p>
                 </div>
@@ -180,37 +180,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
       </section>
 
       {/* Itinerary Preview */}
-      <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20 md:py-24 px-4 md:px-6">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-foreground">
               See Your Trip Come to Life
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               AI-generated itineraries that feel like they were made just for you
             </p>
           </div>
           
-          <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
+          <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 no-scrollbar px-4 md:px-0">
             {sampleItinerary.map((day, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-80 bg-card rounded-2xl shadow-lg hover:shadow-premium transition-all duration-300 hover:scale-105 border border-border/50"
+                className="flex-shrink-0 w-72 md:w-80 bg-card rounded-2xl shadow-lg hover:shadow-premium transition-all duration-500 hover:scale-105 border border-border/30"
               >
-                <div className={`h-48 ${day.color} rounded-t-2xl relative overflow-hidden`}>
+                <div className={`h-40 md:h-48 ${day.color} rounded-t-2xl relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                  <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                    <span className="text-white font-semibold">{day.day}</span>
+                  <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 md:px-4 md:py-2">
+                    <span className="text-white font-semibold text-sm md:text-base">{day.day}</span>
                   </div>
-                  <div className="absolute bottom-4 right-4">
-                    <Camera className="h-8 w-8 text-white/80" />
+                  <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4">
+                    <Camera className="h-6 w-6 md:h-8 md:w-8 text-white/80" />
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{day.title}</h3>
+                <div className="p-5 md:p-6">
+                  <h3 className="text-lg md:text-xl font-bold mb-2">{day.title}</h3>
                   <div className="flex items-center text-muted-foreground">
                     <Clock className="h-4 w-4 mr-2" />
-                    <span>{day.time}</span>
+                    <span className="text-sm md:text-base">{day.time}</span>
                   </div>
                 </div>
               </div>
@@ -251,21 +251,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 px-6 bg-gradient-hero relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20" />
+      <section className="py-20 md:py-24 px-4 md:px-6 bg-gradient-hero relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10" />
         <div className="relative z-10 max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6">
             Your Smartest Trip Starts Here
           </h2>
-          <p className="text-xl mb-12 opacity-90 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed">
             Join thousands of travelers who trust AI to plan their perfect adventures
           </p>
           <Button
             onClick={onCreateTrip}
             size="xl"
-            className="bg-white text-primary hover:bg-white/90 hover:scale-105 transition-all duration-300 shadow-premium text-lg px-12 py-6"
+            className="bg-white text-primary hover:bg-white/90 hover:scale-105 transition-all duration-500 shadow-premium text-lg px-8 md:px-12 py-4 md:py-6 font-semibold"
           >
-            <Sparkles className="mr-3 h-6 w-6" />
+            <Sparkles className="mr-3 h-5 w-5 md:h-6 md:w-6" />
             Create Your Trip
           </Button>
         </div>

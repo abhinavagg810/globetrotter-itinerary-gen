@@ -8,58 +8,58 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Premium travel-themed color palette */
+    /* Calming blue and green travel palette */
     --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --foreground: 213 25% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 213 25% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 213 25% 20%;
 
-    /* Deep ocean blue primary */
-    --primary: 214 84% 56%;
+    /* Calming ocean blue primary */
+    --primary: 210 80% 55%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 214 84% 70%;
-    --primary-dark: 214 84% 42%;
+    --primary-light: 210 80% 70%;
+    --primary-dark: 210 80% 40%;
 
-    /* Warm coral secondary */
-    --secondary: 14 100% 57%;
+    /* Tranquil sage green secondary */
+    --secondary: 150 40% 55%;
     --secondary-foreground: 0 0% 100%;
 
     /* Soft neutral tones */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 210 30% 96%;
+    --muted-foreground: 213 15% 55%;
 
-    /* Golden accent */
-    --accent: 43 96% 56%;
-    --accent-foreground: 215 25% 15%;
+    /* Soft mint accent */
+    --accent: 160 50% 65%;
+    --accent-foreground: 213 25% 20%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 214 84% 56%;
+    --border: 210 25% 90%;
+    --input: 210 25% 90%;
+    --ring: 210 80% 55%;
 
-    /* Premium travel colors */
-    --ocean: 214 84% 56%;
-    --sky: 197 71% 73%;
-    --sunset: 14 100% 57%;
-    --coral: 14 100% 57%;
-    --mint: 158 64% 52%;
-    --sand: 45 29% 97%;
-    --gold: 43 96% 56%;
-    --deep-blue: 214 84% 42%;
-    --sage: 158 25% 50%;
+    /* Calming travel colors */
+    --ocean: 210 80% 55%;
+    --sky: 200 75% 70%;
+    --sage: 150 40% 55%;
+    --mint: 160 50% 65%;
+    --forest: 140 60% 45%;
+    --seafoam: 170 40% 70%;
+    --pearl: 210 20% 95%;
+    --navy: 210 80% 35%;
+    --teal: 180 60% 50%;
 
-    /* Premium gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(197 71% 73%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(214 32% 97%) 100%);
-    --gradient-ocean: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(214 84% 42%) 100%);
-    --gradient-sunset: linear-gradient(135deg, hsl(14 100% 57%) 0%, hsl(43 96% 56%) 100%);
-    --gradient-premium: linear-gradient(135deg, hsl(214 84% 56%) 0%, hsl(158 64% 52%) 50%, hsl(43 96% 56%) 100%);
+    /* Calming gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(210 80% 55%) 0%, hsl(160 50% 65%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(210 25% 97%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(210 80% 55%) 0%, hsl(200 75% 70%) 100%);
+    --gradient-sage: linear-gradient(135deg, hsl(150 40% 55%) 0%, hsl(160 50% 65%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(210 80% 55%) 0%, hsl(160 50% 65%) 50%, hsl(150 40% 55%) 100%);
 
     /* Premium shadows */
     --shadow-sm: 0 1px 2px 0 hsl(214 84% 56% / 0.05);
@@ -81,54 +81,54 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Premium dark mode colors */
-    --background: 215 25% 15%;
-    --foreground: 210 40% 98%;
+    /* Calming dark mode colors */
+    --background: 213 25% 15%;
+    --foreground: 210 30% 95%;
 
-    --card: 215 25% 18%;
-    --card-foreground: 210 40% 98%;
+    --card: 213 25% 18%;
+    --card-foreground: 210 30% 95%;
 
-    --popover: 215 25% 18%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 213 25% 18%;
+    --popover-foreground: 210 30% 95%;
 
-    --primary: 214 84% 70%;
-    --primary-foreground: 215 25% 15%;
-    --primary-light: 214 84% 80%;
-    --primary-dark: 214 84% 60%;
+    --primary: 210 80% 70%;
+    --primary-foreground: 213 25% 15%;
+    --primary-light: 210 80% 80%;
+    --primary-dark: 210 80% 60%;
 
-    --secondary: 14 100% 67%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 150 40% 65%;
+    --secondary-foreground: 210 30% 95%;
 
-    --muted: 215 25% 25%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 213 25% 25%;
+    --muted-foreground: 213 15% 65%;
 
-    --accent: 43 96% 66%;
-    --accent-foreground: 215 25% 15%;
+    --accent: 160 50% 70%;
+    --accent-foreground: 213 25% 15%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 210 30% 95%;
 
-    --border: 215 20% 30%;
-    --input: 215 20% 25%;
-    --ring: 214 84% 70%;
+    --border: 213 20% 30%;
+    --input: 213 20% 25%;
+    --ring: 210 80% 70%;
 
-    /* Premium dark colors */
-    --ocean: 214 84% 70%;
-    --sky: 197 71% 83%;
-    --sunset: 14 100% 67%;
-    --coral: 14 100% 67%;
-    --mint: 158 64% 62%;
-    --sand: 45 29% 85%;
-    --gold: 43 96% 66%;
-    --deep-blue: 214 84% 60%;
-    --sage: 158 25% 60%;
+    /* Calming dark colors */
+    --ocean: 210 80% 70%;
+    --sky: 200 75% 80%;
+    --sage: 150 40% 65%;
+    --mint: 160 50% 70%;
+    --forest: 140 60% 55%;
+    --seafoam: 170 40% 75%;
+    --pearl: 210 20% 85%;
+    --navy: 210 80% 45%;
+    --teal: 180 60% 60%;
 
-    /* Premium dark gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(214 84% 70%) 0%, hsl(197 71% 83%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(215 25% 18%) 0%, hsl(214 32% 22%) 100%);
-    --gradient-ocean: linear-gradient(135deg, hsl(214 84% 70%) 0%, hsl(214 84% 60%) 100%);
-    --gradient-sunset: linear-gradient(135deg, hsl(14 100% 67%) 0%, hsl(43 96% 66%) 100%);
-    --gradient-premium: linear-gradient(135deg, hsl(214 84% 70%) 0%, hsl(158 64% 62%) 50%, hsl(43 96% 66%) 100%);
+    /* Calming dark gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(210 80% 70%) 0%, hsl(160 50% 70%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(213 25% 18%) 0%, hsl(210 25% 22%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(210 80% 70%) 0%, hsl(200 75% 80%) 100%);
+    --gradient-sage: linear-gradient(135deg, hsl(150 40% 65%) 0%, hsl(160 50% 70%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(210 80% 70%) 0%, hsl(160 50% 70%) 50%, hsl(150 40% 65%) 100%);
 
     /* Premium dark shadows */
     --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
@@ -176,8 +176,8 @@ All colors MUST be HSL.
     background: var(--gradient-ocean);
   }
   
-  .bg-gradient-sunset {
-    background: var(--gradient-sunset);
+  .bg-gradient-sage {
+    background: var(--gradient-sage);
   }
   
   .bg-gradient-premium {
