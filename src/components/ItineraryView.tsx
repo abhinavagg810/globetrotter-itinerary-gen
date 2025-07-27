@@ -73,34 +73,80 @@ export function ItineraryView({
   });
   const { formatPrice, currentCurrency } = useCurrency();
 
-  // Currency and timezone data for common destinations
+  // Expanded currency and timezone data for common destinations
   const destinationData: Record<string, { currency: { code: string; name: string; symbol: string; rate: number }; timezone: { name: string; offset: string; offsetHours: number } }> = {
-    'Dubai': { currency: { code: 'AED', name: 'UAE Dirham', symbol: 'AED', rate: 3.67 }, timezone: { name: 'GST', offset: 'UTC+4', offsetHours: 4 } },
+    // Asia
+    'Dubai': { currency: { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', rate: 3.67 }, timezone: { name: 'GST', offset: 'UTC+4', offsetHours: 4 } },
     'Singapore': { currency: { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', rate: 1.35 }, timezone: { name: 'SGT', offset: 'UTC+8', offsetHours: 8 } },
-    'London': { currency: { code: 'GBP', name: 'British Pound', symbol: '£', rate: 0.79 }, timezone: { name: 'GMT', offset: 'UTC+0', offsetHours: 0 } },
-    'New York': { currency: { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.0 }, timezone: { name: 'EST', offset: 'UTC-5', offsetHours: -5 } },
-    'Paris': { currency: { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
     'Tokyo': { currency: { code: 'JPY', name: 'Japanese Yen', symbol: '¥', rate: 110 }, timezone: { name: 'JST', offset: 'UTC+9', offsetHours: 9 } },
-    'Sydney': { currency: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', rate: 1.45 }, timezone: { name: 'AEDT', offset: 'UTC+11', offsetHours: 11 } },
     'Bangkok': { currency: { code: 'THB', name: 'Thai Baht', symbol: '฿', rate: 33 }, timezone: { name: 'ICT', offset: 'UTC+7', offsetHours: 7 } },
+    'Bali': { currency: { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', rate: 15000 }, timezone: { name: 'WITA', offset: 'UTC+8', offsetHours: 8 } },
+    'Seoul': { currency: { code: 'KRW', name: 'South Korean Won', symbol: '₩', rate: 1200 }, timezone: { name: 'KST', offset: 'UTC+9', offsetHours: 9 } },
+    'Hong Kong': { currency: { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', rate: 7.8 }, timezone: { name: 'HKT', offset: 'UTC+8', offsetHours: 8 } },
+    'Malaysia': { currency: { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', rate: 4.5 }, timezone: { name: 'MYT', offset: 'UTC+8', offsetHours: 8 } },
+    'Maldives': { currency: { code: 'MVR', name: 'Maldivian Rufiyaa', symbol: 'Rf', rate: 15.4 }, timezone: { name: 'MVT', offset: 'UTC+5', offsetHours: 5 } },
+    
+    // Europe
+    'London': { currency: { code: 'GBP', name: 'British Pound', symbol: '£', rate: 0.79 }, timezone: { name: 'GMT', offset: 'UTC+0', offsetHours: 0 } },
+    'Paris': { currency: { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
+    'Rome': { currency: { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
+    'Amsterdam': { currency: { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
+    'Barcelona': { currency: { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
+    'Switzerland': { currency: { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', rate: 0.92 }, timezone: { name: 'CET', offset: 'UTC+1', offsetHours: 1 } },
+    
+    // Americas
+    'New York': { currency: { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.0 }, timezone: { name: 'EST', offset: 'UTC-5', offsetHours: -5 } },
+    'Los Angeles': { currency: { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.0 }, timezone: { name: 'PST', offset: 'UTC-8', offsetHours: -8 } },
+    'Toronto': { currency: { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', rate: 1.25 }, timezone: { name: 'EST', offset: 'UTC-5', offsetHours: -5 } },
+    'Mexico': { currency: { code: 'MXN', name: 'Mexican Peso', symbol: '$', rate: 20 }, timezone: { name: 'CST', offset: 'UTC-6', offsetHours: -6 } },
+    
+    // Oceania
+    'Sydney': { currency: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', rate: 1.45 }, timezone: { name: 'AEDT', offset: 'UTC+11', offsetHours: 11 } },
+    'Melbourne': { currency: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', rate: 1.45 }, timezone: { name: 'AEDT', offset: 'UTC+11', offsetHours: 11 } },
+    'Auckland': { currency: { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$', rate: 1.6 }, timezone: { name: 'NZDT', offset: 'UTC+13', offsetHours: 13 } },
+    
+    // India
     'Mumbai': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
     'Delhi': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
+    'Bangalore': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
+    'Goa': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
+    'Kerala': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
+    'Rajasthan': { currency: { code: 'INR', name: 'Indian Rupee', symbol: '₹', rate: 1 }, timezone: { name: 'IST', offset: 'UTC+5:30', offsetHours: 5.5 } },
   };
 
   const getDestinationCurrencyInfo = () => {
     if (!itineraryData.destinations || itineraryData.destinations.length === 0) return null;
     
-    const destination = itineraryData.destinations[0];
-    const data = Object.keys(destinationData).find(key => 
-      destination.toLowerCase().includes(key.toLowerCase())
+    const destination = itineraryData.destinations[0].trim();
+    
+    // Try exact match first
+    const exactMatch = Object.keys(destinationData).find(key => 
+      destination.toLowerCase() === key.toLowerCase()
     );
     
-    if (data) {
-      const currencyInfo = destinationData[data].currency;
-      // Calculate conversion rate from user's currency to destination currency
-      const userToUsd = currentCurrency.code === 'USD' ? 1 : (1 / currentCurrency.rate);
-      const usdToDestination = currencyInfo.rate;
-      const conversionRate = (userToUsd * usdToDestination).toFixed(2);
+    if (exactMatch) {
+      const currencyInfo = destinationData[exactMatch].currency;
+      const conversionRate = currentCurrency.code !== currencyInfo.code 
+        ? (currencyInfo.rate / (currentCurrency.rate || 1)).toFixed(2)
+        : '1.00';
+      
+      return {
+        ...currencyInfo,
+        rate: conversionRate
+      };
+    }
+    
+    // Try partial match
+    const partialMatch = Object.keys(destinationData).find(key => 
+      destination.toLowerCase().includes(key.toLowerCase()) || 
+      key.toLowerCase().includes(destination.toLowerCase())
+    );
+    
+    if (partialMatch) {
+      const currencyInfo = destinationData[partialMatch].currency;
+      const conversionRate = currentCurrency.code !== currencyInfo.code 
+        ? (currencyInfo.rate / (currentCurrency.rate || 1)).toFixed(2)
+        : '1.00';
       
       return {
         ...currencyInfo,
@@ -114,24 +160,52 @@ export function ItineraryView({
   const getTimezoneInfo = () => {
     if (!itineraryData.destinations || itineraryData.destinations.length === 0) return null;
     
-    const destination = itineraryData.destinations[0];
-    const data = Object.keys(destinationData).find(key => 
-      destination.toLowerCase().includes(key.toLowerCase())
+    const destination = itineraryData.destinations[0].trim();
+    
+    // Try exact match first
+    const exactMatch = Object.keys(destinationData).find(key => 
+      destination.toLowerCase() === key.toLowerCase()
     );
     
-    if (data) {
-      const timezoneInfo = destinationData[data].timezone;
-      // Assuming user is in IST (UTC+5:30) by default
-      const userOffsetHours = 5.5;
+    if (exactMatch) {
+      const timezoneInfo = destinationData[exactMatch].timezone;
+      const userOffsetHours = 5.5; // IST (UTC+5:30)
       const timeDifference = timezoneInfo.offsetHours - userOffsetHours;
       
       let differenceText = '';
-      if (timeDifference > 0) {
-        differenceText = `${timeDifference} hours ahead`;
-      } else if (timeDifference < 0) {
-        differenceText = `${Math.abs(timeDifference)} hours behind`;
-      } else {
+      if (Math.abs(timeDifference) < 0.1) {
         differenceText = 'Same time zone';
+      } else if (timeDifference > 0) {
+        differenceText = `${timeDifference} hours ahead`;
+      } else {
+        differenceText = `${Math.abs(timeDifference)} hours behind`;
+      }
+      
+      return {
+        timezone: timezoneInfo.name,
+        offset: timezoneInfo.offset,
+        difference: differenceText
+      };
+    }
+    
+    // Try partial match
+    const partialMatch = Object.keys(destinationData).find(key => 
+      destination.toLowerCase().includes(key.toLowerCase()) || 
+      key.toLowerCase().includes(destination.toLowerCase())
+    );
+    
+    if (partialMatch) {
+      const timezoneInfo = destinationData[partialMatch].timezone;
+      const userOffsetHours = 5.5; // IST (UTC+5:30)
+      const timeDifference = timezoneInfo.offsetHours - userOffsetHours;
+      
+      let differenceText = '';
+      if (Math.abs(timeDifference) < 0.1) {
+        differenceText = 'Same time zone';
+      } else if (timeDifference > 0) {
+        differenceText = `${timeDifference} hours ahead`;
+      } else {
+        differenceText = `${Math.abs(timeDifference)} hours behind`;
       }
       
       return {
