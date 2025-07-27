@@ -33,7 +33,7 @@ export interface ItineraryData {
   destinationPreference?: string;
 }
 
-type Step = 'destinations' | 'dates' | 'duration' | 'companions' | 'purpose' | 'vibes' | 'budget' | 'preferences' | 'help-departure' | 'help-dates' | 'help-duration' | 'help-companions' | 'help-purpose' | 'help-vibes' | 'help-budget' | 'help-preferences';
+type Step = 'destinations' | 'dates' | 'duration' | 'companions' | 'purpose' | 'vibes' | 'budget' | 'help-departure' | 'help-dates' | 'help-duration' | 'help-companions' | 'help-purpose' | 'help-vibes' | 'help-budget';
 
 export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStepsProps) {
   const [currentStep, setCurrentStep] = useState<Step>('destinations');
@@ -70,7 +70,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     { id: 'help-purpose', title: 'Purpose', icon: Heart },
     { id: 'help-vibes', title: 'Vibes', icon: Sparkles },
     { id: 'help-budget', title: 'Budget', icon: DollarSign },
-    { id: 'help-preferences', title: 'Preferences', icon: Globe },
   ];
 
   const isHelpFlow = currentStep.startsWith('help-');
@@ -162,8 +161,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     } else if (currentStep === 'help-vibes' && formData.travelVibes && formData.travelVibes.length > 0) {
       setCurrentStep('help-budget');
     } else if (currentStep === 'help-budget' && formData.budget) {
-      setCurrentStep('help-preferences');
-    } else if (currentStep === 'help-preferences' && formData.destinationPreference) {
       onGenerate(formData);
     }
   };
@@ -199,8 +196,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
       setCurrentStep('help-purpose');
     } else if (currentStep === 'help-budget') {
       setCurrentStep('help-vibes');
-    } else if (currentStep === 'help-preferences') {
-      setCurrentStep('help-budget');
     }
   };
 
@@ -218,7 +213,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
       case 'help-purpose': return formData.tripPurpose;
       case 'help-vibes': return formData.travelVibes && formData.travelVibes.length > 0;
       case 'help-budget': return formData.budget;
-      case 'help-preferences': return formData.destinationPreference;
+      
       default: return false;
     }
   };
@@ -313,7 +308,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               {currentStep === 'help-purpose' && 'What\'s the purpose of your trip?'}
               {currentStep === 'help-vibes' && 'How would you describe your travel vibe?'}
               {currentStep === 'help-budget' && 'What\'s your approximate budget per person?'}
-              {currentStep === 'help-preferences' && 'Destination preference?'}
+              
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-6 pt-0">
@@ -642,34 +637,9 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               </div>
             )}
 
-            {currentStep === 'help-preferences' && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-deep-blue">What's your travel preference?</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {travelTypes.map((type) => (
-                    <div
-                      key={type.id}
-                      className={cn(
-                        "p-4 rounded-lg border-2 cursor-pointer text-center transition-all hover:scale-105",
-                        formData.travelType === type.id
-                          ? "border-primary bg-primary/10 shadow-lg"
-                          : "border-border/50 hover:border-primary/50 bg-white/70"
-                      )}
-                      onClick={() => setFormData(prev => ({ ...prev, travelType: type.id }))}
-                    >
-                      <div className="text-2xl mb-1">{type.emoji}</div>
-                      <div className="font-semibold text-sm text-deep-blue">{type.label}</div>
-                      <div className="text-xs text-muted-foreground">{type.description}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-
             {currentStep === 'help-budget' && (
               <div className="space-y-4">
-                <h3 className="font-semibold text-deep-blue">What's your budget range?</h3>
+                <h3 className="font-semibold text-deep-blue">What's your approximate budget per person?</h3>
                 <div className="grid grid-cols-1 gap-3">
                   {budgetRanges.map((budget) => (
                     <div
@@ -695,38 +665,6 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               </div>
             )}
 
-            {currentStep === 'help-preferences' && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-deep-blue">Destination preference?</h3>
-                <RadioGroup 
-                  value={formData.destinationPreference} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, destinationPreference: value }))}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
-                    <RadioGroupItem value="domestic" id="domestic" />
-                    <Label htmlFor="domestic" className="flex items-center gap-3 cursor-pointer flex-1">
-                      <span className="text-xl">🏠</span>
-                      <span className="font-medium text-deep-blue">Domestic</span>
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
-                    <RadioGroupItem value="international" id="international" />
-                    <Label htmlFor="international" className="flex items-center gap-3 cursor-pointer flex-1">
-                      <span className="text-xl">🌍</span>
-                      <span className="font-medium text-deep-blue">International</span>
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
-                    <RadioGroupItem value="either" id="either" />
-                    <Label htmlFor="either" className="flex items-center gap-3 cursor-pointer flex-1">
-                      <span className="text-xl">🔀</span>
-                      <span className="font-medium text-deep-blue">Either</span>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -740,7 +678,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
           size="lg"
           disabled={!canProceed()}
         >
-          {(currentStep === 'vibes' || currentStep === 'help-preferences') ? (
+          {(currentStep === 'vibes' || currentStep === 'help-budget') ? (
             <>
               <Sparkles className="h-4 w-4 mr-2" />
               Generate Itinerary
