@@ -80,10 +80,6 @@ export function AuthPage({ onLogin }: AuthPageProps) {
             </CardContent>
           </Card>
 
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-4 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-            Travel Globe AI
-          </h1>
-          <p className="text-white/90 text-base md:text-lg lg:text-xl mb-6 md:mb-8">Your AI-Powered Travel Companion</p>
           
           
         </div>
