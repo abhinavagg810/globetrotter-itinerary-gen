@@ -67,58 +67,60 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
         <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="flex items-center gap-2 text-deep-blue text-lg md:text-xl">
-              <Star className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-              Features to replace all your other tools
+              <div className="text-xl md:text-2xl mr-1">🔥</div>
+              Why Travelers Love Us
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 md:p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div className="text-center p-4 md:p-6 bg-white/50 rounded-xl">
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
-                  <div className="text-xl md:text-2xl">🤖</div>
+            <div className="space-y-4 md:space-y-6">
+              <div className="flex gap-3 md:gap-4 p-4 md:p-6 bg-white/50 rounded-xl">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <div className="text-xl md:text-2xl">🧠</div>
                 </div>
-                <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">AI-Powered Itinerary Planning</h4>
-                <p className="text-xs md:text-sm text-muted-foreground">Smart algorithms create personalized travel plans based on your preferences, budget, and interests.</p>
+                <div>
+                  <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">AI-Curated Travel Itineraries</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground">Get smart, personalized, day-by-day travel plans based on your vibe, destination, pace, group type, and budget — in seconds.</p>
+                </div>
               </div>
               
-              <div className="text-center p-6 bg-white/50 rounded-xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl">📄</div>
+              <div className="flex gap-3 md:gap-4 p-4 md:p-6 bg-white/50 rounded-xl">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <div className="text-xl md:text-2xl">👯</div>
                 </div>
-                <h4 className="font-bold text-deep-blue text-base mb-2">Document Management</h4>
-                <p className="text-sm text-muted-foreground">Store and organize all your travel documents - passports, tickets, reservations in one secure place.</p>
+                <div>
+                  <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">Collaborate with Co-Travelers</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground">Add your friends, partner, or family to plan trips together. Co-edit plans, vote on ideas, and stay in sync.</p>
+                </div>
               </div>
               
-              <div className="text-center p-6 bg-white/50 rounded-xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl">💰</div>
+              <div className="flex gap-3 md:gap-4 p-4 md:p-6 bg-white/50 rounded-xl">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <div className="text-xl md:text-2xl">💸</div>
                 </div>
-                <h4 className="font-bold text-deep-blue text-base mb-2">Expense Tracking & Splitting</h4>
-                <p className="text-sm text-muted-foreground">Keep track of your budget and easily split costs with travel companions in real-time.</p>
+                <div>
+                  <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">Smart Expense Splitting</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground">Track who paid what, split group bills effortlessly, and avoid awkward math or spreadsheets.</p>
+                </div>
               </div>
               
-              <div className="text-center p-6 bg-white/50 rounded-xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl">🎯</div>
+              <div className="flex gap-3 md:gap-4 p-4 md:p-6 bg-white/50 rounded-xl">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <div className="text-xl md:text-2xl">📁</div>
                 </div>
-                <h4 className="font-bold text-deep-blue text-base mb-2">Personalized Recommendations</h4>
-                <p className="text-sm text-muted-foreground">Get smart suggestions for places to visit, restaurants, and activities tailored to your travel style.</p>
+                <div>
+                  <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">All Your Travel Docs, Organized</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground">Centralize all your bookings — flights, hotels, activities, etc. Upload PDFs or screenshots, and view them in a clean trip timeline.</p>
+                </div>
               </div>
               
-              <div className="text-center p-6 bg-white/50 rounded-xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl">✈️</div>
+              <div className="flex gap-3 md:gap-4 p-4 md:p-6 bg-white/50 rounded-xl">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <div className="text-xl md:text-2xl">🔍</div>
                 </div>
-                <h4 className="font-bold text-deep-blue text-base mb-2">Flight & Hotel Integration</h4>
-                <p className="text-sm text-muted-foreground">Connect your email to automatically import flight and hotel reservations into your itinerary.</p>
-              </div>
-              
-              <div className="text-center p-6 bg-white/50 rounded-xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl">👥</div>
+                <div>
+                  <h4 className="font-bold text-deep-blue text-sm md:text-base mb-2">No More Manual Entry</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground">Upload your travel documents and we'll instantly organize dates, bookings, and expenses for your itinerary.</p>
                 </div>
-                <h4 className="font-bold text-deep-blue text-base mb-2">Collaborative Planning</h4>
-                <p className="text-sm text-muted-foreground">Plan trips with friends and family using real-time collaboration and live editing features.</p>
               </div>
             </div>
           </CardContent>
