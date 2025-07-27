@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload, Plus, X, Route, FootprintsIcon } from "lucide-react";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload, Plus, X, Route, FootprintsIcon, Paperclip, Download, Eye } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
@@ -68,7 +68,8 @@ export function ItineraryView({
     weather: false,
     visa: false,
     flights: false,
-    hotels: false
+    hotels: false,
+    documents: false
   });
   const { formatPrice, currentCurrency } = useCurrency();
 
@@ -1147,6 +1148,79 @@ export function ItineraryView({
                         </div>
                         <div className="text-xs text-green-600 mt-1 font-medium">✓ Free cancellation</div>
                       </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Documents */}
+            <Collapsible 
+              open={openSections.documents} 
+              onOpenChange={(open) => setOpenSections(prev => ({ ...prev, documents: open }))}
+            >
+              <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Paperclip className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <CardTitle className="text-lg">Documents</CardTitle>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 transition-transform ${openSections.documents ? 'rotate-180' : ''}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      {bookingDetails && bookingDetails.length > 0 ? (
+                        bookingDetails.map((booking, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                {booking.type === 'flight' && <Plane className="h-4 w-4 text-blue-600" />}
+                                {booking.type === 'hotel' && <Hotel className="h-4 w-4 text-blue-600" />}
+                                {booking.type === 'activity' && <Camera className="h-4 w-4 text-blue-600" />}
+                                {booking.type === 'restaurant' && <Utensils className="h-4 w-4 text-blue-600" />}
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">{booking.title}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {booking.type.charAt(0).toUpperCase() + booking.type.slice(1)} • 
+                                  {booking.documentUrl ? '1 document' : 'No documents'}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center p-6 bg-muted/30 rounded-lg">
+                          <Paperclip className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                          <div className="text-sm font-medium text-muted-foreground mb-1">No documents uploaded</div>
+                          <div className="text-xs text-muted-foreground">
+                            Upload booking confirmations, tickets, and other travel documents
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Quick upload button */}
+                    <div className="mt-4 pt-4 border-t border-border/20">
+                      <Button variant="outline" className="w-full" size="sm">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Document
+                      </Button>
                     </div>
                   </CardContent>
                 </CollapsibleContent>
