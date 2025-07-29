@@ -155,7 +155,12 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     } else if (currentStep === 'help-vibes' && formData.travelVibes && formData.travelVibes.length > 0) {
       setCurrentStep('help-budget');
     } else if (currentStep === 'help-budget' && formData.budget) {
-      onGenerate(formData);
+      // For help flow, set a placeholder destination to allow itinerary generation
+      const updatedFormData = { ...formData };
+      if (formData.needsDestinationHelp) {
+        updatedFormData.destinations = ["Recommended Destination"];
+      }
+      onGenerate(updatedFormData);
     }
   };
 
