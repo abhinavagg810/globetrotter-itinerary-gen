@@ -1533,75 +1533,143 @@ export function ItineraryView({
                                   </div>
                                 </div>
                                 
-                                {/* Details */}
-                                <div className="space-y-3">
-                                  <div>
-                                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Description</h4>
-                                    <p className="text-foreground mt-1">{item.description}</p>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Time</h4>
-                                      <div className="flex items-center gap-2 mt-1">
-                                        <Clock className="h-4 w-4 text-muted-foreground" />
-                                        <span>{item.time}</span>
-                                      </div>
-                                    </div>
-                                    
-                                    {item.price && (
-                                      <div>
-                                        <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Price</h4>
-                                        <span className="text-lg font-semibold text-primary mt-1 block">{item.price}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  {item.type === 'activity' && (
-                                    <div>
-                                      <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Location Details</h4>
-                                      <div className="flex items-center gap-2 mt-1">
-                                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                                        <span>15 minutes walk • 0.5 miles</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                  
-                                  <div>
-                                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Rating</h4>
-                                    <div className="flex items-center gap-1 mt-1">
-                                      {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                                      ))}
-                                      <span className="ml-2 text-sm text-muted-foreground">4.8 (324 reviews)</span>
-                                    </div>
-                                  </div>
-                                </div>
+                                 {/* Details */}
+                                 <div className="space-y-4">
+                                   <div>
+                                     <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Description</h4>
+                                     <p className="text-foreground mt-1">{item.description}</p>
+                                   </div>
+                                   
+                                   {/* About Section with dynamic content based on type */}
+                                   <div>
+                                     <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">About</h4>
+                                     <div className="mt-2 space-y-2 text-sm text-foreground">
+                                       {item.type === 'flight' && (
+                                         <div className="space-y-1">
+                                           <p>• Direct flight with comfortable seating and in-flight entertainment</p>
+                                           <p>• Free checked baggage up to 20kg included</p>
+                                           <p>• Complimentary meals and beverages served</p>
+                                           <p>• Online check-in available 24 hours before departure</p>
+                                         </div>
+                                       )}
+                                       {item.type === 'hotel' && (
+                                         <div className="space-y-1">
+                                           <p>• Luxury accommodation with modern amenities</p>
+                                           <p>• Free WiFi, fitness center, and swimming pool</p>
+                                           <p>• 24/7 room service and concierge assistance</p>
+                                           <p>• Prime location with easy access to major attractions</p>
+                                           <p>• Complimentary breakfast included</p>
+                                         </div>
+                                       )}
+                                       {item.type === 'activity' && (
+                                         <div className="space-y-1">
+                                           <p>• Professional guided tour with local expert</p>
+                                           <p>• Small group experience (max 15 people)</p>
+                                           <p>• All entrance fees and equipment included</p>
+                                           <p>• Perfect for photography and cultural immersion</p>
+                                           <p>• Suitable for all fitness levels</p>
+                                         </div>
+                                       )}
+                                       {item.type === 'restaurant' && (
+                                         <div className="space-y-1">
+                                           <p>• Authentic local cuisine with fresh ingredients</p>
+                                           <p>• Award-winning chef with international recognition</p>
+                                           <p>• Vegetarian and vegan options available</p>
+                                           <p>• Elegant ambiance perfect for special occasions</p>
+                                           <p>• Extensive wine collection and signature cocktails</p>
+                                         </div>
+                                       )}
+                                     </div>
+                                   </div>
+                                   
+                                   <div className="grid grid-cols-2 gap-4">
+                                     <div>
+                                       <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Time</h4>
+                                       <div className="flex items-center gap-2 mt-1">
+                                         <Clock className="h-4 w-4 text-muted-foreground" />
+                                         <span>{item.time}</span>
+                                       </div>
+                                     </div>
+                                     
+                                     {item.price && (
+                                       <div>
+                                         <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Price</h4>
+                                         <span className="text-lg font-semibold text-primary mt-1 block">{item.price}</span>
+                                       </div>
+                                     )}
+                                   </div>
+                                   
+                                   <div>
+                                     <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Location Details</h4>
+                                     <div className="flex items-center gap-2 mt-1">
+                                       <MapPin className="h-4 w-4 text-muted-foreground" />
+                                       <span>
+                                         {item.type === 'flight' ? 'Terminal 3, Delhi Airport' : 
+                                          item.type === 'hotel' ? 'Downtown area, 2km from city center' :
+                                          '15 minutes walk • 0.5 miles from hotel'}
+                                       </span>
+                                     </div>
+                                   </div>
+                                   
+                                   <div>
+                                     <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Rating</h4>
+                                     <div className="flex items-center gap-1 mt-1">
+                                       {[1, 2, 3, 4, 5].map((star) => (
+                                         <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                       ))}
+                                       <span className="ml-2 text-sm text-muted-foreground">
+                                         {item.type === 'flight' ? '4.2 (1,240 reviews)' :
+                                          item.type === 'hotel' ? '4.6 (892 reviews)' :
+                                          item.type === 'restaurant' ? '4.7 (456 reviews)' :
+                                          '4.8 (324 reviews)'}
+                                       </span>
+                                     </div>
+                                   </div>
+                                 </div>
                                 
-                                {/* Action Buttons */}
-                                <div className="flex gap-3 pt-4">
-                                  {hasBookingDetails ? (
-                                    <Button 
-                                      className="flex-1"
-                                      variant="outline"
-                                      onClick={() => {
-                                        const details = bookingDetails.find(bd => bd.title === item.title);
-                                        if (details) handleViewBookingDetails(details);
-                                      }}
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-2" />
-                                      View Booking Details
-                                    </Button>
-                                  ) : (
-                                    <Button 
-                                      className="flex-1"
-                                      onClick={() => onAddDetails(item.type, item.title, item.id)}
-                                    >
-                                      <Receipt className="h-4 w-4 mr-2" />
-                                      Add Booking Details
-                                    </Button>
-                                  )}
-                                </div>
+                                 {/* Action Buttons */}
+                                 <div className="flex gap-3 pt-4">
+                                   {hasBookingDetails ? (
+                                     <Button 
+                                       className="flex-1"
+                                       variant="outline"
+                                       onClick={() => {
+                                         const details = bookingDetails.find(bd => bd.title === item.title);
+                                         if (details) handleViewBookingDetails(details);
+                                       }}
+                                     >
+                                       <CheckCircle className="h-4 w-4 mr-2" />
+                                       View Booking Details
+                                     </Button>
+                                   ) : (
+                                     <Button 
+                                       className="flex-1"
+                                       variant="outline"
+                                       onClick={() => onAddDetails(item.type, item.title, item.id)}
+                                     >
+                                       <Receipt className="h-4 w-4 mr-2" />
+                                       Add Booking Details
+                                     </Button>
+                                   )}
+                                   
+                                   {/* Book Now Button for Flights and Hotels */}
+                                   {(item.type === 'flight' || item.type === 'hotel') && (
+                                     <Button 
+                                       className="flex-1"
+                                       onClick={() => {
+                                         // Open booking page in new tab
+                                         const bookingUrl = item.type === 'flight' 
+                                           ? 'https://www.makemytrip.com/flights/' 
+                                           : 'https://www.makemytrip.com/hotels/';
+                                         window.open(bookingUrl, '_blank');
+                                       }}
+                                     >
+                                       <Plane className={`h-4 w-4 mr-2 ${item.type === 'hotel' ? 'hidden' : ''}`} />
+                                       <Hotel className={`h-4 w-4 mr-2 ${item.type === 'flight' ? 'hidden' : ''}`} />
+                                       Book Now
+                                     </Button>
+                                   )}
+                                 </div>
                               </div>
                             </DialogContent>
                            </Dialog>
