@@ -1507,16 +1507,16 @@ export function ItineraryView({
                               </div>
                             </DialogTrigger>
                             
-                            {/* Detail Modal */}
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle className="flex items-center gap-3">
-                                  <div className="p-2 rounded-full bg-primary/10">
-                                    <Icon className="h-5 w-5 text-primary" />
-                                  </div>
-                                  {item.title}
-                                </DialogTitle>
-                              </DialogHeader>
+                             {/* Detail Modal */}
+                             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                               <DialogHeader>
+                                 <DialogTitle className="flex items-center gap-3">
+                                   <div className="p-2 rounded-full bg-primary/10">
+                                     <Icon className="h-5 w-5 text-primary" />
+                                   </div>
+                                   {item.title}
+                                 </DialogTitle>
+                               </DialogHeader>
                               
                               <div className="space-y-4">
                                 {/* Large Image */}
