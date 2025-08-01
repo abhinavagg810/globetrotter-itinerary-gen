@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Users, Plus, Mail, UserMinus } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Users, Plus, Mail, UserMinus, MessageCircle, DollarSign, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export interface TripMate {
@@ -22,11 +23,15 @@ interface TripMateManagerProps {
   tripMates: TripMate[];
   onAddTripMate: (tripMate: Omit<TripMate, 'id' | 'totalPaid' | 'totalOwed'>) => void;
   onRemoveTripMate: (id: string) => void;
+  onSettleUp?: (fromMateId: string, toMateId: string, amount: number) => void;
+  tripName?: string;
 }
 
-export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: TripMateManagerProps) {
+export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate, onSettleUp, tripName = "Trip" }: TripMateManagerProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSettleDialogOpen, setIsSettleDialogOpen] = useState(false);
   const [newMate, setNewMate] = useState({ name: '', email: '' });
+  const [selectedMateForSettle, setSelectedMateForSettle] = useState<TripMate | null>(null);
   const { toast } = useToast();
 
   const handleAddMate = () => {
@@ -59,6 +64,47 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
     toast({
       title: "Trip mate added",
       description: `${newMate.name} has been added to the trip`
+    });
+  };
+
+  const handleWhatsAppShare = (email: string, name: string) => {
+    const message = `Hey ${name}! You've been invited to join "${tripName}". Join to track and split expenses together. Download the app: [App Link]`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleEmailShare = (email: string, name: string) => {
+    const subject = `You're invited to join ${tripName}`;
+    const body = `Hey ${name}!\n\nYou've been invited to join "${tripName}" to track and split expenses together.\n\nClick here to join: [App Link]\n\nHappy travels!`;
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, '_blank');
+  };
+
+  const handleSettleUp = (mate: TripMate) => {
+    setSelectedMateForSettle(mate);
+    setIsSettleDialogOpen(true);
+  };
+
+  const confirmSettleUp = () => {
+    if (!selectedMateForSettle || !onSettleUp) return;
+    
+    const balance = selectedMateForSettle.totalPaid - selectedMateForSettle.totalOwed;
+    const ownerMate = tripMates.find(m => m.isOwner);
+    
+    if (balance < 0 && ownerMate) {
+      // Mate owes money to owner
+      onSettleUp(selectedMateForSettle.id, ownerMate.id, Math.abs(balance));
+    } else if (balance > 0 && ownerMate) {
+      // Owner owes money to mate
+      onSettleUp(ownerMate.id, selectedMateForSettle.id, balance);
+    }
+    
+    setIsSettleDialogOpen(false);
+    setSelectedMateForSettle(null);
+    
+    toast({
+      title: "Settlement recorded",
+      description: `${selectedMateForSettle.name} has been settled up`
     });
   };
 
@@ -110,12 +156,43 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
                     placeholder="Enter email"
                   />
                 </div>
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={handleAddMate} className="flex-1">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Send Invite
+                <Separator className="my-4" />
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Share invitation via:</p>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => {
+                        handleEmailShare(newMate.email, newMate.name);
+                        handleAddMate();
+                      }} 
+                      className="flex-1"
+                      disabled={!newMate.name.trim() || !newMate.email.trim()}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        handleWhatsAppShare(newMate.email, newMate.name);
+                        handleAddMate();
+                      }}
+                      variant="outline" 
+                      className="flex-1"
+                      disabled={!newMate.name.trim() || !newMate.email.trim()}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      WhatsApp
+                    </Button>
+                  </div>
+                  <Button 
+                    onClick={handleAddMate} 
+                    variant="ghost" 
+                    className="w-full"
+                    disabled={!newMate.name.trim() || !newMate.email.trim()}
+                  >
+                    Add without invitation
                   </Button>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="w-full">
                     Cancel
                   </Button>
                 </div>
@@ -155,7 +232,7 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between sm:justify-end gap-3">
+                    <div className="flex items-center justify-between sm:justify-end gap-2">
                     <div className="text-left sm:text-right flex-1 sm:flex-initial">
                       <Badge className={`text-xs ${balanceStatus.color} mb-1`}>
                         {balanceStatus.text}
@@ -165,16 +242,31 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
                       </p>
                     </div>
                     
-                    {!mate.isOwner && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onRemoveTripMate(mate.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 flex-shrink-0"
-                      >
-                        <UserMinus className="h-3 w-3 md:h-4 md:w-4" />
-                      </Button>
-                    )}
+                    <div className="flex gap-1">
+                      {(mate.totalPaid !== mate.totalOwed) && onSettleUp && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSettleUp(mate)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0 flex-shrink-0"
+                          title="Settle up"
+                        >
+                          <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
+                        </Button>
+                      )}
+                      
+                      {!mate.isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onRemoveTripMate(mate.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 flex-shrink-0"
+                          title="Remove mate"
+                        >
+                          <UserMinus className="h-3 w-3 md:h-4 md:w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -182,6 +274,48 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate }: 
           )}
         </div>
       </CardContent>
+      
+      {/* Settle Up Dialog */}
+      <Dialog open={isSettleDialogOpen} onOpenChange={setIsSettleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Settle Up with {selectedMateForSettle?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedMateForSettle && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Current Balance:</span>
+                  <span className={`font-bold ${
+                    selectedMateForSettle.totalPaid - selectedMateForSettle.totalOwed > 0 
+                      ? 'text-green-600' 
+                      : 'text-red-600'
+                  }`}>
+                    {selectedMateForSettle.totalPaid - selectedMateForSettle.totalOwed > 0 
+                      ? `Gets back $${(selectedMateForSettle.totalPaid - selectedMateForSettle.totalOwed).toFixed(2)}`
+                      : `Owes $${Math.abs(selectedMateForSettle.totalPaid - selectedMateForSettle.totalOwed).toFixed(2)}`
+                    }
+                  </span>
+                </div>
+              </div>
+              
+              <p className="text-sm text-muted-foreground">
+                This will mark all balances as settled between you and {selectedMateForSettle.name}.
+              </p>
+              
+              <div className="flex gap-2 pt-4">
+                <Button onClick={confirmSettleUp} className="flex-1">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Confirm Settlement
+                </Button>
+                <Button variant="outline" onClick={() => setIsSettleDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

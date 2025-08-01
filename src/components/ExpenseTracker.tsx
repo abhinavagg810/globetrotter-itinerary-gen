@@ -7,7 +7,7 @@ import { Plane, Hotel, Camera, Utensils, TrendingUp, PieChart, Split, Users } fr
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { BookingDetails } from "./DocumentUpload";
 import { TripMateManager, TripMate } from "./TripMateManager";
-import { ExpenseSplitter, ExpenseSplit } from "./ExpenseSplitter";
+import { EnhancedExpenseSplitter, ExpenseSplit } from "./EnhancedExpenseSplitter";
 
 interface ExpenseTrackerProps {
   expenses: BookingDetails[];
@@ -16,6 +16,7 @@ interface ExpenseTrackerProps {
   onUpdateTripMates?: (tripMates: TripMate[]) => void;
   expenseSplits?: ExpenseSplit[];
   onUpdateExpenseSplits?: (splits: ExpenseSplit[]) => void;
+  tripName?: string;
 }
 
 export function ExpenseTracker({ 
@@ -24,7 +25,8 @@ export function ExpenseTracker({
   tripMates = [], 
   onUpdateTripMates, 
   expenseSplits = [], 
-  onUpdateExpenseSplits 
+  onUpdateExpenseSplits,
+  tripName = "Your Trip"
 }: ExpenseTrackerProps) {
   const { formatPrice } = useCurrency();
   const [selectedExpenseForSplit, setSelectedExpenseForSplit] = useState<BookingDetails | null>(null);
@@ -113,6 +115,21 @@ export function ExpenseTracker({
       );
       onUpdateExpenseSplits([...filteredSplits, ...splits]);
     }
+  };
+
+  const handleSettleUp = (fromMateId: string, toMateId: string, amount: number) => {
+    // Create a settlement record by adjusting balances
+    const updatedTripMates = tripMates.map(mate => {
+      if (mate.id === fromMateId) {
+        return { ...mate, totalPaid: mate.totalPaid + amount };
+      }
+      if (mate.id === toMateId) {
+        return { ...mate, totalOwed: mate.totalOwed + amount };
+      }
+      return mate;
+    });
+    
+    onUpdateTripMates?.(updatedTripMates);
   };
 
   const getExpenseSplitInfo = (expense: BookingDetails) => {
@@ -266,6 +283,8 @@ export function ExpenseTracker({
               tripMates={updatedTripMates}
               onAddTripMate={handleAddTripMate}
               onRemoveTripMate={handleRemoveTripMate}
+              onSettleUp={handleSettleUp}
+              tripName={tripName}
             />
           ) : (
             <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
@@ -280,7 +299,7 @@ export function ExpenseTracker({
 
       {/* Expense Splitter Dialog */}
       {onUpdateExpenseSplits && (
-        <ExpenseSplitter
+        <EnhancedExpenseSplitter
           expense={selectedExpenseForSplit}
           tripMates={updatedTripMates}
           existingSplits={expenseSplits.filter(split => split.expenseId === selectedExpenseForSplit?.id)}
