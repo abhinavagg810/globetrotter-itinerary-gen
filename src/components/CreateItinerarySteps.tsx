@@ -104,16 +104,16 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
   ];
 
   const vibeOptions = [
+    { id: "beach", label: "Beach", emoji: "🏖️" },
+    { id: "mountains", label: "Mountains", emoji: "🏔️" },
     { id: "relaxing", label: "Relaxing", emoji: "🧘" },
-    { id: "romantic", label: "Romantic", emoji: "💕" },
-    { id: "adventure", label: "Adventure", emoji: "🏔️" },
+    { id: "adventure", label: "Adventure", emoji: "🧗" },
     { id: "cultural", label: "Cultural", emoji: "🏛️" },
-    { id: "foodie", label: "Foodie", emoji: "🍽️" },
-    { id: "party", label: "Party", emoji: "🎉" },
-    { id: "nature", label: "Nature", emoji: "🌿" },
-    { id: "luxury", label: "Luxury", emoji: "👑" },
-    { id: "budget", label: "Budget", emoji: "💰" },
-    { id: "offbeat", label: "Offbeat", emoji: "🗺️" },
+    { id: "romantic", label: "Romantic", emoji: "💑" },
+    { id: "foodie", label: "Foodie", emoji: "🍜" },
+    { id: "nightlife", label: "Nightlife", emoji: "🌃" },
+    { id: "shopping", label: "Shopping", emoji: "🛍️" },
+    { id: "offbeat", label: "Offbeat", emoji: "🌍" },
   ];
 
   const budgetRanges = [
