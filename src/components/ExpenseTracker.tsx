@@ -39,17 +39,19 @@ export function ExpenseTracker({
   const [selectedExpenseForSplit, setSelectedExpenseForSplit] = useState<BookingDetails | null>(null);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [newExpense, setNewExpense] = useState<{
-    title: string;
-    provider: string;
-    type: 'flight' | 'hotel' | 'activity' | 'restaurant';
     cost: string;
-    details: string;
+    type: 'flight' | 'hotel' | 'activity' | 'restaurant';
+    title: string;
+    paidBy: string;
+    splitOption: string;
+    date: string;
   }>({
-    title: '',
-    provider: '',
-    type: 'activity',
     cost: '',
-    details: ''
+    type: 'restaurant',
+    title: '',
+    paidBy: 'You',
+    splitOption: "Don't split",
+    date: ''
   });
 
   const getIcon = (type: string) => {
@@ -167,24 +169,25 @@ export function ExpenseTracker({
   };
 
   const handleAddExpense = () => {
-    if (!onAddExpense || !newExpense.title || !newExpense.cost) return;
+    if (!onAddExpense || !newExpense.cost) return;
     
     const expense: Omit<BookingDetails, 'id'> = {
-      title: newExpense.title,
-      provider: newExpense.provider || 'Manual Entry',
+      title: newExpense.title || `${newExpense.type} expense`,
+      provider: 'Manual Entry',
       type: newExpense.type,
       cost: parseFloat(newExpense.cost),
-      details: newExpense.details,
+      details: `Paid by: ${newExpense.paidBy}${newExpense.date ? `, Date: ${newExpense.date}` : ''}`,
       bookingReference: `MAN-${Date.now()}`,
     };
     
     onAddExpense(expense);
     setNewExpense({
-      title: '',
-      provider: '',
-      type: 'activity',
       cost: '',
-      details: ''
+      type: 'restaurant',
+      title: '',
+      paidBy: 'You',
+      splitOption: "Don't split",
+      date: ''
     });
     setShowAddExpense(false);
   };
@@ -357,67 +360,92 @@ export function ExpenseTracker({
       <Dialog open={showAddExpense} onOpenChange={setShowAddExpense}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add New Expense</DialogTitle>
+            <DialogTitle>Add expense</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div>
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                placeholder="e.g., Lunch at restaurant"
-                value={newExpense.title}
-                onChange={(e) => setNewExpense(prev => ({ ...prev, title: e.target.value }))}
-              />
+          <div className="space-y-6 pt-4">
+            {/* Cost Field with Currency */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Select defaultValue="INR">
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="INR">₹</SelectItem>
+                    <SelectItem value="USD">$</SelectItem>
+                    <SelectItem value="EUR">€</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={newExpense.cost}
+                  onChange={(e) => setNewExpense(prev => ({ ...prev, cost: e.target.value }))}
+                  className="text-lg flex-1"
+                />
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="type">Category *</Label>
-              <Select value={newExpense.type} onValueChange={(value) => setNewExpense(prev => ({ ...prev, type: value as 'flight' | 'hotel' | 'activity' | 'restaurant' }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="flight">Flight</SelectItem>
-                  <SelectItem value="hotel">Hotel</SelectItem>
-                  <SelectItem value="activity">Activity</SelectItem>
-                  <SelectItem value="restaurant">Restaurant</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Select Item */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-muted">
+                    {newExpense.type === 'restaurant' && <Utensils className="h-4 w-4" />}
+                    {newExpense.type === 'flight' && <Plane className="h-4 w-4" />}
+                    {newExpense.type === 'hotel' && <Hotel className="h-4 w-4" />}
+                    {newExpense.type === 'activity' && <Camera className="h-4 w-4" />}
+                  </div>
+                  <div>
+                    <p className="font-medium">Select item</p>
+                  </div>
+                </div>
+                <Select value={newExpense.type} onValueChange={(value) => setNewExpense(prev => ({ ...prev, type: value as 'flight' | 'hotel' | 'activity' | 'restaurant' }))}>
+                  <SelectTrigger className="w-32 border-0 shadow-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="restaurant">Restaurant</SelectItem>
+                    <SelectItem value="flight">Flight</SelectItem>
+                    <SelectItem value="hotel">Hotel</SelectItem>
+                    <SelectItem value="activity">Activity</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="cost">Cost (INR) *</Label>
-              <Input
-                id="cost"
-                type="number"
-                placeholder="Enter amount"
-                value={newExpense.cost}
-                onChange={(e) => setNewExpense(prev => ({ ...prev, cost: e.target.value }))}
-              />
+
+            {/* Paid by */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Paid by: <span className="text-muted-foreground">{newExpense.paidBy}</span></p>
+                </div>
+                <div className="text-muted-foreground">›</div>
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="provider">Provider/Vendor</Label>
-              <Input
-                id="provider"
-                placeholder="e.g., Zomato, MakeMyTrip"
-                value={newExpense.provider}
-                onChange={(e) => setNewExpense(prev => ({ ...prev, provider: e.target.value }))}
-              />
+
+            {/* Split */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Split: <span className="text-muted-foreground">{newExpense.splitOption}</span></p>
+                </div>
+                <div className="text-muted-foreground">›</div>
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="details">Description</Label>
-              <Textarea
-                id="details"
-                placeholder="Add any additional details..."
-                value={newExpense.details}
-                onChange={(e) => setNewExpense(prev => ({ ...prev, details: e.target.value }))}
-                rows={3}
-              />
+
+            {/* Date */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Date: <span className="text-muted-foreground">{newExpense.date || 'Optional'}</span></p>
+                </div>
+                <div className="text-muted-foreground">›</div>
+              </div>
             </div>
-            
-            <div className="flex gap-2 pt-4">
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
               <Button 
                 variant="outline" 
                 onClick={() => setShowAddExpense(false)}
@@ -427,10 +455,10 @@ export function ExpenseTracker({
               </Button>
               <Button 
                 onClick={handleAddExpense}
-                disabled={!newExpense.title || !newExpense.cost}
-                className="flex-1"
+                disabled={!newExpense.cost}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white"
               >
-                Add Expense
+                Done
               </Button>
             </div>
           </div>
