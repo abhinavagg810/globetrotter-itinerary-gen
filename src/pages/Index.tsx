@@ -88,6 +88,7 @@ const Index = () => {
                   onAddDetails={handleAddDetails}
                   onViewExpenses={handleViewExpenses}
                   bookingDetails={bookingDetails}
+                  onAddBookingDetails={(booking) => setBookingDetails([...bookingDetails, booking])}
                   tripMates={tripMates}
                   onUpdateTripMates={setTripMates}
                   expenseSplits={expenseSplits}
@@ -124,6 +125,13 @@ const Index = () => {
                     <ExpenseTracker 
                       expenses={bookingDetails} 
                       onViewDetails={handleViewBookingDetails}
+                      onAddExpense={(expense) => {
+                        const newExpense: BookingDetails = {
+                          ...expense,
+                          id: `exp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                        };
+                        setBookingDetails([...bookingDetails, newExpense]);
+                      }}
                       tripMates={tripMates}
                       onUpdateTripMates={setTripMates}
                       expenseSplits={expenseSplits}

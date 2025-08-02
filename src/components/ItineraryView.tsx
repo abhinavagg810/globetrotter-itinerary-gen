@@ -23,6 +23,7 @@ interface ItineraryViewProps {
   expenseSplits?: ExpenseSplit[];
   onUpdateExpenseSplits?: (splits: ExpenseSplit[]) => void;
   bookingDetails: BookingDetails[];
+  onAddBookingDetails?: (booking: BookingDetails) => void;
 }
 
 interface ItineraryItem {
@@ -52,6 +53,7 @@ export function ItineraryView({
   onAddDetails, 
   onViewExpenses, 
   bookingDetails,
+  onAddBookingDetails,
   tripMates,
   onUpdateTripMates,
   expenseSplits,
@@ -1701,6 +1703,13 @@ export function ItineraryView({
             <ExpenseTracker 
               expenses={bookingDetails} 
               onViewDetails={handleViewBookingDetails}
+              onAddExpense={onAddBookingDetails ? (expense) => {
+                const newExpense: BookingDetails = {
+                  ...expense,
+                  id: `exp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                };
+                onAddBookingDetails(newExpense);
+              } : undefined}
               tripMates={tripMates}
               onUpdateTripMates={onUpdateTripMates}
               expenseSplits={expenseSplits}
