@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 export interface TripMate {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   avatar?: string;
   totalPaid: number;
   totalOwed: number;
@@ -30,35 +30,25 @@ interface TripMateManagerProps {
 export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate, onSettleUp, tripName = "Trip" }: TripMateManagerProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSettleDialogOpen, setIsSettleDialogOpen] = useState(false);
-  const [newMate, setNewMate] = useState({ name: '', email: '' });
+  const [newMate, setNewMate] = useState({ name: '' });
   const [selectedMateForSettle, setSelectedMateForSettle] = useState<TripMate | null>(null);
   const { toast } = useToast();
 
   const handleAddMate = () => {
-    if (!newMate.name.trim() || !newMate.email.trim()) {
+    if (!newMate.name.trim()) {
       toast({
         title: "Invalid input",
-        description: "Please enter both name and email",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (tripMates.some(mate => mate.email === newMate.email)) {
-      toast({
-        title: "Duplicate email",
-        description: "This email is already added",
+        description: "Please enter a nickname",
         variant: "destructive"
       });
       return;
     }
 
     onAddTripMate({
-      name: newMate.name.trim(),
-      email: newMate.email.trim().toLowerCase()
+      name: newMate.name.trim()
     });
 
-    setNewMate({ name: '', email: '' });
+    setNewMate({ name: '' });
     setIsAddDialogOpen(false);
     
     toast({
@@ -67,7 +57,7 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate, on
     });
   };
 
-  const handleWhatsAppShare = (email: string, name: string) => {
+  const handleWhatsAppShare = (name: string) => {
     const message = `Hey ${name}! You've been invited to join "${tripName}". Join to track and split expenses together. Download the app: [App Link]`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -140,58 +130,38 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate, on
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Name</label>
+                  <label className="text-sm font-medium">Nickname</label>
                   <Input
                     value={newMate.name}
                     onChange={(e) => setNewMate(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter name"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <Input
-                    type="email"
-                    value={newMate.email}
-                    onChange={(e) => setNewMate(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Enter email"
+                    placeholder="Enter nickname"
                   />
                 </div>
                 <Separator className="my-4" />
                 <div className="space-y-3">
-                  <p className="text-sm font-medium">Share invitation via:</p>
+                  <p className="text-sm font-medium">Add trip mate:</p>
                   <div className="flex gap-2">
                     <Button 
                       onClick={() => {
-                        handleEmailShare(newMate.email, newMate.name);
-                        handleAddMate();
-                      }} 
-                      className="flex-1"
-                      disabled={!newMate.name.trim() || !newMate.email.trim()}
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Email
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        handleWhatsAppShare(newMate.email, newMate.name);
+                        handleWhatsAppShare(newMate.name);
                         handleAddMate();
                       }}
-                      variant="outline" 
                       className="flex-1"
-                      disabled={!newMate.name.trim() || !newMate.email.trim()}
+                      disabled={!newMate.name.trim()}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
-                      WhatsApp
+                      Share via WhatsApp
+                    </Button>
+                    <Button 
+                      onClick={handleAddMate} 
+                      variant="outline" 
+                      className="flex-1"
+                      disabled={!newMate.name.trim()}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Add from Contacts
                     </Button>
                   </div>
-                  <Button 
-                    onClick={handleAddMate} 
-                    variant="ghost" 
-                    className="w-full"
-                    disabled={!newMate.name.trim() || !newMate.email.trim()}
-                  >
-                    Add without invitation
-                  </Button>
                   <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="w-full">
                     Cancel
                   </Button>
@@ -228,7 +198,7 @@ export function TripMateManager({ tripMates, onAddTripMate, onRemoveTripMate, on
                           <Badge variant="secondary" className="text-xs">Owner</Badge>
                         )}
                       </div>
-                      <p className="text-xs md:text-sm text-muted-foreground truncate">{mate.email}</p>
+                      {mate.email && <p className="text-xs md:text-sm text-muted-foreground truncate">{mate.email}</p>}
                     </div>
                   </div>
                   
