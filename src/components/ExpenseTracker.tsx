@@ -3,7 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plane, Hotel, Camera, Utensils, TrendingUp, PieChart, Split, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Plane, Hotel, Camera, Utensils, TrendingUp, PieChart, Split, Users, Plus } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { BookingDetails } from "./DocumentUpload";
 import { TripMateManager, TripMate } from "./TripMateManager";
@@ -12,6 +17,7 @@ import { EnhancedExpenseSplitter, ExpenseSplit } from "./EnhancedExpenseSplitter
 interface ExpenseTrackerProps {
   expenses: BookingDetails[];
   onViewDetails: (expense: BookingDetails) => void;
+  onAddExpense?: (expense: Omit<BookingDetails, 'id'>) => void;
   tripMates?: TripMate[];
   onUpdateTripMates?: (tripMates: TripMate[]) => void;
   expenseSplits?: ExpenseSplit[];
@@ -21,7 +27,8 @@ interface ExpenseTrackerProps {
 
 export function ExpenseTracker({ 
   expenses, 
-  onViewDetails, 
+  onViewDetails,
+  onAddExpense,
   tripMates = [], 
   onUpdateTripMates, 
   expenseSplits = [], 
@@ -30,6 +37,20 @@ export function ExpenseTracker({
 }: ExpenseTrackerProps) {
   const { formatPrice } = useCurrency();
   const [selectedExpenseForSplit, setSelectedExpenseForSplit] = useState<BookingDetails | null>(null);
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [newExpense, setNewExpense] = useState<{
+    title: string;
+    provider: string;
+    type: 'flight' | 'hotel' | 'activity' | 'restaurant';
+    cost: string;
+    details: string;
+  }>({
+    title: '',
+    provider: '',
+    type: 'activity',
+    cost: '',
+    details: ''
+  });
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -145,6 +166,29 @@ export function ExpenseTracker({
     };
   };
 
+  const handleAddExpense = () => {
+    if (!onAddExpense || !newExpense.title || !newExpense.cost) return;
+    
+    const expense: Omit<BookingDetails, 'id'> = {
+      title: newExpense.title,
+      provider: newExpense.provider || 'Manual Entry',
+      type: newExpense.type,
+      cost: parseFloat(newExpense.cost),
+      details: newExpense.details,
+      bookingReference: `MAN-${Date.now()}`,
+    };
+    
+    onAddExpense(expense);
+    setNewExpense({
+      title: '',
+      provider: '',
+      type: 'activity',
+      cost: '',
+      details: ''
+    });
+    setShowAddExpense(false);
+  };
+
   const updatedTripMates = calculateTripMateBalances();
 
   return (
@@ -209,7 +253,19 @@ export function ExpenseTracker({
       {/* Expense Details */}
       <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-deep-blue">Expense Details</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-deep-blue">Expense Details</CardTitle>
+            {onAddExpense && (
+              <Button 
+                onClick={() => setShowAddExpense(true)}
+                className="gap-2 bg-primary hover:bg-primary/90"
+                size="sm"
+              >
+                <Plus className="h-4 w-4" />
+                Add Expense
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -296,6 +352,90 @@ export function ExpenseTracker({
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Add Expense Dialog */}
+      <Dialog open={showAddExpense} onOpenChange={setShowAddExpense}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Expense</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Lunch at restaurant"
+                value={newExpense.title}
+                onChange={(e) => setNewExpense(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="type">Category *</Label>
+              <Select value={newExpense.type} onValueChange={(value) => setNewExpense(prev => ({ ...prev, type: value as 'flight' | 'hotel' | 'activity' | 'restaurant' }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="flight">Flight</SelectItem>
+                  <SelectItem value="hotel">Hotel</SelectItem>
+                  <SelectItem value="activity">Activity</SelectItem>
+                  <SelectItem value="restaurant">Restaurant</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="cost">Cost (INR) *</Label>
+              <Input
+                id="cost"
+                type="number"
+                placeholder="Enter amount"
+                value={newExpense.cost}
+                onChange={(e) => setNewExpense(prev => ({ ...prev, cost: e.target.value }))}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="provider">Provider/Vendor</Label>
+              <Input
+                id="provider"
+                placeholder="e.g., Zomato, MakeMyTrip"
+                value={newExpense.provider}
+                onChange={(e) => setNewExpense(prev => ({ ...prev, provider: e.target.value }))}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="details">Description</Label>
+              <Textarea
+                id="details"
+                placeholder="Add any additional details..."
+                value={newExpense.details}
+                onChange={(e) => setNewExpense(prev => ({ ...prev, details: e.target.value }))}
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex gap-2 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowAddExpense(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddExpense}
+                disabled={!newExpense.title || !newExpense.cost}
+                className="flex-1"
+              >
+                Add Expense
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Expense Splitter Dialog */}
       {onUpdateExpenseSplits && (
