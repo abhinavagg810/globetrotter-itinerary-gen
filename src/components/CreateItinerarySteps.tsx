@@ -31,9 +31,10 @@ export interface ItineraryData {
   isFlexibleWithDates?: boolean;
   tripDuration?: number;
   destinationPreference?: string;
+  domesticOrInternational?: string;
 }
 
-type Step = 'destinations' | 'dates' | 'duration' | 'companions' | 'vibes' | 'budget' | 'help-departure' | 'help-dates' | 'help-duration' | 'help-companions' | 'help-vibes' | 'help-budget';
+type Step = 'destinations' | 'travel-type' | 'dates' | 'duration' | 'companions' | 'vibes' | 'budget' | 'help-departure' | 'help-travel-type' | 'help-dates' | 'help-duration' | 'help-companions' | 'help-vibes' | 'help-budget';
 
 export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStepsProps) {
   const [currentStep, setCurrentStep] = useState<Step>('destinations');
@@ -63,6 +64,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
 
   const helpSteps = [
     { id: 'help-departure', title: 'Departure', icon: Plane },
+    { id: 'help-travel-type', title: 'Travel Type', icon: Globe },
     { id: 'help-dates', title: 'Travel dates', icon: CalendarIcon },
     { id: 'help-duration', title: 'Duration', icon: CalendarIcon },
     { id: 'help-companions', title: 'Companions', icon: Users },
@@ -141,6 +143,8 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     } 
     // Help flow navigation
     else if (currentStep === 'help-departure' && formData.fromLocation) {
+      setCurrentStep('help-travel-type');
+    } else if (currentStep === 'help-travel-type' && formData.domesticOrInternational) {
       setCurrentStep('help-dates');
     } else if (currentStep === 'help-dates') {
       if (formData.fromDate && formData.toDate) {
@@ -177,8 +181,10 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
     // Help flow back navigation
     else if (currentStep === 'help-departure') {
       setCurrentStep('destinations');
-    } else if (currentStep === 'help-dates') {
+    } else if (currentStep === 'help-travel-type') {
       setCurrentStep('help-departure');
+    } else if (currentStep === 'help-dates') {
+      setCurrentStep('help-travel-type');
     } else if (currentStep === 'help-duration') {
       setCurrentStep('help-dates');
     } else if (currentStep === 'help-companions') {
@@ -201,6 +207,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
       case 'companions': return formData.travelingWith;
       case 'vibes': return formData.travelVibes && formData.travelVibes.length > 0;
       case 'help-departure': return formData.fromLocation;
+      case 'help-travel-type': return formData.domesticOrInternational;
       case 'help-dates': return (formData.fromDate && formData.toDate) || formData.isFlexibleWithDates;
       case 'help-duration': return formData.tripDuration;
       case 'help-companions': return formData.travelingWith;
@@ -294,6 +301,7 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
               {currentStep === 'companions' && 'Who are you traveling with?'}
               {currentStep === 'vibes' && 'How would you describe your travel vibe?'}
               {currentStep === 'help-departure' && 'Where are you traveling from?'}
+              {currentStep === 'help-travel-type' && 'Are you looking for domestic or international travel?'}
               {currentStep === 'help-dates' && 'Travel Dates:'}
               {currentStep === 'help-duration' && 'Trip duration (if dates not fixed)?'}
               {currentStep === 'help-companions' && 'Who are you traveling with?'}
@@ -587,6 +595,31 @@ export function CreateItinerarySteps({ onBack, onGenerate }: CreateItineraryStep
                   placeholder="e.g., Mumbai, India"
                   className="bg-white/70 border-border/50"
                 />
+              </div>
+            )}
+
+            {currentStep === 'help-travel-type' && (
+              <div className="space-y-4">
+                <RadioGroup 
+                  value={formData.domesticOrInternational} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, domesticOrInternational: value }))}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                    <RadioGroupItem value="domestic" id="domestic" />
+                    <Label htmlFor="domestic" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <span className="text-xl">🏠</span>
+                      <span className="font-medium text-deep-blue">Domestic</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/70 border border-border/50 hover:bg-white/90 transition-colors">
+                    <RadioGroupItem value="international" id="international" />
+                    <Label htmlFor="international" className="flex items-center gap-3 cursor-pointer flex-1">
+                      <span className="text-xl">✈️</span>
+                      <span className="font-medium text-deep-blue">International</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
             )}
 
