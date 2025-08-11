@@ -1504,6 +1504,55 @@ export function ItineraryView({
                                          )}
                                        </div>
                                     </div>
+
+                                      {(item.type === 'flight' || item.type === 'hotel') && (
+                                        <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+                                          {hasBookingDetails ? (
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="w-full sm:w-auto"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const details = bookingDetails.find(bd => bd.title === item.title);
+                                                if (details) handleViewBookingDetails(details);
+                                              }}
+                                            >
+                                              <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                                              View Details
+                                            </Button>
+                                          ) : (
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="w-full sm:w-auto"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAddDetails(item.type, item.title, item.id);
+                                              }}
+                                            >
+                                              <Receipt className="h-3.5 w-3.5 mr-1.5" />
+                                              Add Details
+                                            </Button>
+                                          )}
+                                          <Button
+                                            size="sm"
+                                            className="w-full sm:w-auto"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const bookingUrl = item.type === 'flight'
+                                                ? 'https://www.makemytrip.com/flights/'
+                                                : 'https://www.makemytrip.com/hotels/';
+                                              window.open(bookingUrl, '_blank');
+                                            }}
+                                          >
+                                            <Plane className={`h-3.5 w-3.5 mr-1.5 ${item.type === 'hotel' ? 'hidden' : ''}`} />
+                                            <Hotel className={`h-3.5 w-3.5 mr-1.5 ${item.type === 'flight' ? 'hidden' : ''}`} />
+                                            Book
+                                          </Button>
+                                        </div>
+                                      )}
+
                                   </CardContent>
                                 </Card>
                               </div>
