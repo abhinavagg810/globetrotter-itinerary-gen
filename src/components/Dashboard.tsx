@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Plus, Calendar, User, Plane, Camera } from 'lucide-react';
+import { MapPin, Plus, Calendar, User, Plane, Camera, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardProps {
   onCreateItinerary: () => void;
@@ -10,6 +11,8 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: DashboardProps) {
+  const { user, signOut } = useAuth();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sage/20">
       {/* Header */}
@@ -21,15 +24,26 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
             </div>
             <h1 className="text-xl font-bold text-deep-blue">TravelAI</h1>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onProfile}
-            className="text-deep-blue hover:text-sky"
-          >
-            <User className="w-4 h-4 mr-2" />
-            Profile
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onProfile}
+              className="text-deep-blue hover:text-sky"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={signOut}
+              className="text-deep-blue hover:text-red-500"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 

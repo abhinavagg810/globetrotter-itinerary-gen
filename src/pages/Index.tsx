@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthPage } from "@/components/AuthPage";
 import { Dashboard } from "@/components/Dashboard";
+import { useAuth } from "@/hooks/useAuth";
 import { CreateItinerarySteps, ItineraryData } from "@/components/CreateItinerarySteps";
 import { ItineraryView } from "@/components/ItineraryView";
 import { MyItineraries } from "@/components/MyItineraries";
@@ -14,7 +15,16 @@ import { ExpenseSplit } from "@/components/ExpenseSplitter";
 type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker' | 'profile';
 
 const Index = () => {
+  const { user, loading } = useAuth();
   const [appState, setAppState] = useState<AppState>('auth');
+  
+  useEffect(() => {
+    if (user && appState === 'auth') {
+      setAppState('dashboard');
+    } else if (!user && appState !== 'auth') {
+      setAppState('auth');
+    }
+  }, [user]);
   const [currentItinerary, setCurrentItinerary] = useState<ItineraryData | null>(null);
   const [documentUploadData, setDocumentUploadData] = useState<{ itemType: 'flight' | 'hotel' | 'activity' | 'restaurant'; itemTitle: string; itemId: string } | null>(null);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails[]>([]);
@@ -68,6 +78,17 @@ const Index = () => {
     setCurrentItinerary(mockData);
     setAppState('itinerary');
   };
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-sky/30 via-sage/20 to-sand/30">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-sky border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-deep-blue">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <CurrencyProvider>
