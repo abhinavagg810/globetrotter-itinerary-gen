@@ -5,17 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload, Plus, X, Route, FootprintsIcon, Paperclip, Download, Eye } from "lucide-react";
+import { ArrowLeft, Plane, Hotel, Camera, Utensils, Loader2, CheckCircle, Receipt, GripVertical, BarChart3, Sparkles, MapPin, Clock, Star, DollarSign, Info, CloudSun, FileText, Calendar, ChevronDown, Navigation, Car, Upload, Plus, X, Route, FootprintsIcon, Paperclip, Download, Eye, Globe, Phone, Lightbulb } from "lucide-react";
 import { ItineraryData } from "./CreateItinerary";
 import { BookingDetails } from "./DocumentUpload";
 import { ExpenseTracker } from "./ExpenseTracker";
 import { TripMate } from "./TripMateManager";
 import { ExpenseSplit } from "./ExpenseSplitter";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { AIItinerary } from "@/hooks/useGenerateItinerary";
 
 interface ItineraryViewProps {
   onBack: () => void;
   itineraryData: ItineraryData;
+  aiItinerary?: AIItinerary | null;
   onAddDetails: (itemType: 'flight' | 'hotel' | 'activity' | 'restaurant', itemTitle: string, itemId: string) => void;
   onViewExpenses: () => void;
   tripMates?: TripMate[];
@@ -50,6 +52,7 @@ interface TransportationInfo {
 export function ItineraryView({ 
   onBack, 
   itineraryData, 
+  aiItinerary,
   onAddDetails, 
   onViewExpenses, 
   bookingDetails,
@@ -317,7 +320,38 @@ export function ItineraryView({
   useEffect(() => {
     const generateItinerary = async () => {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // If we have AI-generated itinerary, use it
+      if (aiItinerary && aiItinerary.days) {
+        const generatedItems: ItineraryItem[] = [];
+        
+        aiItinerary.days.forEach((day) => {
+          const currentDate = new Date(day.date);
+          
+          day.activities.forEach((activity) => {
+            generatedItems.push({
+              id: activity.id,
+              time: activity.time,
+              title: activity.title,
+              description: activity.description,
+              type: activity.type,
+              price: activity.price > 0 ? formatPrice(activity.price) : 'Free',
+              bookingStatus: activity.bookingStatus,
+              day: day.dayNumber,
+              date: currentDate,
+              basePrice: activity.price,
+              location: activity.location,
+            });
+          });
+        });
+        
+        setItems(generatedItems);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fallback to mock data if no AI itinerary
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       const getDaysDifference = () => {
         if (!itineraryData.fromDate || !itineraryData.toDate) return 1;
@@ -337,7 +371,6 @@ export function ItineraryView({
         const currentDestination = itineraryData.destinations[destinationIndex];
 
         if (day === 0) {
-          // First day - arrival
           generatedItems.push({
             id: `${dayPrefix}-flight`,
             time: "08:00",
@@ -377,7 +410,6 @@ export function ItineraryView({
             basePrice: 5000,
           });
         } else if (day === numberOfDays - 1) {
-          // Last day - departure
           generatedItems.push({
             id: `${dayPrefix}-checkout`,
             time: "10:00",
@@ -403,7 +435,6 @@ export function ItineraryView({
             basePrice: 37500,
           });
         } else {
-          // Middle days - activities
           const activities = [
             { time: "09:00", title: "Morning Adventure", description: `Exciting morning activity in ${currentDestination}`, type: "activity", basePrice: 4500 },
             { time: "12:30", title: "Local Lunch", description: "Authentic local cuisine experience", type: "restaurant", basePrice: 3750 },
@@ -448,7 +479,7 @@ export function ItineraryView({
     };
 
     generateItinerary();
-  }, [itineraryData]);
+  }, [itineraryData, aiItinerary]);
 
   const handleDragStart = (e: React.DragEvent, item: ItineraryItem) => {
     // Don't allow dragging first and last day items
@@ -980,6 +1011,23 @@ export function ItineraryView({
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
+            {/* Trip Summary - Only shown when AI data available */}
+            {aiItinerary && (
+              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-sm border border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center shrink-0">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-deep-blue mb-1">{aiItinerary.tripName}</h3>
+                      <p className="text-sm text-muted-foreground">{aiItinerary.summary}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Estimated Budget */}
             <Collapsible 
               open={openSections.budget} 
@@ -1004,27 +1052,62 @@ export function ItineraryView({
                     <div className="space-y-4">
                       <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-primary">{formatPrice(150000)} - {formatPrice(200000)}</div>
-                          <p className="text-sm text-muted-foreground mt-1">For {Math.ceil((itineraryData.toDate!.getTime() - itineraryData.fromDate!.getTime()) / (1000 * 3600 * 24))} days</p>
+                          <div className="text-3xl font-bold text-primary">
+                            {aiItinerary?.estimatedBudget 
+                              ? formatPrice(aiItinerary.estimatedBudget.total)
+                              : `${formatPrice(150000)} - ${formatPrice(200000)}`}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            For {Math.ceil((itineraryData.toDate!.getTime() - itineraryData.fromDate!.getTime()) / (1000 * 3600 * 24))} days
+                            {aiItinerary?.estimatedBudget?.perPerson && (
+                              <span className="block text-xs mt-1">
+                                ({formatPrice(aiItinerary.estimatedBudget.perPerson)} per person)
+                              </span>
+                            )}
+                          </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-3 bg-muted/30 rounded-lg">
-                          <div className="text-lg font-semibold">{formatPrice(75000)}</div>
+                          <div className="text-lg font-semibold">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.flights || 75000)}
+                          </div>
                           <div className="text-xs text-muted-foreground">Flights</div>
                         </div>
                         <div className="text-center p-3 bg-muted/30 rounded-lg">
-                          <div className="text-lg font-semibold">{formatPrice(80000)}</div>
+                          <div className="text-lg font-semibold">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.accommodation || 80000)}
+                          </div>
                           <div className="text-xs text-muted-foreground">Accommodation</div>
                         </div>
                         <div className="text-center p-3 bg-muted/30 rounded-lg">
-                          <div className="text-lg font-semibold">{formatPrice(25000)}</div>
+                          <div className="text-lg font-semibold">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.activities || 25000)}
+                          </div>
                           <div className="text-xs text-muted-foreground">Activities</div>
                         </div>
                         <div className="text-center p-3 bg-muted/30 rounded-lg">
-                          <div className="text-lg font-semibold">{formatPrice(20000)}</div>
+                          <div className="text-lg font-semibold">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.food || 20000)}
+                          </div>
                           <div className="text-xs text-muted-foreground">Food & Dining</div>
                         </div>
+                        {aiItinerary?.estimatedBudget?.breakdown?.transportation && (
+                          <div className="text-center p-3 bg-muted/30 rounded-lg">
+                            <div className="text-lg font-semibold">
+                              {formatPrice(aiItinerary.estimatedBudget.breakdown.transportation)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Transportation</div>
+                          </div>
+                        )}
+                        {aiItinerary?.estimatedBudget?.breakdown?.miscellaneous && (
+                          <div className="text-center p-3 bg-muted/30 rounded-lg">
+                            <div className="text-lg font-semibold">
+                              {formatPrice(aiItinerary.estimatedBudget.breakdown.miscellaneous)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">Miscellaneous</div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -1059,8 +1142,13 @@ export function ItineraryView({
                         <div className="text-sm flex-1">
                           <div className="font-medium">Local Currency</div>
                           <div className="text-muted-foreground">
-                            {getDestinationCurrencyInfo()?.name} ({getDestinationCurrencyInfo()?.symbol})
-                            {getDestinationCurrencyInfo()?.code !== currentCurrency.code && (
+                            {aiItinerary?.importantInfo?.localCurrency 
+                              ? `${aiItinerary.importantInfo.localCurrency.name} (${aiItinerary.importantInfo.localCurrency.symbol})`
+                              : `${getDestinationCurrencyInfo()?.name} (${getDestinationCurrencyInfo()?.symbol})`}
+                            {aiItinerary?.importantInfo?.localCurrency?.exchangeRate && (
+                              <div className="mt-1 text-xs">{aiItinerary.importantInfo.localCurrency.exchangeRate}</div>
+                            )}
+                            {!aiItinerary?.importantInfo?.localCurrency && getDestinationCurrencyInfo()?.code !== currentCurrency.code && (
                               <div className="mt-1 text-xs">
                                 1 {currentCurrency.symbol} = ~{getDestinationCurrencyInfo()?.rate} {getDestinationCurrencyInfo()?.symbol}
                               </div>
@@ -1073,20 +1161,61 @@ export function ItineraryView({
                         <div className="text-sm flex-1">
                           <div className="font-medium">Time Zone</div>
                           <div className="text-muted-foreground">
-                            {getTimezoneInfo()?.timezone} ({getTimezoneInfo()?.offset})
+                            {aiItinerary?.importantInfo?.timezone 
+                              ? `${aiItinerary.importantInfo.timezone.name} (${aiItinerary.importantInfo.timezone.offset})`
+                              : `${getTimezoneInfo()?.timezone} (${getTimezoneInfo()?.offset})`}
                             <div className="mt-1 text-xs">
-                              {getTimezoneInfo()?.difference} from your location
+                              {aiItinerary?.importantInfo?.timezone?.differenceFromIST || getTimezoneInfo()?.difference + ' from your location'}
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                        <Star className="h-4 w-4 text-primary mt-0.5" />
-                        <div className="text-sm">
-                          <div className="font-medium">Local Customs</div>
-                          <div className="text-muted-foreground">Respect local traditions and dress codes</div>
+                      {aiItinerary?.importantInfo?.language && (
+                        <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                          <Globe className="h-4 w-4 text-primary mt-0.5" />
+                          <div className="text-sm">
+                            <div className="font-medium">Language</div>
+                            <div className="text-muted-foreground">{aiItinerary.importantInfo.language}</div>
+                          </div>
                         </div>
-                      </div>
+                      )}
+                      {aiItinerary?.importantInfo?.emergencyNumbers && (
+                        <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                          <Phone className="h-4 w-4 text-primary mt-0.5" />
+                          <div className="text-sm">
+                            <div className="font-medium">Emergency Numbers</div>
+                            <div className="text-muted-foreground text-xs space-y-1 mt-1">
+                              <div>Police: {aiItinerary.importantInfo.emergencyNumbers.police}</div>
+                              <div>Ambulance: {aiItinerary.importantInfo.emergencyNumbers.ambulance}</div>
+                              {aiItinerary.importantInfo.emergencyNumbers.tourist && (
+                                <div>Tourist Helpline: {aiItinerary.importantInfo.emergencyNumbers.tourist}</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {aiItinerary?.importantInfo?.travelTips && aiItinerary.importantInfo.travelTips.length > 0 && (
+                        <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                          <Lightbulb className="h-4 w-4 text-primary mt-0.5" />
+                          <div className="text-sm">
+                            <div className="font-medium">Travel Tips</div>
+                            <ul className="text-muted-foreground text-xs mt-1 space-y-1">
+                              {aiItinerary.importantInfo.travelTips.map((tip, idx) => (
+                                <li key={idx}>• {tip}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                      {!aiItinerary?.importantInfo?.travelTips && (
+                        <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                          <Star className="h-4 w-4 text-primary mt-0.5" />
+                          <div className="text-sm">
+                            <div className="font-medium">Local Customs</div>
+                            <div className="text-muted-foreground">Respect local traditions and dress codes</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </CollapsibleContent>
@@ -1118,25 +1247,42 @@ export function ItineraryView({
                       <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg">
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="text-2xl font-bold">28°C</div>
-                            <div className="text-sm text-muted-foreground">Average Temperature</div>
+                            <div className="text-2xl font-bold">
+                              {aiItinerary?.weather?.temperature 
+                                ? `${aiItinerary.weather.temperature.min}°C - ${aiItinerary.weather.temperature.max}°C`
+                                : '28°C'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {aiItinerary?.weather?.condition || 'Average Temperature'}
+                            </div>
                           </div>
-                          <div className="text-4xl">☀️</div>
+                          <div className="text-4xl">
+                            {aiItinerary?.weather?.condition?.toLowerCase().includes('rain') ? '🌧️' : 
+                             aiItinerary?.weather?.condition?.toLowerCase().includes('cloud') ? '⛅' : '☀️'}
+                          </div>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="text-center p-3 bg-muted/30 rounded-lg">
-                          <div className="text-lg font-semibold">15%</div>
-                          <div className="text-xs text-muted-foreground">Rain Chance</div>
+                          <div className="text-lg font-semibold">
+                            {aiItinerary?.weather?.humidity || '65%'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Humidity</div>
                         </div>
                         <div className="text-center p-3 bg-muted/30 rounded-lg">
-                          <div className="text-lg font-semibold">65%</div>
-                          <div className="text-xs text-muted-foreground">Humidity</div>
+                          <div className="text-lg font-semibold">
+                            {aiItinerary?.importantInfo?.bestTimeToVisit?.split(' ')[0] || 'Good'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Travel Season</div>
                         </div>
                       </div>
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <div className="text-sm font-medium text-blue-800">Packing Recommendations</div>
-                        <div className="text-xs text-blue-600 mt-1">Light cotton clothes, sunscreen, hat, comfortable walking shoes</div>
+                        <div className="text-xs text-blue-600 mt-1">
+                          {aiItinerary?.weather?.packingTips 
+                            ? aiItinerary.weather.packingTips.join(', ')
+                            : 'Light cotton clothes, sunscreen, hat, comfortable walking shoes'}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -1169,10 +1315,14 @@ export function ItineraryView({
                       <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <div className="font-medium text-green-800">Visa on Arrival Available</div>
+                          <div className="font-medium text-green-800">
+                            {aiItinerary?.importantInfo?.visaRequirements 
+                              ? 'Visa Requirements'
+                              : 'Visa on Arrival Available'}
+                          </div>
                         </div>
                         <div className="text-sm text-green-700">
-                          30-day tourist visa available at airport for eligible countries
+                          {aiItinerary?.importantInfo?.visaRequirements || '30-day tourist visa available at airport for eligible countries'}
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1189,6 +1339,63 @@ export function ItineraryView({
                 </CollapsibleContent>
               </Card>
             </Collapsible>
+
+            {/* Recommendations - Only shown when AI data available */}
+            {aiItinerary?.recommendations && (
+              <Collapsible>
+                <Card className="bg-white/80 backdrop-blur-sm border border-border/20">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <CardTitle className="text-lg">AI Recommendations</CardTitle>
+                        </div>
+                        <ChevronDown className="h-5 w-5" />
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <div className="space-y-4">
+                        {aiItinerary.recommendations.mustTry && aiItinerary.recommendations.mustTry.length > 0 && (
+                          <div>
+                            <div className="text-sm font-medium text-green-700 mb-2">✨ Must Try</div>
+                            <div className="flex flex-wrap gap-2">
+                              {aiItinerary.recommendations.mustTry.map((item, idx) => (
+                                <Badge key={idx} variant="secondary" className="bg-green-50 text-green-700">{item}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {aiItinerary.recommendations.localCustoms && aiItinerary.recommendations.localCustoms.length > 0 && (
+                          <div>
+                            <div className="text-sm font-medium text-blue-700 mb-2">🎭 Local Customs</div>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                              {aiItinerary.recommendations.localCustoms.map((custom, idx) => (
+                                <li key={idx}>• {custom}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {aiItinerary.recommendations.avoidances && aiItinerary.recommendations.avoidances.length > 0 && (
+                          <div>
+                            <div className="text-sm font-medium text-red-700 mb-2">⚠️ Things to Avoid</div>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                              {aiItinerary.recommendations.avoidances.map((item, idx) => (
+                                <li key={idx}>• {item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )}
 
             {/* Flights */}
             <Collapsible 
