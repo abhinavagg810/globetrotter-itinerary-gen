@@ -11,12 +11,14 @@ import { Profile } from "@/components/Profile";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { TripMate } from "@/components/TripMateManager";
 import { ExpenseSplit } from "@/components/ExpenseSplitter";
+import { useGenerateItinerary, AIItinerary } from "@/hooks/useGenerateItinerary";
 
-type AppState = 'auth' | 'dashboard' | 'create' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker' | 'profile';
+type AppState = 'auth' | 'dashboard' | 'create' | 'generating' | 'itinerary' | 'my-itineraries' | 'document-upload' | 'expense-tracker' | 'profile';
 
 const Index = () => {
   const { user, loading } = useAuth();
   const [appState, setAppState] = useState<AppState>('auth');
+  const { generateItinerary, isGenerating } = useGenerateItinerary();
   
   useEffect(() => {
     if (user && appState === 'auth') {
@@ -26,6 +28,7 @@ const Index = () => {
     }
   }, [user]);
   const [currentItinerary, setCurrentItinerary] = useState<ItineraryData | null>(null);
+  const [aiGeneratedItinerary, setAiGeneratedItinerary] = useState<AIItinerary | null>(null);
   const [documentUploadData, setDocumentUploadData] = useState<{ itemType: 'flight' | 'hotel' | 'activity' | 'restaurant'; itemTitle: string; itemId: string } | null>(null);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails[]>([]);
   const [tripMates, setTripMates] = useState<TripMate[]>([
@@ -58,13 +61,22 @@ const Index = () => {
   };
 
   const handleViewBookingDetails = (details: BookingDetails) => {
-    // In a real app, you might want to open a modal or navigate to a detail view
     console.log('Viewing booking details:', details);
   };
 
-  const handleGenerateItinerary = (data: ItineraryData) => {
+  const handleGenerateItinerary = async (data: ItineraryData) => {
     setCurrentItinerary(data);
-    setAppState('itinerary');
+    setAppState('generating');
+    
+    const result = await generateItinerary(data);
+    
+    if (result) {
+      setAiGeneratedItinerary(result);
+      setAppState('itinerary');
+    } else {
+      // Fallback to showing itinerary view even without AI data
+      setAppState('itinerary');
+    }
   };
 
   const handleViewItinerary = (id: string) => {
@@ -76,6 +88,7 @@ const Index = () => {
       toDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     };
     setCurrentItinerary(mockData);
+    setAiGeneratedItinerary(null);
     setAppState('itinerary');
   };
 
@@ -101,11 +114,22 @@ const Index = () => {
               return <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />;
             case 'create':
               return <CreateItinerarySteps onBack={handleBackToDashboard} onGenerate={handleGenerateItinerary} />;
+            case 'generating':
+              return (
+                <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-sky/30 via-sage/20 to-sand/30">
+                  <div className="text-center max-w-md mx-4">
+                    <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+                    <h2 className="text-2xl font-bold text-deep-blue mb-3">Creating Your Perfect Trip</h2>
+                    <p className="text-muted-foreground">Our AI is crafting a personalized itinerary based on your preferences...</p>
+                  </div>
+                </div>
+              );
             case 'itinerary':
               return currentItinerary ? (
                 <ItineraryView 
                   onBack={handleBackToDashboard} 
                   itineraryData={currentItinerary} 
+                  aiItinerary={aiGeneratedItinerary}
                   onAddDetails={handleAddDetails}
                   onViewExpenses={handleViewExpenses}
                   bookingDetails={bookingDetails}
