@@ -8,12 +8,13 @@ import {
   FileText, 
   MapPin, 
   Clock, 
-  Camera, 
   Plane,
-  Sparkles
+  Sparkles,
+  ArrowRight,
+  Globe,
+  Shield
 } from 'lucide-react';
 
-// Import images
 import heroBeach from '@/assets/hero-beach.jpg';
 import heroMountain from '@/assets/hero-mountain.jpg';
 import heroCity from '@/assets/hero-city.jpg';
@@ -26,78 +27,58 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   const heroImages = [
-    { src: heroBeach, alt: "Beautiful beach sunset" },
-    { src: heroMountain, alt: "Mountain landscape" },
-    { src: heroCity, alt: "Urban architecture" }
+    { src: heroBeach, alt: "Beautiful beach destination" },
+    { src: heroMountain, alt: "Mountain landscape adventure" },
+    { src: heroCity, alt: "Urban city exploration" }
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
   const features = [
     {
       icon: Brain,
-      title: "AI Itinerary Generator",
-      description: "Personalized daily plans tailored to your travel style and preferences",
-      gradient: "bg-gradient-ocean"
+      title: "AI-Powered Planning",
+      description: "Get personalized itineraries tailored to your travel style, interests, and budget.",
     },
     {
       icon: Users,
-      title: "Plan with Tripmates",
-      description: "Share, vote, and co-edit your travel plans with friends and family",
-      gradient: "bg-gradient-sunset"
+      title: "Collaborative Trips",
+      description: "Plan together with friends and family. Share, vote, and coordinate seamlessly.",
     },
     {
       icon: DollarSign,
       title: "Smart Expense Splitting",
-      description: "No more messy spreadsheets — track and split costs effortlessly",
-      gradient: "bg-gradient-premium"
+      description: "Track costs and split expenses fairly among your travel group.",
     },
     {
       icon: FileText,
-      title: "Travel Docs Organizer",
-      description: "All your bookings, tickets, and documents in one organized place",
-      gradient: "bg-gradient-card"
+      title: "Document Organization",
+      description: "Keep all your bookings, tickets, and confirmations in one secure place.",
     }
   ];
 
-  const sampleItinerary = [
-    {
-      day: "Day 1",
-      title: "Beach Day + Sunset Dinner",
-      time: "9:00 AM - 9:00 PM",
-      color: "bg-sky-500"
-    },
-    {
-      day: "Day 2", 
-      title: "Island Hopping + Spa",
-      time: "8:00 AM - 6:00 PM",
-      color: "bg-emerald-500"
-    },
-    {
-      day: "Day 3",
-      title: "Local Market + Rooftop Bar",
-      time: "10:00 AM - 11:00 PM",
-      color: "bg-orange-500"
-    }
+  const stats = [
+    { value: "50K+", label: "Trips Planned" },
+    { value: "120+", label: "Countries" },
+    { value: "4.9", label: "User Rating" }
   ];
 
-  const howItWorksSteps = [
-    { icon: MapPin, title: "Create Trip", description: "Tell us where you want to go" },
-    { icon: Brain, title: "Answer Smart Questions", description: "Share your preferences and style" },
-    { icon: Sparkles, title: "Get AI-Powered Plan", description: "Receive your personalized itinerary" },
-    { icon: FileText, title: "Upload Bookings", description: "Add your travel documents" },
-    { icon: Plane, title: "Travel Together, Smartly", description: "Enjoy your perfectly planned trip" }
+  const howItWorks = [
+    { step: "01", title: "Share Your Preferences", description: "Tell us your destination, dates, and travel style" },
+    { step: "02", title: "AI Creates Your Plan", description: "Get a detailed day-by-day itinerary in seconds" },
+    { step: "03", title: "Customize & Book", description: "Adjust activities, invite friends, and manage bookings" },
+    { step: "04", title: "Travel & Track", description: "Follow your plan and split expenses with your group" }
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Images */}
         {heroImages.map((image, index) => (
           <div
@@ -111,37 +92,64 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
               alt={image.alt}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
           </div>
         ))}
         
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-6">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Let AI Plan Your
-            <span className="block bg-gradient-to-r from-sky-200 to-emerald-200 bg-clip-text text-transparent">Perfect Trip</span>
+        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-6 py-20">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 mb-8">
+            <Sparkles className="w-4 h-4" />
+            <span className="text-sm font-medium">AI-Powered Travel Planning</span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
+            Plan Your Perfect Trip
+            <span className="block text-primary-light mt-2">In Seconds, Not Hours</span>
           </h1>
-          <p className="text-lg md:text-xl lg:text-2xl mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed">
-            Tell us where and when — we'll build your dream itinerary in seconds.
+          
+          <p className="text-lg md:text-xl mb-10 opacity-90 max-w-2xl mx-auto leading-relaxed">
+            Tell us where you want to go. Our AI creates detailed, personalized itineraries 
+            that match your style, budget, and interests.
           </p>
-          <Button
-            onClick={onCreateTrip}
-            size="xl"
-            className="bg-gradient-premium hover:scale-105 transition-all duration-300 shadow-premium text-lg px-12 py-6 text-white font-semibold"
-          >
-            <Sparkles className="mr-3 h-6 w-6" />
-            Create Your Trip
-          </Button>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={onCreateTrip}
+              size="lg"
+              className="bg-primary hover:bg-primary-dark text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Start Planning Free
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 px-8 py-6 text-lg"
+            >
+              See How It Works
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-16 flex justify-center gap-12 md:gap-16">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl md:text-4xl font-bold">{stat.value}</div>
+                <div className="text-sm text-white/70 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Image Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex space-x-3">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex space-x-2">
           {heroImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentImageIndex ? 'bg-white w-6' : 'bg-white/40'
               }`}
             />
           ))}
@@ -149,124 +157,96 @@ const LandingPage: React.FC<LandingPageProps> = ({ onCreateTrip }) => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-24 px-4 md:px-6 bg-muted/20">
+      <section className="py-20 md:py-28 px-4 md:px-6 bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Why Travelers Love Us
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              Everything You Need to Travel Smarter
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Everything you need for the perfect trip, powered by AI
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              From planning to expense tracking, we've got you covered
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card key={index} className="group hover:scale-105 transition-all duration-500 shadow-lg hover:shadow-premium border-0 overflow-hidden bg-card/80 backdrop-blur-sm">
-                <div className={`h-1 ${feature.gradient}`} />
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-premium rounded-full mb-6 mx-auto shadow-lg">
-                    <feature.icon className="h-7 w-7 md:h-8 md:w-8 text-white" />
-                  </div>
-                  <h3 className="text-lg md:text-xl font-bold mb-4 text-center">{feature.title}</h3>
-                  <p className="text-muted-foreground text-center leading-relaxed text-sm md:text-base">
-                    {feature.description}
-                  </p>
+              <Card key={index} className="group hover:shadow-elegant transition-all duration-300 border border-border/50 bg-card p-6">
+                <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl mb-5">
+                  <feature.icon className="h-6 w-6 text-primary" />
                 </div>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {feature.description}
+                </p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Itinerary Preview */}
-      <section className="py-20 md:py-24 px-4 md:px-6">
+      {/* How It Works */}
+      <section className="py-20 md:py-28 px-4 md:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-foreground">
-              See Your Trip Come to Life
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              How It Works
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              AI-generated itineraries that feel like they were made just for you
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              From idea to itinerary in four simple steps
             </p>
           </div>
           
-          <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 no-scrollbar px-4 md:px-0">
-            {sampleItinerary.map((day, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 w-72 md:w-80 bg-card rounded-2xl shadow-lg hover:shadow-premium transition-all duration-500 hover:scale-105 border border-border/30"
-              >
-                <div className={`h-40 md:h-48 ${day.color} rounded-t-2xl relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                  <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 md:px-4 md:py-2">
-                    <span className="text-white font-semibold text-sm md:text-base">{day.day}</span>
-                  </div>
-                  <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4">
-                    <Camera className="h-6 w-6 md:h-8 md:w-8 text-white/80" />
-                  </div>
-                </div>
-                <div className="p-5 md:p-6">
-                  <h3 className="text-lg md:text-xl font-bold mb-2">{day.title}</h3>
-                  <div className="flex items-center text-muted-foreground">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span className="text-sm md:text-base">{day.time}</span>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {howItWorks.map((item, index) => (
+              <div key={index} className="relative">
+                {index < howItWorks.length - 1 && (
+                  <div className="hidden lg:block absolute top-8 left-full w-full h-px bg-border -translate-x-4" />
+                )}
+                <div className="text-5xl font-bold text-primary/20 mb-4">{item.step}</div>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">{item.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-24 px-6 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              How It Works
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              From idea to itinerary in just a few simple steps
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-            {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center relative">
-                {index < howItWorksSteps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-premium transform translate-x-4" />
-                )}
-                <div className="flex items-center justify-center w-16 h-16 bg-gradient-premium rounded-full mb-6 mx-auto relative z-10">
-                  <step.icon className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-lg font-bold mb-3">{step.title}</h3>
-                <p className="text-muted-foreground text-sm">
-                  {step.description}
-                </p>
-              </div>
-            ))}
+      {/* Trust Section */}
+      <section className="py-16 px-4 md:px-6 bg-background border-t border-border/50">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 text-center md:text-left">
+            <div className="flex items-center gap-3">
+              <Globe className="w-5 h-5 text-primary" />
+              <span className="text-muted-foreground">Available Worldwide</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Shield className="w-5 h-5 text-primary" />
+              <span className="text-muted-foreground">Secure & Private</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-primary" />
+              <span className="text-muted-foreground">24/7 Support</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 md:py-24 px-4 md:px-6 bg-gradient-hero relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Your Smartest Trip Starts Here
+      <section className="py-20 md:py-28 px-4 md:px-6 bg-gradient-premium">
+        <div className="max-w-4xl mx-auto text-center text-white">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+            Ready to Plan Your Next Adventure?
           </h2>
-          <p className="text-lg md:text-xl mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of travelers who trust AI to plan their perfect adventures
+          <p className="text-lg md:text-xl mb-10 opacity-90 max-w-2xl mx-auto leading-relaxed">
+            Join thousands of travelers who plan smarter, travel better
           </p>
           <Button
             onClick={onCreateTrip}
-            size="xl"
-            className="bg-white text-primary hover:bg-white/90 hover:scale-105 transition-all duration-500 shadow-premium text-lg px-8 md:px-12 py-4 md:py-6 font-semibold"
+            size="lg"
+            className="bg-white text-primary hover:bg-white/90 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Sparkles className="mr-3 h-5 w-5 md:h-6 md:w-6" />
-            Create Your Trip
+            Get Started Free
+            <Plane className="ml-2 w-5 h-5" />
           </Button>
         </div>
       </section>
