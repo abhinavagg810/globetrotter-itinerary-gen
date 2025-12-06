@@ -13,6 +13,7 @@ import { TripMate } from "./TripMateManager";
 import { ExpenseSplit } from "./ExpenseSplitter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { AIItinerary } from "@/hooks/useGenerateItinerary";
+import { useDestinationImages } from "@/hooks/useDestinationImages";
 
 interface ItineraryViewProps {
   onBack: () => void;
@@ -77,6 +78,10 @@ export function ItineraryView({
     documents: false
   });
   const { formatPrice, currentCurrency } = useCurrency();
+  
+  // Get destination-specific images
+  const primaryDestination = itineraryData.destinations[0] || '';
+  const { images: destinationImages, getActivityImage: getDestinationActivityImage } = useDestinationImages(primaryDestination);
 
   // Expanded currency and timezone data for common destinations
   const destinationData: Record<string, { currency: { code: string; name: string; symbol: string; rate: number }; timezone: { name: string; offset: string; offsetHours: number } }> = {
@@ -288,28 +293,9 @@ export function ItineraryView({
     };
   };
 
-  const getActivityImage = (type: string, index: number) => {
-    const images = {
-      flight: [
-        'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1469899908283-0c3fbe949d6e?w=600&h=400&fit=crop'
-      ],
-      hotel: [
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&h=400&fit=crop'
-      ],
-      activity: [
-        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=600&h=400&fit=crop'
-      ],
-      restaurant: [
-        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop'
-      ]
-    };
-    return images[type as keyof typeof images]?.[index % images[type as keyof typeof images].length] || images.activity[0];
+  const getActivityImage = (type: string, title: string, index: number) => {
+    // Use destination-specific images for activities
+    return getDestinationActivityImage(type, title, index);
   };
 
   const handleSave = (details: BookingDetails) => {
@@ -1419,33 +1405,39 @@ export function ItineraryView({
                 <CollapsibleContent>
                   <CardContent className="pt-0">
                     <div className="space-y-3">
+                      {/* Outbound Flight */}
                       <div className="p-4 border border-border/30 rounded-lg">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="text-lg font-semibold">DEL</div>
+                            <div className="text-lg font-semibold">{itineraryData.fromLocation?.substring(0, 3).toUpperCase() || 'DEL'}</div>
                             <div className="text-sm text-muted-foreground">→</div>
                             <div className="text-lg font-semibold">{itineraryData.destinations[0]?.substring(0, 3).toUpperCase()}</div>
                           </div>
-                          <Badge variant="secondary">{formatPrice(37500)}</Badge>
+                          <Badge variant="secondary">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.flights ? aiItinerary.estimatedBudget.breakdown.flights / 2 : 450)}
+                          </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {itineraryData.fromDate?.toLocaleDateString()} • 6:30 AM - 3:04 PM
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">INDIGO AI 295</div>
+                        <div className="text-xs text-muted-foreground mt-1">Direct Flight</div>
                       </div>
+                      {/* Return Flight */}
                       <div className="p-4 border border-border/30 rounded-lg">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
                             <div className="text-lg font-semibold">{itineraryData.destinations[0]?.substring(0, 3).toUpperCase()}</div>
                             <div className="text-sm text-muted-foreground">→</div>
-                            <div className="text-lg font-semibold">DEL</div>
+                            <div className="text-lg font-semibold">{itineraryData.fromLocation?.substring(0, 3).toUpperCase() || 'DEL'}</div>
                           </div>
-                          <Badge variant="secondary">{formatPrice(37500)}</Badge>
+                          <Badge variant="secondary">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.flights ? aiItinerary.estimatedBudget.breakdown.flights / 2 : 450)}
+                          </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {itineraryData.toDate?.toLocaleDateString()} • 8:15 PM - 11:30 PM
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">INDIGO AI 298</div>
+                        <div className="text-xs text-muted-foreground mt-1">Direct Flight</div>
                       </div>
                     </div>
                   </CardContent>
@@ -1478,12 +1470,16 @@ export function ItineraryView({
                       <div className="p-4 border border-border/30 rounded-lg">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <div className="font-semibold">The Luxury Resort</div>
+                            <div className="font-semibold">Recommended Hotel</div>
                             <div className="text-sm text-muted-foreground">
                               {itineraryData.destinations[0]} • 4.8 ★
                             </div>
                           </div>
-                          <Badge variant="secondary">{formatPrice(23000)}/night</Badge>
+                          <Badge variant="secondary">
+                            {formatPrice(aiItinerary?.estimatedBudget?.breakdown?.accommodation 
+                              ? aiItinerary.estimatedBudget.breakdown.accommodation / Math.max(1, Math.ceil((itineraryData.toDate!.getTime() - itineraryData.fromDate!.getTime()) / (1000 * 3600 * 24)))
+                              : 150)}/night
+                          </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {itineraryData.fromDate?.toLocaleDateString()} - {itineraryData.toDate?.toLocaleDateString()}
@@ -1627,7 +1623,7 @@ export function ItineraryView({
                        {dayItems.map((item, itemIndex) => {
                          const Icon = getIcon(item.type);
                          const hasBookingDetails = bookingDetails.some(bd => bd.title === item.title);
-                         const imageUrl = getActivityImage(item.type, itemIndex);
+                         const imageUrl = getActivityImage(item.type, item.title, itemIndex);
                          const nextItem = dayItems[itemIndex + 1];
                          const transportInfo = nextItem ? getTransportationBetween(item, nextItem) : null;
                          const TransportIcon = transportInfo ? getTransportIcon(transportInfo.mode) : null;
