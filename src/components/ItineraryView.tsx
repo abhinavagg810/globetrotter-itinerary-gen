@@ -14,6 +14,8 @@ import { ExpenseSplit } from "./ExpenseSplitter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { AIItinerary } from "@/hooks/useGenerateItinerary";
 import { useDestinationImages } from "@/hooks/useDestinationImages";
+import { RegenerateDayDialog } from "./RegenerateDayDialog";
+import { useRegenerateDay } from "@/hooks/useRegenerateDay";
 
 interface ItineraryViewProps {
   onBack: () => void;
@@ -68,6 +70,8 @@ export function ItineraryView({
   const [draggedItem, setDraggedItem] = useState<ItineraryItem | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedItem, setSelectedItem] = useState<ItineraryItem | null>(null);
+  const [regenerateDayOpen, setRegenerateDayOpen] = useState(false);
+  const [selectedDayForRegenerate, setSelectedDayForRegenerate] = useState<number>(1);
   const [openSections, setOpenSections] = useState({
     budget: true,
     info: false,
@@ -78,6 +82,7 @@ export function ItineraryView({
     documents: false
   });
   const { formatPrice, currentCurrency } = useCurrency();
+  const { regenerateDay, updateDayInDatabase, isRegenerating } = useRegenerateDay();
   
   // Get destination-specific images
   const primaryDestination = itineraryData.destinations[0] || '';
@@ -1484,8 +1489,8 @@ export function ItineraryView({
                           size="sm" 
                           className="h-9 text-xs bg-white/80 hover:bg-white border-primary/30 hover:border-primary"
                           onClick={() => {
-                            // TODO: Implement regenerate day functionality
-                            console.log(`Regenerating Day ${day}`);
+                            setSelectedDayForRegenerate(day);
+                            setRegenerateDayOpen(true);
                           }}
                         >
                           <Sparkles className="h-3 w-3 mr-1" />

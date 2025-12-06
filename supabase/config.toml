@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.process-document-ocr]
 verify_jwt = true
+
+[functions.regenerate-day]
+verify_jwt = true
