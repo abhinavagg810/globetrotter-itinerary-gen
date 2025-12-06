@@ -380,6 +380,15 @@ const Index = () => {
                       handleViewItinerary(savedItineraryId);
                     }
                   }}
+                  isSaving={isSaving}
+                  onSaveTrip={async () => {
+                    if (!user || !currentItinerary || !aiGeneratedItinerary) return;
+                    const savedResult = await saveItineraryToDatabase(currentItinerary, aiGeneratedItinerary, user.id);
+                    if (savedResult) {
+                      setSavedItineraryId(savedResult.id);
+                      await loadTripParticipants(savedResult.id);
+                    }
+                  }}
                 />
               ) : (
                 <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />

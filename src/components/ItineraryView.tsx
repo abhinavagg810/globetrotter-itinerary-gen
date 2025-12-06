@@ -31,6 +31,8 @@ interface ItineraryViewProps {
   bookingDetails: BookingDetails[];
   onAddBookingDetails?: (booking: BookingDetails) => void;
   onItineraryUpdated?: () => void;
+  onSaveTrip?: () => Promise<void>;
+  isSaving?: boolean;
 }
 
 interface ItineraryItem {
@@ -67,7 +69,9 @@ export function ItineraryView({
   onUpdateTripMates,
   expenseSplits,
   onUpdateExpenseSplits,
-  onItineraryUpdated
+  onItineraryUpdated,
+  onSaveTrip,
+  isSaving = false
 }: ItineraryViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<ItineraryItem[]>([]);
@@ -901,10 +905,37 @@ export function ItineraryView({
               <p className="text-sm text-muted-foreground">{itineraryData.destinations.join(" → ")}</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={onViewExpenses}>
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Expenses
-          </Button>
+          <div className="flex items-center gap-2">
+            {!itineraryId && onSaveTrip && (
+              <Button 
+                onClick={onSaveTrip} 
+                disabled={isSaving}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Save Trip
+                  </>
+                )}
+              </Button>
+            )}
+            {itineraryId && (
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Saved
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" onClick={onViewExpenses}>
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Expenses
+            </Button>
+          </div>
         </div>
       </div>
 
