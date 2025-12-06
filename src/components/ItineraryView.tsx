@@ -21,6 +21,7 @@ interface ItineraryViewProps {
   onBack: () => void;
   itineraryData: ItineraryData;
   aiItinerary?: AIItinerary | null;
+  itineraryId?: string | null;
   onAddDetails: (itemType: 'flight' | 'hotel' | 'activity' | 'restaurant', itemTitle: string, itemId: string) => void;
   onViewExpenses: () => void;
   tripMates?: TripMate[];
@@ -29,6 +30,7 @@ interface ItineraryViewProps {
   onUpdateExpenseSplits?: (splits: ExpenseSplit[]) => void;
   bookingDetails: BookingDetails[];
   onAddBookingDetails?: (booking: BookingDetails) => void;
+  onItineraryUpdated?: () => void;
 }
 
 interface ItineraryItem {
@@ -56,6 +58,7 @@ export function ItineraryView({
   onBack, 
   itineraryData, 
   aiItinerary,
+  itineraryId,
   onAddDetails, 
   onViewExpenses, 
   bookingDetails,
@@ -63,7 +66,8 @@ export function ItineraryView({
   tripMates,
   onUpdateTripMates,
   expenseSplits,
-  onUpdateExpenseSplits 
+  onUpdateExpenseSplits,
+  onItineraryUpdated
 }: ItineraryViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<ItineraryItem[]>([]);
@@ -305,7 +309,52 @@ export function ItineraryView({
 
   const handleSave = (details: BookingDetails) => {
     setBookingDetailsDialogOpen(false);
-    // Add logic to save edited booking details
+  };
+
+  const handleRegenerateDay = async (changeRequest: string) => {
+    if (!aiItinerary) return;
+    
+    const dayData = aiItinerary.days.find(d => d.dayNumber === selectedDayForRegenerate);
+    if (!dayData) return;
+
+    const result = await regenerateDay({
+      dayNumber: selectedDayForRegenerate,
+      date: dayData.date,
+      location: dayData.location || itineraryData.destinations[0] || '',
+      currentActivities: dayData.activities,
+      changeRequest,
+      destination: itineraryData.destinations[0],
+      travelVibes: (itineraryData as any).travelVibes,
+      travelingWith: (itineraryData as any).travelingWith,
+    });
+
+    if (result && itineraryId) {
+      // Update the database
+      await updateDayInDatabase(itineraryId, selectedDayForRegenerate, result);
+      
+      // Update local items state
+      const updatedItems = items.filter(item => item.day !== selectedDayForRegenerate);
+      const newItems = result.activities.map((activity, index) => ({
+        id: activity.id || `regen-${selectedDayForRegenerate}-${index}`,
+        time: activity.time,
+        title: activity.title,
+        description: activity.description,
+        type: activity.type as 'flight' | 'hotel' | 'activity' | 'restaurant',
+        price: activity.price > 0 ? formatPrice(activity.price) : 'Free',
+        bookingStatus: activity.bookingStatus as 'available' | 'booked' | 'loading',
+        day: selectedDayForRegenerate,
+        date: dayData.date ? new Date(dayData.date) : new Date(),
+        basePrice: activity.price,
+        location: activity.location,
+      }));
+      
+      setItems([...updatedItems, ...newItems].sort((a, b) => {
+        if (a.day !== b.day) return a.day - b.day;
+        return a.time.localeCompare(b.time);
+      }));
+      
+      onItineraryUpdated?.();
+    }
   };
 
   useEffect(() => {
@@ -468,6 +517,14 @@ export function ItineraryView({
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
+      {/* Regenerate Day Dialog */}
+      <RegenerateDayDialog
+        open={regenerateDayOpen}
+        onOpenChange={setRegenerateDayOpen}
+        dayNumber={selectedDayForRegenerate}
+        onRegenerate={handleRegenerateDay}
+        isLoading={isRegenerating}
+      />
       {/* Booking Details Dialog */}
       <Dialog open={bookingDetailsDialogOpen} onOpenChange={setBookingDetailsDialogOpen}>
         <DialogContent className="max-w-2xl">

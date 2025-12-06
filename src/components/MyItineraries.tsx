@@ -42,7 +42,29 @@ export function MyItineraries({ onBack, onViewItinerary, onCreateNew }: MyItiner
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItineraries(data || []);
+      
+      // Auto-update status based on dates
+      const today = new Date();
+      const updatedData = (data || []).map(trip => {
+        const startDate = new Date(trip.start_date);
+        const endDate = new Date(trip.end_date);
+        
+        let newStatus = trip.status;
+        if (endDate < today && trip.status !== 'completed') {
+          newStatus = 'completed';
+        } else if (startDate <= today && endDate >= today && trip.status === 'planning') {
+          newStatus = 'active';
+        }
+        
+        // Update in database if status changed
+        if (newStatus !== trip.status) {
+          supabase.from('itineraries').update({ status: newStatus }).eq('id', trip.id).then();
+        }
+        
+        return { ...trip, status: newStatus };
+      });
+      
+      setItineraries(updatedData);
     } catch (error) {
       console.error('Error loading itineraries:', error);
       toast.error('Failed to load your trips');

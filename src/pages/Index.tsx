@@ -253,33 +253,47 @@ const Index = () => {
   };
 
   const handleUpdateTripMates = async (updatedMates: TripMate[]) => {
+    const oldMates = [...tripMates];
     setTripMates(updatedMates);
     
     // Sync with database
     if (savedItineraryId) {
       for (const mate of updatedMates) {
-        if (!tripMates.find(m => m.id === mate.id)) {
-          // New mate - insert
-          await supabase.from('trip_participants').insert({
-            itinerary_id: savedItineraryId,
-            name: mate.name,
-            email: mate.email || null,
-            total_paid: mate.totalPaid,
-            total_owed: mate.totalOwed,
-          });
-        } else {
-          // Existing mate - update
-          await supabase.from('trip_participants')
-            .update({
+        const existingMate = oldMates.find(m => m.id === mate.id);
+        if (!existingMate) {
+          // New mate - insert and get the new ID
+          const { data: insertedMate, error } = await supabase.from('trip_participants')
+            .insert({
+              itinerary_id: savedItineraryId,
+              name: mate.name,
+              email: mate.email || null,
               total_paid: mate.totalPaid,
               total_owed: mate.totalOwed,
             })
-            .eq('id', mate.id);
+            .select()
+            .single();
+          
+          if (!error && insertedMate) {
+            // Update local state with the real ID from database
+            setTripMates(prev => prev.map(m => 
+              m.id === mate.id ? { ...m, id: insertedMate.id } : m
+            ));
+          }
+        } else {
+          // Existing mate - update if balances changed
+          if (existingMate.totalPaid !== mate.totalPaid || existingMate.totalOwed !== mate.totalOwed) {
+            await supabase.from('trip_participants')
+              .update({
+                total_paid: mate.totalPaid,
+                total_owed: mate.totalOwed,
+              })
+              .eq('id', mate.id);
+          }
         }
       }
 
       // Handle deletions
-      for (const oldMate of tripMates) {
+      for (const oldMate of oldMates) {
         if (!updatedMates.find(m => m.id === oldMate.id)) {
           await supabase.from('trip_participants').delete().eq('id', oldMate.id);
         }
@@ -351,6 +365,7 @@ const Index = () => {
                   onBack={handleBackToDashboard} 
                   itineraryData={currentItinerary} 
                   aiItinerary={aiGeneratedItinerary}
+                  itineraryId={savedItineraryId}
                   onAddDetails={handleAddDetails}
                   onViewExpenses={handleViewExpenses}
                   bookingDetails={bookingDetails}
@@ -359,6 +374,12 @@ const Index = () => {
                   onUpdateTripMates={handleUpdateTripMates}
                   expenseSplits={expenseSplits}
                   onUpdateExpenseSplits={handleUpdateExpenseSplits}
+                  onItineraryUpdated={() => {
+                    // Refresh itinerary data
+                    if (savedItineraryId) {
+                      handleViewItinerary(savedItineraryId);
+                    }
+                  }}
                 />
               ) : (
                 <Dashboard onCreateItinerary={handleCreateItinerary} onViewItineraries={handleViewItineraries} onProfile={handleProfile} />
