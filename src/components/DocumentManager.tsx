@@ -133,11 +133,11 @@ export function DocumentManager({ itineraryId, tripName = 'Trip' }: DocumentMana
           );
         })}
         
-        {data.confidence && (
+        {data.confidence !== undefined && (
           <div className="pt-2 border-t">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">OCR Confidence:</span>
-              <span className="font-medium">{data.confidence}%</span>
+              <span className="font-medium">{String(data.confidence)}%</span>
             </div>
           </div>
         )}
