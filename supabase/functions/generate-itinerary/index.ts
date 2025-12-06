@@ -55,6 +55,12 @@ Trip: From ${fromLocation} to ${destinationText}
 Dates: ${fromDate} to ${toDate}
 ${companionContext} ${vibesContext} ${budgetContext}
 
+IMPORTANT: Generate REAL, DESTINATION-SPECIFIC information:
+- visaRequirements: Include SPECIFIC visa rules for travelers from ${fromLocation} visiting the destination (e.g., "Indian passport holders need a visa on arrival valid for 30 days" or "No visa required for stays up to 90 days for US citizens")
+- localCurrency: Use the ACTUAL local currency with real exchange rates
+- timezone: Use the ACTUAL timezone of the destination
+- emergencyNumbers: Use REAL emergency numbers for that country
+
 Return this exact JSON structure:
 {
   "tripName": "Creative trip name",
@@ -69,16 +75,16 @@ Return this exact JSON structure:
   },
   "importantInfo": {
     "localCurrency": {"code": "XXX", "name": "Currency Name", "symbol": "$", "exchangeRate": "1 USD = X"},
-    "timezone": {"name": "TZ", "offset": "UTC+X", "differenceFromOrigin": "X hours"},
+    "timezone": {"name": "TZ", "offset": "UTC+X", "differenceFromOrigin": "X hours ahead/behind ${fromLocation}"},
     "language": "Primary language",
     "emergencyNumbers": {"police": "XXX", "ambulance": "XXX", "tourist": "XXX"},
     "bestTimeToVisit": "Best months to visit",
-    "visaRequirements": "Visa info",
+    "visaRequirements": "SPECIFIC visa requirements for travelers from ${fromLocation} - include visa type, duration, cost if applicable",
     "travelTips": ["Tip 1", "Tip 2", "Tip 3"]
   },
   "weather": {
     "temperature": {"min": 15, "max": 25, "unit": "°C"},
-    "condition": "Weather description",
+    "condition": "Weather description for ${fromDate} to ${toDate}",
     "humidity": "Medium",
     "packingTips": ["Item 1", "Item 2", "Item 3"]
   },
@@ -128,7 +134,8 @@ Rules:
 - 3-5 activities per day with realistic times
 - Use real restaurant and attraction names
 - All prices in USD
-- Generate exactly ${maxDays} days`;
+- Generate exactly ${maxDays} days
+- CRITICAL: visaRequirements MUST be specific to travelers from ${fromLocation}`;
 
     console.log("Generating itinerary for:", { fromLocation, destinations, numberOfDays: maxDays, travelVibes, budget });
 
