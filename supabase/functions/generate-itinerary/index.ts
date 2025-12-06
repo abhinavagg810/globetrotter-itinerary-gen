@@ -33,141 +33,104 @@ serve(async (req) => {
     const startDate = new Date(fromDate);
     const endDate = new Date(toDate);
     const numberOfDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)) + 1;
+    
+    // Limit trip duration to avoid response truncation
+    const maxDays = Math.min(numberOfDays, 7);
 
-    // Build context for better AI understanding
     const companionContext = travelingWith ? `Traveling with: ${travelingWith}.` : '';
     const vibesContext = travelVibes?.length > 0 ? `Travel vibes: ${travelVibes.join(', ')}.` : '';
     const budgetContext = budget ? `Budget level: ${budget}.` : '';
     const travelTypeContext = domesticOrInternational ? `${domesticOrInternational} travel.` : '';
 
-    const systemPrompt = `You are an expert international travel planner with extensive knowledge of destinations worldwide. You create detailed, practical, and culturally-aware travel itineraries. Your recommendations are based on real places, accurate local information, and current travel norms.
-
-Key principles:
-- Provide realistic pricing in USD (convert mentally for global accessibility)
-- Include specific, real restaurant names, attractions, and hotels
-- Consider local customs, dress codes, and cultural sensitivities
-- Account for realistic travel times between locations
-- Include mix of popular attractions and local hidden gems
-- Provide practical tips that experienced travelers would know
-
-Always respond with valid JSON only, no markdown formatting or explanations.`;
+    const systemPrompt = `You are an expert travel planner. Create practical travel itineraries with real places and realistic prices in USD. Always respond with valid, parseable JSON only - no markdown, no explanations, no code blocks.`;
 
     const destinationText = needsDestinationHelp 
-      ? `Help suggest the best destination based on preferences: ${vibesContext} ${budgetContext} ${travelTypeContext}`
-      : `Destination(s): ${destinations.join(", ")}`;
+      ? `Suggest a destination matching: ${vibesContext} ${budgetContext} ${travelTypeContext}`
+      : `Destination: ${destinations.join(", ")}`;
 
-    const userPrompt = `Create a comprehensive ${numberOfDays}-day travel itinerary.
+    // Simplified prompt for faster, more reliable responses
+    const userPrompt = `Create a ${maxDays}-day travel itinerary as JSON.
 
-**Trip Details:**
-- Departing from: ${fromLocation}
-- ${destinationText}
-- Travel dates: ${fromDate} to ${toDate}
-${companionContext}
-${vibesContext}
-${budgetContext}
+Trip: From ${fromLocation} to ${destinationText}
+Dates: ${fromDate} to ${toDate}
+${companionContext} ${vibesContext} ${budgetContext}
 
-**Generate a detailed JSON response with this structure:**
+Return this exact JSON structure:
 {
-  "tripName": "Creative, memorable trip name",
-  "destination": "Primary destination name",
-  "summary": "3-4 sentence engaging overview of the trip highlighting key experiences",
+  "tripName": "Creative trip name",
+  "destination": "Main destination",
+  "summary": "2-3 sentence trip overview",
   "estimatedBudget": {
-    "total": number (in USD),
-    "breakdown": {
-      "flights": number,
-      "accommodation": number,
-      "activities": number,
-      "food": number,
-      "transportation": number,
-      "miscellaneous": number
-    },
-    "perPerson": number,
+    "total": 2500,
+    "breakdown": {"flights": 800, "accommodation": 700, "activities": 400, "food": 400, "transportation": 100, "miscellaneous": 100},
+    "perPerson": 2500,
     "currency": "USD",
-    "budgetLevel": "budget|moderate|luxury|premium"
+    "budgetLevel": "moderate"
   },
   "importantInfo": {
-    "localCurrency": {
-      "code": "3-letter code",
-      "name": "Full currency name",
-      "symbol": "Currency symbol",
-      "exchangeRate": "Approximate rate vs USD"
-    },
-    "timezone": {
-      "name": "Timezone abbreviation",
-      "offset": "UTC offset",
-      "differenceFromOrigin": "Difference from ${fromLocation} timezone"
-    },
-    "language": "Primary language(s) spoken",
-    "emergencyNumbers": {
-      "police": "Local police number",
-      "ambulance": "Emergency medical",
-      "tourist": "Tourist helpline if available"
-    },
-    "bestTimeToVisit": "Best months and why",
-    "visaRequirements": "Visa info for major nationalities",
-    "travelTips": ["5 practical local tips for first-time visitors"]
+    "localCurrency": {"code": "XXX", "name": "Currency Name", "symbol": "$", "exchangeRate": "1 USD = X"},
+    "timezone": {"name": "TZ", "offset": "UTC+X", "differenceFromOrigin": "X hours"},
+    "language": "Primary language",
+    "emergencyNumbers": {"police": "XXX", "ambulance": "XXX", "tourist": "XXX"},
+    "bestTimeToVisit": "Best months to visit",
+    "visaRequirements": "Visa info",
+    "travelTips": ["Tip 1", "Tip 2", "Tip 3"]
   },
   "weather": {
-    "temperature": { "min": number, "max": number, "unit": "°C" },
-    "condition": "Expected weather description",
-    "humidity": "Low/Medium/High with percentage",
-    "packingTips": ["5 essential items to pack for this weather"]
+    "temperature": {"min": 15, "max": 25, "unit": "°C"},
+    "condition": "Weather description",
+    "humidity": "Medium",
+    "packingTips": ["Item 1", "Item 2", "Item 3"]
   },
   "days": [
     {
       "dayNumber": 1,
       "date": "YYYY-MM-DD",
-      "theme": "Descriptive day theme",
-      "location": "Area/neighborhood name",
+      "theme": "Day theme",
+      "location": "Area name",
       "activities": [
         {
-          "id": "unique-id-string",
-          "time": "HH:MM",
-          "endTime": "HH:MM",
-          "title": "Specific activity/place name",
-          "description": "Detailed 2-3 sentence description with what to expect",
+          "id": "unique-id",
+          "time": "09:00",
+          "endTime": "11:00",
+          "title": "Activity name",
+          "description": "Brief description",
           "type": "flight|hotel|activity|restaurant",
-          "price": number (in USD, 0 if free),
-          "location": "Specific address or landmark",
+          "price": 50,
+          "location": "Address",
           "bookingStatus": "available",
-          "tips": "Insider tip for this activity",
-          "rating": number (4.0-5.0 realistic rating),
-          "duration": "Estimated duration",
-          "bookingRequired": true|false,
-          "dressCode": "Any dress requirements if applicable"
+          "tips": "Helpful tip",
+          "rating": 4.5,
+          "duration": "2 hours",
+          "bookingRequired": false
         }
       ]
     }
   ],
   "recommendations": {
-    "mustTry": ["5 must-try foods/experiences unique to this destination"],
-    "hiddenGems": ["3 off-the-beaten-path places locals love"],
-    "avoidances": ["3 common tourist traps or things to avoid"],
-    "localCustoms": ["4 important cultural customs and etiquette"],
-    "photoSpots": ["3 best places for photos/Instagram"]
+    "mustTry": ["Experience 1", "Experience 2"],
+    "hiddenGems": ["Place 1", "Place 2"],
+    "avoidances": ["Avoid 1"],
+    "localCustoms": ["Custom 1"],
+    "photoSpots": ["Spot 1"]
   },
   "practicalInfo": {
-    "transportation": "Best ways to get around",
-    "simCard": "SIM card/internet recommendations",
-    "safety": "Safety considerations and tips",
-    "tipping": "Local tipping customs"
+    "transportation": "How to get around",
+    "simCard": "Internet options",
+    "safety": "Safety tips",
+    "tipping": "Tipping customs"
   }
 }
 
-**Important Guidelines:**
-- Day 1 should include arrival with realistic flight times
-- Last day should include departure preparations
-- Include 4-6 activities per day with realistic scheduling
-- Add meal recommendations (breakfast, lunch, dinner) with specific restaurant names
-- Hotel should appear only on check-in/check-out days
-- Consider travel time between activities (don't overschedule)
-- Prices should reflect the ${budget || 'moderate'} budget level
-- Make activities appropriate for ${travelingWith || 'general travelers'}
-- Include local experiences that match these vibes: ${travelVibes?.join(', ') || 'balanced exploration'}
-- All restaurant suggestions should be real, well-reviewed places
-- Include both popular spots and local favorites`;
+Rules:
+- Day 1: Include arrival flight and hotel check-in
+- Last day: Include departure activities
+- 3-5 activities per day with realistic times
+- Use real restaurant and attraction names
+- All prices in USD
+- Generate exactly ${maxDays} days`;
 
-    console.log("Generating itinerary for:", { fromLocation, destinations, numberOfDays, travelVibes, budget });
+    console.log("Generating itinerary for:", { fromLocation, destinations, numberOfDays: maxDays, travelVibes, budget });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -212,13 +175,49 @@ ${budgetContext}
 
     let itinerary;
     try {
-      itinerary = JSON.parse(content);
+      // Clean the content before parsing
+      let cleanContent = content.trim();
+      
+      // Remove markdown code blocks if present
+      if (cleanContent.startsWith("```json")) {
+        cleanContent = cleanContent.slice(7);
+      } else if (cleanContent.startsWith("```")) {
+        cleanContent = cleanContent.slice(3);
+      }
+      if (cleanContent.endsWith("```")) {
+        cleanContent = cleanContent.slice(0, -3);
+      }
+      cleanContent = cleanContent.trim();
+      
+      itinerary = JSON.parse(cleanContent);
     } catch (parseError) {
-      console.error("Failed to parse AI response:", content);
-      throw new Error("Invalid JSON response from AI");
+      console.error("JSON parse error:", parseError);
+      console.error("Content length:", content.length);
+      console.error("First 500 chars:", content.substring(0, 500));
+      console.error("Last 500 chars:", content.substring(content.length - 500));
+      
+      // Try to extract JSON from the content
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          itinerary = JSON.parse(jsonMatch[0]);
+          console.log("Successfully parsed extracted JSON");
+        } catch (e) {
+          console.error("Failed to parse extracted JSON:", e);
+          throw new Error("Invalid JSON response from AI");
+        }
+      } else {
+        throw new Error("Invalid JSON response from AI");
+      }
     }
 
-    console.log("Successfully generated itinerary:", itinerary.tripName);
+    // Validate required fields
+    if (!itinerary.tripName || !itinerary.days || !Array.isArray(itinerary.days)) {
+      console.error("Missing required fields in itinerary:", Object.keys(itinerary));
+      throw new Error("Incomplete itinerary data");
+    }
+
+    console.log("Successfully generated itinerary:", itinerary.tripName, "with", itinerary.days.length, "days");
 
     return new Response(JSON.stringify(itinerary), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

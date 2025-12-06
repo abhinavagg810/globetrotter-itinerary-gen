@@ -198,7 +198,7 @@ export function useGenerateItinerary() {
           start_date: data.fromDate?.toISOString().split("T")[0],
           end_date: data.toDate?.toISOString().split("T")[0],
           travel_type: data.travelType,
-          status: "planned",
+          status: "planning",
         })
         .select()
         .single();
