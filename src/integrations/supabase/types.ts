@@ -460,7 +460,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_itinerary_owner: {
+        Args: { _itinerary_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_trip_participant: {
+        Args: { _itinerary_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
