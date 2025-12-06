@@ -1,1 +1,7 @@
 project_id = "lbbfaanjiairtulqrrjt"
+
+[functions.generate-itinerary]
+verify_jwt = true
+
+[functions.process-document-ocr]
+verify_jwt = true
