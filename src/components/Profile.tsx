@@ -1,14 +1,57 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, User, Settings, Globe, Bell, Lock, Heart, Shield, Star } from "lucide-react";
+import { ArrowLeft, User, Settings, Globe, Bell, Lock, Heart, Shield, Star, Loader2 } from "lucide-react";
 import { CurrencySelector } from "./CurrencySelector";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProfileProps {
   onBack: () => void;
 }
 
 export function Profile({ onBack }: ProfileProps) {
+  const { user } = useAuth();
+  const [stats, setStats] = useState({ trips: 0, destinations: 0, expenses: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: itineraries } = await supabase
+          .from('itineraries')
+          .select('id, destinations')
+          .eq('user_id', user.id);
+        
+        const tripCount = itineraries?.length || 0;
+        const allDestinations = itineraries?.flatMap(i => i.destinations) || [];
+        const uniqueDestinations = new Set(allDestinations).size;
+        
+        const { count: expenseCount } = await supabase
+          .from('expenses')
+          .select('id', { count: 'exact', head: true });
+        
+        setStats({
+          trips: tripCount,
+          destinations: uniqueDestinations,
+          expenses: expenseCount || 0
+        });
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadStats();
+  }, [user]);
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Traveler';
+  const displayEmail = user?.email || '';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky/10 to-sand/30">
       {/* Header */}
@@ -29,16 +72,16 @@ export function Profile({ onBack }: ProfileProps) {
         <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
                 <User className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-deep-blue">Travel Explorer</h2>
-                <p className="text-muted-foreground">explorer@voyageai.com</p>
+                <h2 className="text-xl font-bold text-deep-blue">{displayName}</h2>
+                <p className="text-muted-foreground">{displayEmail}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex items-center gap-1">
                     <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                    <span className="text-sm text-muted-foreground">Premium Member</span>
+                    <span className="text-sm text-muted-foreground">Travel Explorer</span>
                   </div>
                 </div>
               </div>
@@ -114,27 +157,29 @@ export function Profile({ onBack }: ProfileProps) {
         {/* Stats */}
         <Card className="bg-gradient-card backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-deep-blue">Travel Statistics</CardTitle>
+            <CardTitle className="text-deep-blue">Your Travel Stats</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-white/50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-500">12</div>
-                <div className="text-xs text-muted-foreground">Countries Visited</div>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
-              <div className="text-center p-4 bg-white/50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-500">28</div>
-                <div className="text-xs text-muted-foreground">Cities Explored</div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <div className="text-2xl font-bold text-primary">{stats.trips}</div>
+                  <div className="text-xs text-muted-foreground">Trips Planned</div>
+                </div>
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <div className="text-2xl font-bold text-accent">{stats.destinations}</div>
+                  <div className="text-xs text-muted-foreground">Destinations</div>
+                </div>
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <div className="text-2xl font-bold text-secondary">{stats.expenses}</div>
+                  <div className="text-xs text-muted-foreground">Expenses Tracked</div>
+                </div>
               </div>
-              <div className="text-center p-4 bg-white/50 rounded-lg">
-                <div className="text-2xl font-bold text-green-500">156</div>
-                <div className="text-xs text-muted-foreground">Days Traveled</div>
-              </div>
-              <div className="text-center p-4 bg-white/50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-500">89</div>
-                <div className="text-xs text-muted-foreground">Memories Created</div>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
