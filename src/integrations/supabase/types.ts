@@ -64,6 +64,77 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          amount: number | null
+          booking_reference: string | null
+          created_at: string
+          currency: string | null
+          document_type: string
+          event_date: string | null
+          extracted_data: Json | null
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          itinerary_id: string
+          ocr_confidence: number | null
+          ocr_status: string | null
+          provider_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          booking_reference?: string | null
+          created_at?: string
+          currency?: string | null
+          document_type: string
+          event_date?: string | null
+          extracted_data?: Json | null
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+          itinerary_id: string
+          ocr_confidence?: number | null
+          ocr_status?: string | null
+          provider_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          booking_reference?: string | null
+          created_at?: string
+          currency?: string | null
+          document_type?: string
+          event_date?: string | null
+          extracted_data?: Json | null
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          itinerary_id?: string
+          ocr_confidence?: number | null
+          ocr_status?: string | null
+          provider_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_itinerary_id_fkey"
+            columns: ["itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expense_splits: {
         Row: {
           amount: number
@@ -274,6 +345,64 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      settlements: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          from_participant_id: string
+          id: string
+          itinerary_id: string
+          notes: string | null
+          settled_at: string
+          to_participant_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          from_participant_id: string
+          id?: string
+          itinerary_id: string
+          notes?: string | null
+          settled_at?: string
+          to_participant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          from_participant_id?: string
+          id?: string
+          itinerary_id?: string
+          notes?: string | null
+          settled_at?: string
+          to_participant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlements_from_participant_id_fkey"
+            columns: ["from_participant_id"]
+            isOneToOne: false
+            referencedRelation: "trip_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlements_itinerary_id_fkey"
+            columns: ["itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlements_to_participant_id_fkey"
+            columns: ["to_participant_id"]
+            isOneToOne: false
+            referencedRelation: "trip_participants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trip_participants: {
         Row: {
