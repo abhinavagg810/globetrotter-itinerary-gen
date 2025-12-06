@@ -304,11 +304,11 @@ export function ItineraryView({
   };
 
   useEffect(() => {
-    const generateItinerary = async () => {
+    const loadItinerary = () => {
       setIsLoading(true);
       
-      // If we have AI-generated itinerary, use it
-      if (aiItinerary && aiItinerary.days) {
+      // Only use AI-generated itinerary data - no mock data
+      if (aiItinerary && aiItinerary.days && aiItinerary.days.length > 0) {
         const generatedItems: ItineraryItem[] = [];
         
         aiItinerary.days.forEach((day) => {
@@ -332,140 +332,16 @@ export function ItineraryView({
         });
         
         setItems(generatedItems);
-        setIsLoading(false);
-        return;
+      } else {
+        // No AI itinerary available - show empty state
+        setItems([]);
       }
       
-      // Fallback to mock data if no AI itinerary
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const getDaysDifference = () => {
-        if (!itineraryData.fromDate || !itineraryData.toDate) return 1;
-        const timeDiff = itineraryData.toDate.getTime() - itineraryData.fromDate.getTime();
-        return Math.ceil(timeDiff / (1000 * 3600 * 24));
-      };
-
-      const numberOfDays = getDaysDifference();
-      const generatedItems: ItineraryItem[] = [];
-
-      for (let day = 0; day < numberOfDays; day++) {
-        const currentDate = new Date(itineraryData.fromDate!);
-        currentDate.setDate(currentDate.getDate() + day);
-        
-        const dayPrefix = `day-${day}`;
-        const destinationIndex = day % itineraryData.destinations.length;
-        const currentDestination = itineraryData.destinations[destinationIndex];
-
-        if (day === 0) {
-          generatedItems.push({
-            id: `${dayPrefix}-flight`,
-            time: "08:00",
-            title: `Flight from ${itineraryData.fromLocation}`,
-            description: `Direct flight to ${currentDestination}`,
-            type: "flight",
-            price: formatPrice(37500),
-            bookingStatus: "available",
-            day: day + 1,
-            date: currentDate,
-            basePrice: 37500,
-          });
-          
-          generatedItems.push({
-            id: `${dayPrefix}-hotel`,
-            time: "14:00",
-            title: "Hotel Check-in",
-            description: `Luxury accommodation in ${currentDestination}`,
-            type: "hotel",
-            price: formatPrice(23000) + "/night",
-            bookingStatus: "available",
-            day: day + 1,
-            date: currentDate,
-            basePrice: 23000,
-          });
-          
-          generatedItems.push({
-            id: `${dayPrefix}-activity`,
-            time: "16:00",
-            title: "City Orientation",
-            description: `Explore the highlights of ${currentDestination}`,
-            type: "activity",
-            price: formatPrice(5000),
-            bookingStatus: "available",
-            day: day + 1,
-            date: currentDate,
-            basePrice: 5000,
-          });
-        } else if (day === numberOfDays - 1) {
-          generatedItems.push({
-            id: `${dayPrefix}-checkout`,
-            time: "10:00",
-            title: "Hotel Check-out",
-            description: "Check out and prepare for departure",
-            type: "hotel",
-            bookingStatus: "available",
-            day: day + 1,
-            date: currentDate,
-            basePrice: 0,
-          });
-          
-          generatedItems.push({
-            id: `${dayPrefix}-departure`,
-            time: "15:00",
-            title: `Flight to ${itineraryData.fromLocation}`,
-            description: "Return journey",
-            type: "flight",
-            price: formatPrice(37500),
-            bookingStatus: "available",
-            day: day + 1,
-            date: currentDate,
-            basePrice: 37500,
-          });
-        } else {
-          const activities = [
-            { time: "09:00", title: "Morning Adventure", description: `Exciting morning activity in ${currentDestination}`, type: "activity", basePrice: 4500 },
-            { time: "12:30", title: "Local Lunch", description: "Authentic local cuisine experience", type: "restaurant", basePrice: 3750 },
-            { time: "15:00", title: "Cultural Experience", description: `Immerse in ${currentDestination}'s culture`, type: "activity", basePrice: 6000 },
-            { time: "19:00", title: "Evening Dining", description: "Fine dining experience", type: "restaurant", basePrice: 7000 },
-          ];
-          
-          activities.forEach((activity, index) => {
-            generatedItems.push({
-              id: `${dayPrefix}-${index}`,
-              time: activity.time,
-              title: activity.title,
-              description: activity.description,
-              type: activity.type as 'flight' | 'hotel' | 'activity' | 'restaurant',
-              price: formatPrice(activity.basePrice),
-              bookingStatus: "available",
-              day: day + 1,
-              date: currentDate,
-              basePrice: activity.basePrice,
-            });
-          });
-        }
-        
-        if (day < numberOfDays - 1) {
-          generatedItems.push({
-            id: `${dayPrefix}-dinner`,
-            time: "19:30",
-            title: "Welcome Dinner",
-            description: `Local cuisine in ${currentDestination}`,
-            type: "restaurant",
-            price: formatPrice(5400),
-            bookingStatus: "available",
-            day: day + 1,
-            date: currentDate,
-            basePrice: 5400,
-          });
-        }
-      }
-      
-      setItems(generatedItems);
       setIsLoading(false);
     };
 
-    generateItinerary();
-  }, [itineraryData, aiItinerary]);
+    loadItinerary();
+  }, [itineraryData, aiItinerary, formatPrice]);
 
   const handleDragStart = (e: React.DragEvent, item: ItineraryItem) => {
     // Don't allow dragging first and last day items
