@@ -1,8 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Plus, Calendar, User, Plane, FolderOpen, LogOut, Sparkles, Globe } from 'lucide-react';
+import { MapPin, Plus, Calendar, User, Plane, FolderOpen, LogOut, Sparkles, Globe, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ApiHealthCheck } from './ApiHealthCheck';
 
 interface DashboardProps {
   onCreateItinerary: () => void;
@@ -28,6 +30,23 @@ export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: D
               <span className="text-xl font-bold text-foreground tracking-tight">TravelGlobe</span>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>API Connection</DialogTitle>
+                  </DialogHeader>
+                  <ApiHealthCheck />
+                </DialogContent>
+              </Dialog>
               <Button 
                 variant="ghost" 
                 size="sm" 
