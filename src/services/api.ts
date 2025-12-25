@@ -1,6 +1,11 @@
 // API Client for Spring Boot Backend
 
+// Configure your Spring Boot API URL here or set VITE_API_URL environment variable
+// For local development: http://localhost:8080/api
+// For production: https://your-api-domain.com/api
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+export const getApiBaseUrl = () => API_BASE_URL;
 
 interface ApiResponse<T> {
   data?: T;
