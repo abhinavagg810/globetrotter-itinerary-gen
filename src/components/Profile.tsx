@@ -49,7 +49,7 @@ export function Profile({ onBack }: ProfileProps) {
     loadStats();
   }, [user]);
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Traveler';
+  const displayName = user?.fullName || user?.email?.split('@')[0] || 'Traveler';
   const displayEmail = user?.email || '';
 
   return (

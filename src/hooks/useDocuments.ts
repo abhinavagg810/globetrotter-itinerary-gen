@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api, Document as ApiDocument } from '@/services/api';
 import { toast } from 'sonner';
 
 export interface Document {
@@ -29,6 +29,28 @@ export interface UploadDocumentParams {
   documentType: Document['document_type'];
 }
 
+// Convert API response to legacy format
+const fromApiDocument = (doc: ApiDocument): Document => ({
+  id: doc.id,
+  itinerary_id: doc.itineraryId,
+  user_id: doc.userId,
+  file_name: doc.fileName,
+  file_type: doc.fileType,
+  file_size: doc.fileSize,
+  file_url: doc.fileUrl,
+  document_type: doc.documentType,
+  extracted_data: doc.extractedData,
+  ocr_status: doc.ocrStatus,
+  ocr_confidence: doc.ocrConfidence,
+  booking_reference: doc.bookingReference,
+  provider_name: doc.providerName,
+  amount: doc.amount,
+  currency: doc.currency,
+  event_date: doc.eventDate,
+  created_at: doc.createdAt,
+  updated_at: doc.updatedAt,
+});
+
 export function useDocuments(itineraryId?: string) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,14 +62,10 @@ export function useDocuments(itineraryId?: string) {
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('itinerary_id', itineraryId)
-        .order('created_at', { ascending: false });
+      const { data, error } = await api.getDocuments(itineraryId);
 
-      if (error) throw error;
-      setDocuments(data as Document[]);
+      if (error) throw new Error(error);
+      setDocuments((data || []).map(fromApiDocument));
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast.error('Failed to load documents');
@@ -60,48 +78,17 @@ export function useDocuments(itineraryId?: string) {
     setIsUploading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await api.uploadDocument(itineraryId, file, documentType);
 
-      // Upload file to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${itineraryId}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('trip-documents')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('trip-documents')
-        .getPublicUrl(fileName);
-
-      // Create document record
-      const { data: document, error: insertError } = await supabase
-        .from('documents')
-        .insert({
-          itinerary_id: itineraryId,
-          user_id: user.id,
-          file_name: file.name,
-          file_type: file.type,
-          file_size: file.size,
-          file_url: publicUrl,
-          document_type: documentType,
-          ocr_status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Failed to upload document');
 
       toast.success('Document uploaded successfully');
       
-      // Update local state
-      setDocuments(prev => [document as Document, ...prev]);
+      const legacyDocument = fromApiDocument(data);
+      setDocuments(prev => [legacyDocument, ...prev]);
       
-      return document as Document;
+      return legacyDocument;
     } catch (error) {
       console.error('Error uploading document:', error);
       toast.error('Failed to upload document');
@@ -111,41 +98,18 @@ export function useDocuments(itineraryId?: string) {
     }
   }, []);
 
-  const processDocumentOCR = useCallback(async (documentId: string, file?: File): Promise<boolean> => {
+  const processDocumentOCR = useCallback(async (documentId: string, _file?: File): Promise<boolean> => {
     setIsProcessing(true);
     
     try {
-      const doc = documents.find(d => d.id === documentId);
-      if (!doc) throw new Error('Document not found');
+      const { data, error } = await api.processDocumentOCR(documentId);
 
-      let fileBase64: string | undefined;
-      
-      // Convert file to base64 if provided
-      if (file) {
-        fileBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
+      if (error) throw new Error(error);
 
-      const { data, error } = await supabase.functions.invoke('process-document-ocr', {
-        body: {
-          documentId,
-          fileUrl: doc.file_url,
-          documentType: doc.document_type,
-          fileBase64,
-        },
-      });
-
-      if (error) throw error;
-
-      // Refresh documents to get updated OCR data
-      await fetchDocuments();
-      
-      if (data.success) {
-        toast.success(`Document processed with ${data.confidence}% confidence`);
+      if (data) {
+        const legacyDocument = fromApiDocument(data);
+        setDocuments(prev => prev.map(d => d.id === documentId ? legacyDocument : d));
+        toast.success(`Document processed with ${data.ocrConfidence}% confidence`);
         return true;
       } else {
         toast.error('OCR processing failed');
@@ -158,26 +122,13 @@ export function useDocuments(itineraryId?: string) {
     } finally {
       setIsProcessing(false);
     }
-  }, [documents, fetchDocuments]);
+  }, []);
 
   const deleteDocument = useCallback(async (documentId: string): Promise<boolean> => {
     try {
-      const doc = documents.find(d => d.id === documentId);
-      if (!doc) throw new Error('Document not found');
+      const { error } = await api.deleteDocument(documentId);
 
-      // Delete from storage
-      const filePath = doc.file_url.split('/trip-documents/')[1];
-      if (filePath) {
-        await supabase.storage.from('trip-documents').remove([filePath]);
-      }
-
-      // Delete record
-      const { error } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', documentId);
-
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setDocuments(prev => prev.filter(d => d.id !== documentId));
       toast.success('Document deleted');
@@ -187,7 +138,7 @@ export function useDocuments(itineraryId?: string) {
       toast.error('Failed to delete document');
       return false;
     }
-  }, [documents]);
+  }, []);
 
   const getDocumentsByType = useCallback((type: Document['document_type']) => {
     return documents.filter(doc => doc.document_type === type);

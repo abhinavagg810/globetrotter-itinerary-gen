@@ -1,43 +1,16 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api, Itinerary, ItineraryDay, Activity, CreateItineraryRequest, CreateActivityRequest } from '@/services/api';
 import { toast } from 'sonner';
 
-export interface Itinerary {
-  id: string;
-  user_id: string;
-  name: string;
-  destinations: string[];
-  start_date: string;
-  end_date: string;
-  status: string;
-  travel_type: string | null;
-  image_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
+// Re-export types for backwards compatibility
+export type { Itinerary, Activity } from '@/services/api';
 
-export interface ItineraryDay {
-  id: string;
+export interface CreateDayParams {
   itinerary_id: string;
   day_number: number;
   date: string;
-  location: string | null;
-  notes: string | null;
-  created_at: string;
-}
-
-export interface Activity {
-  id: string;
-  itinerary_day_id: string;
-  title: string;
-  description: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  location: string | null;
-  category: string | null;
-  cost: number | null;
-  booking_status: string | null;
-  created_at: string;
+  location?: string;
+  notes?: string;
 }
 
 export interface CreateItineraryParams {
@@ -48,14 +21,6 @@ export interface CreateItineraryParams {
   status?: string;
   travel_type?: string;
   image_url?: string;
-}
-
-export interface CreateDayParams {
-  itinerary_id: string;
-  day_number: number;
-  date: string;
-  location?: string;
-  notes?: string;
 }
 
 export interface CreateActivityParams {
@@ -70,23 +35,120 @@ export interface CreateActivityParams {
   booking_status?: string;
 }
 
+// Convert snake_case to camelCase for API
+const toApiItinerary = (params: CreateItineraryParams): CreateItineraryRequest => ({
+  name: params.name,
+  destinations: params.destinations,
+  startDate: params.start_date,
+  endDate: params.end_date,
+  status: params.status,
+  travelType: params.travel_type,
+  imageUrl: params.image_url,
+});
+
+const toApiActivity = (params: CreateActivityParams): CreateActivityRequest => ({
+  itineraryDayId: params.itinerary_day_id,
+  title: params.title,
+  description: params.description,
+  startTime: params.start_time,
+  endTime: params.end_time,
+  location: params.location,
+  category: params.category,
+  cost: params.cost,
+  bookingStatus: params.booking_status,
+});
+
+// Convert camelCase from API to snake_case for frontend compatibility
+const fromApiItinerary = (itinerary: Itinerary) => ({
+  id: itinerary.id,
+  user_id: itinerary.userId,
+  name: itinerary.name,
+  destinations: itinerary.destinations,
+  start_date: itinerary.startDate,
+  end_date: itinerary.endDate,
+  status: itinerary.status,
+  travel_type: itinerary.travelType,
+  image_url: itinerary.imageUrl,
+  created_at: itinerary.createdAt,
+  updated_at: itinerary.updatedAt,
+});
+
+const fromApiDay = (day: ItineraryDay) => ({
+  id: day.id,
+  itinerary_id: day.itineraryId,
+  day_number: day.dayNumber,
+  date: day.date,
+  location: day.location,
+  notes: day.notes,
+  created_at: day.createdAt,
+});
+
+const fromApiActivity = (activity: Activity) => ({
+  id: activity.id,
+  itinerary_day_id: activity.itineraryDayId,
+  title: activity.title,
+  description: activity.description,
+  start_time: activity.startTime,
+  end_time: activity.endTime,
+  location: activity.location,
+  category: activity.category,
+  cost: activity.cost,
+  booking_status: activity.bookingStatus,
+  created_at: activity.createdAt,
+});
+
+export interface LegacyItinerary {
+  id: string;
+  user_id: string;
+  name: string;
+  destinations: string[];
+  start_date: string;
+  end_date: string;
+  status: string;
+  travel_type: string | null;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LegacyItineraryDay {
+  id: string;
+  itinerary_id: string;
+  day_number: number;
+  date: string;
+  location: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface LegacyActivity {
+  id: string;
+  itinerary_day_id: string;
+  title: string;
+  description: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  location: string | null;
+  category: string | null;
+  cost: number | null;
+  booking_status: string | null;
+  created_at: string;
+}
+
 export function useItineraries() {
-  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
-  const [currentItinerary, setCurrentItinerary] = useState<Itinerary | null>(null);
-  const [days, setDays] = useState<ItineraryDay[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [itineraries, setItineraries] = useState<LegacyItinerary[]>([]);
+  const [currentItinerary, setCurrentItinerary] = useState<LegacyItinerary | null>(null);
+  const [days, setDays] = useState<LegacyItineraryDay[]>([]);
+  const [activities, setActivities] = useState<LegacyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchItineraries = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('itineraries')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await api.getItineraries();
 
-      if (error) throw error;
-      setItineraries(data as Itinerary[]);
+      if (error) throw new Error(error);
+      setItineraries((data || []).map(fromApiItinerary));
     } catch (error) {
       console.error('Error fetching itineraries:', error);
       toast.error('Failed to load itineraries');
@@ -98,40 +160,26 @@ export function useItineraries() {
   const fetchItinerary = useCallback(async (itineraryId: string) => {
     setIsLoading(true);
     try {
-      // Fetch itinerary
-      const { data: itinerary, error: itineraryError } = await supabase
-        .from('itineraries')
-        .select('*')
-        .eq('id', itineraryId)
-        .single();
+      const { data, error } = await api.getItinerary(itineraryId);
 
-      if (itineraryError) throw itineraryError;
-      setCurrentItinerary(itinerary as Itinerary);
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Itinerary not found');
+      
+      const legacyItinerary = fromApiItinerary(data.itinerary);
+      setCurrentItinerary(legacyItinerary);
 
-      // Fetch days
-      const { data: daysData, error: daysError } = await supabase
-        .from('itinerary_days')
-        .select('*')
-        .eq('itinerary_id', itineraryId)
-        .order('day_number', { ascending: true });
+      const legacyDays = data.days.map(fromApiDay);
+      setDays(legacyDays);
 
-      if (daysError) throw daysError;
-      setDays(daysData as ItineraryDay[]);
+      const allActivities: LegacyActivity[] = [];
+      data.days.forEach(day => {
+        day.activities.forEach(activity => {
+          allActivities.push(fromApiActivity(activity));
+        });
+      });
+      setActivities(allActivities);
 
-      // Fetch activities for all days
-      if (daysData && daysData.length > 0) {
-        const dayIds = daysData.map(d => d.id);
-        const { data: activitiesData, error: activitiesError } = await supabase
-          .from('activities')
-          .select('*')
-          .in('itinerary_day_id', dayIds)
-          .order('start_time', { ascending: true });
-
-        if (activitiesError) throw activitiesError;
-        setActivities(activitiesData as Activity[]);
-      }
-
-      return itinerary as Itinerary;
+      return legacyItinerary;
     } catch (error) {
       console.error('Error fetching itinerary:', error);
       toast.error('Failed to load itinerary');
@@ -141,31 +189,17 @@ export function useItineraries() {
     }
   }, []);
 
-  const createItinerary = useCallback(async (params: CreateItineraryParams): Promise<Itinerary | null> => {
+  const createItinerary = useCallback(async (params: CreateItineraryParams): Promise<LegacyItinerary | null> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await api.createItinerary(toApiItinerary(params));
 
-      const { data, error } = await supabase
-        .from('itineraries')
-        .insert({
-          user_id: user.id,
-          name: params.name,
-          destinations: params.destinations,
-          start_date: params.start_date,
-          end_date: params.end_date,
-          status: params.status || 'planning',
-          travel_type: params.travel_type,
-          image_url: params.image_url,
-        })
-        .select()
-        .single();
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Failed to create itinerary');
 
-      if (error) throw error;
-
-      setItineraries(prev => [data as Itinerary, ...prev]);
+      const legacyItinerary = fromApiItinerary(data);
+      setItineraries(prev => [legacyItinerary, ...prev]);
       toast.success('Trip created successfully');
-      return data as Itinerary;
+      return legacyItinerary;
     } catch (error) {
       console.error('Error creating itinerary:', error);
       toast.error('Failed to create trip');
@@ -175,12 +209,18 @@ export function useItineraries() {
 
   const updateItinerary = useCallback(async (itineraryId: string, updates: Partial<CreateItineraryParams>): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('itineraries')
-        .update(updates)
-        .eq('id', itineraryId);
+      const apiUpdates: Partial<CreateItineraryRequest> = {};
+      if (updates.name) apiUpdates.name = updates.name;
+      if (updates.destinations) apiUpdates.destinations = updates.destinations;
+      if (updates.start_date) apiUpdates.startDate = updates.start_date;
+      if (updates.end_date) apiUpdates.endDate = updates.end_date;
+      if (updates.status) apiUpdates.status = updates.status;
+      if (updates.travel_type) apiUpdates.travelType = updates.travel_type;
+      if (updates.image_url) apiUpdates.imageUrl = updates.image_url;
 
-      if (error) throw error;
+      const { error } = await api.updateItinerary(itineraryId, apiUpdates);
+
+      if (error) throw new Error(error);
 
       setItineraries(prev => prev.map(i => 
         i.id === itineraryId ? { ...i, ...updates } : i
@@ -201,12 +241,9 @@ export function useItineraries() {
 
   const deleteItinerary = useCallback(async (itineraryId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('itineraries')
-        .delete()
-        .eq('id', itineraryId);
+      const { error } = await api.deleteItinerary(itineraryId);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setItineraries(prev => prev.filter(i => i.id !== itineraryId));
       toast.success('Trip deleted');
@@ -218,38 +255,24 @@ export function useItineraries() {
     }
   }, []);
 
-  const createDay = useCallback(async (params: CreateDayParams): Promise<ItineraryDay | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('itinerary_days')
-        .insert(params)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setDays(prev => [...prev, data as ItineraryDay].sort((a, b) => a.day_number - b.day_number));
-      return data as ItineraryDay;
-    } catch (error) {
-      console.error('Error creating day:', error);
-      toast.error('Failed to add day');
-      return null;
-    }
+  const createDay = useCallback(async (_params: CreateDayParams): Promise<LegacyItineraryDay | null> => {
+    // Days are typically created as part of itinerary generation
+    // This would need a dedicated endpoint in Spring Boot
+    toast.error('Day creation not yet implemented');
+    return null;
   }, []);
 
-  const createActivity = useCallback(async (params: CreateActivityParams): Promise<Activity | null> => {
+  const createActivity = useCallback(async (params: CreateActivityParams): Promise<LegacyActivity | null> => {
     try {
-      const { data, error } = await supabase
-        .from('activities')
-        .insert(params)
-        .select()
-        .single();
+      const { data, error } = await api.createActivity(toApiActivity(params));
 
-      if (error) throw error;
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Failed to create activity');
 
-      setActivities(prev => [...prev, data as Activity]);
+      const legacyActivity = fromApiActivity(data);
+      setActivities(prev => [...prev, legacyActivity]);
       toast.success('Activity added');
-      return data as Activity;
+      return legacyActivity;
     } catch (error) {
       console.error('Error creating activity:', error);
       toast.error('Failed to add activity');
@@ -259,12 +282,19 @@ export function useItineraries() {
 
   const updateActivity = useCallback(async (activityId: string, updates: Partial<CreateActivityParams>): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('activities')
-        .update(updates)
-        .eq('id', activityId);
+      const apiUpdates: Partial<CreateActivityRequest> = {};
+      if (updates.title) apiUpdates.title = updates.title;
+      if (updates.description) apiUpdates.description = updates.description;
+      if (updates.start_time) apiUpdates.startTime = updates.start_time;
+      if (updates.end_time) apiUpdates.endTime = updates.end_time;
+      if (updates.location) apiUpdates.location = updates.location;
+      if (updates.category) apiUpdates.category = updates.category;
+      if (updates.cost !== undefined) apiUpdates.cost = updates.cost;
+      if (updates.booking_status) apiUpdates.bookingStatus = updates.booking_status;
 
-      if (error) throw error;
+      const { error } = await api.updateActivity(activityId, apiUpdates);
+
+      if (error) throw new Error(error);
 
       setActivities(prev => prev.map(a => 
         a.id === activityId ? { ...a, ...updates } : a
@@ -279,12 +309,9 @@ export function useItineraries() {
 
   const deleteActivity = useCallback(async (activityId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('activities')
-        .delete()
-        .eq('id', activityId);
+      const { error } = await api.deleteActivity(activityId);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setActivities(prev => prev.filter(a => a.id !== activityId));
       toast.success('Activity deleted');

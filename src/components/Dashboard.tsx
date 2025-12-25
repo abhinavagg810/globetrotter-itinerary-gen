@@ -13,7 +13,7 @@ interface DashboardProps {
 export function Dashboard({ onCreateItinerary, onViewItineraries, onProfile }: DashboardProps) {
   const { user, signOut } = useAuth();
   
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Traveler';
+  const displayName = user?.fullName || user?.email?.split('@')[0] || 'Traveler';
   
   return (
     <div className="min-h-screen bg-background">
