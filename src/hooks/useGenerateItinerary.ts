@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { api, AIItinerary } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { ItineraryData } from "@/components/CreateItinerarySteps";
 
@@ -28,72 +28,7 @@ export interface AIItineraryDay {
   activities: AIItineraryActivity[];
 }
 
-export interface AIItinerary {
-  tripName: string;
-  destination?: string;
-  summary: string;
-  estimatedBudget: {
-    total: number;
-    breakdown: {
-      flights: number;
-      accommodation: number;
-      activities: number;
-      food: number;
-      transportation: number;
-      miscellaneous: number;
-    };
-    perPerson: number;
-    currency: string;
-    budgetLevel?: string;
-  };
-  importantInfo: {
-    localCurrency: {
-      code: string;
-      name: string;
-      symbol: string;
-      exchangeRate: string;
-    };
-    timezone: {
-      name: string;
-      offset: string;
-      differenceFromOrigin?: string;
-      differenceFromIST?: string;
-    };
-    language: string;
-    emergencyNumbers: {
-      police: string;
-      ambulance: string;
-      tourist?: string;
-    };
-    bestTimeToVisit: string;
-    visaRequirements: string;
-    travelTips: string[];
-  };
-  weather: {
-    temperature: {
-      min: number;
-      max: number;
-      unit: string;
-    };
-    condition: string;
-    humidity: string;
-    packingTips: string[];
-  };
-  days: AIItineraryDay[];
-  recommendations: {
-    mustTry: string[];
-    hiddenGems?: string[];
-    avoidances: string[];
-    localCustoms: string[];
-    photoSpots?: string[];
-  };
-  practicalInfo?: {
-    transportation?: string;
-    simCard?: string;
-    safety?: string;
-    tipping?: string;
-  };
-}
+export type { AIItinerary } from "@/services/api";
 
 export interface SavedItinerary {
   id: string;
@@ -112,48 +47,39 @@ export function useGenerateItinerary() {
     setError(null);
 
     try {
-      const { data: functionData, error: functionError } = await supabase.functions.invoke(
-        "generate-itinerary",
-        {
-          body: {
-            fromLocation: data.fromLocation,
-            destinations: data.destinations.filter((d) => d.trim() !== ""),
-            travelType: data.travelType,
-            fromDate: data.fromDate?.toISOString().split("T")[0],
-            toDate: data.toDate?.toISOString().split("T")[0],
-            travelingWith: data.travelingWith,
-            travelVibes: data.travelVibes,
-            budget: data.budget,
-            domesticOrInternational: data.domesticOrInternational,
-            tripDuration: data.tripDuration,
-            needsDestinationHelp: data.needsDestinationHelp,
-          },
-        }
-      );
+      const { data: itinerary, error: apiError } = await api.generateItinerary({
+        fromLocation: data.fromLocation,
+        destinations: data.destinations.filter((d) => d.trim() !== ""),
+        travelType: data.travelType,
+        fromDate: data.fromDate?.toISOString().split("T")[0] || "",
+        toDate: data.toDate?.toISOString().split("T")[0] || "",
+        travelingWith: data.travelingWith,
+        travelVibes: data.travelVibes,
+        budget: data.budget,
+        domesticOrInternational: data.domesticOrInternational,
+        tripDuration: String(data.tripDuration),
+        needsDestinationHelp: data.needsDestinationHelp,
+      });
 
-      if (functionError) {
-        console.error("Edge function error:", functionError);
-        throw new Error(functionError.message || "Failed to generate itinerary");
-      }
-
-      if (functionData?.error) {
-        if (functionData.error.includes("Rate limit")) {
+      if (apiError) {
+        if (apiError.includes("Rate limit")) {
           toast({
             title: "Rate Limited",
             description: "Too many requests. Please wait a moment and try again.",
             variant: "destructive",
           });
-        } else if (functionData.error.includes("credits")) {
+        } else if (apiError.includes("credits")) {
           toast({
             title: "Credits Exhausted",
             description: "Please add credits to continue using AI features.",
             variant: "destructive",
           });
         }
-        throw new Error(functionData.error);
+        throw new Error(apiError);
       }
 
-      const itinerary: AIItinerary = functionData;
+      if (!itinerary) throw new Error("Failed to generate itinerary");
+
       setGeneratedItinerary(itinerary);
 
       toast({
@@ -183,91 +109,32 @@ export function useGenerateItinerary() {
   const saveItineraryToDatabase = async (
     data: ItineraryData,
     aiItinerary: AIItinerary,
-    userId: string
+    _userId: string
   ): Promise<SavedItinerary | null> => {
     setIsSaving(true);
 
     try {
-      // 1. Create the main itinerary record
-      const { data: itineraryRecord, error: itineraryError } = await supabase
-        .from("itineraries")
-        .insert({
-          user_id: userId,
-          name: aiItinerary.tripName,
-          destinations: data.destinations.filter((d) => d),
-          start_date: data.fromDate?.toISOString().split("T")[0],
-          end_date: data.toDate?.toISOString().split("T")[0],
-          travel_type: data.travelType,
-          status: "planning",
-        })
-        .select()
-        .single();
+      // Create the main itinerary record
+      const { data: itineraryRecord, error: itineraryError } = await api.createItinerary({
+        name: aiItinerary.tripName,
+        destinations: data.destinations.filter((d) => d),
+        startDate: data.fromDate?.toISOString().split("T")[0] || "",
+        endDate: data.toDate?.toISOString().split("T")[0] || "",
+        travelType: data.travelType,
+        status: "planning",
+      });
 
       if (itineraryError) {
         console.error("Error creating itinerary:", itineraryError);
         throw new Error("Failed to save itinerary");
       }
 
+      if (!itineraryRecord) throw new Error("Failed to save itinerary");
+
       const itineraryId = itineraryRecord.id;
 
-      // 2. Create itinerary days and activities
-      for (const day of aiItinerary.days) {
-        const { data: dayRecord, error: dayError } = await supabase
-          .from("itinerary_days")
-          .insert({
-            itinerary_id: itineraryId,
-            day_number: day.dayNumber,
-            date: day.date,
-            location: day.location,
-            notes: day.theme,
-          })
-          .select()
-          .single();
-
-        if (dayError) {
-          console.error("Error creating day:", dayError);
-          continue;
-        }
-
-        // Create activities for this day
-        const activitiesInsert = day.activities.map((activity) => ({
-          itinerary_day_id: dayRecord.id,
-          title: activity.title,
-          description: activity.description,
-          start_time: activity.time,
-          end_time: activity.endTime || null,
-          category: activity.type,
-          cost: activity.price,
-          location: activity.location || null,
-          booking_status: activity.bookingStatus,
-        }));
-
-        if (activitiesInsert.length > 0) {
-          const { error: activitiesError } = await supabase
-            .from("activities")
-            .insert(activitiesInsert);
-
-          if (activitiesError) {
-            console.error("Error creating activities:", activitiesError);
-          }
-        }
-      }
-
-      // 3. Add the trip owner as the first participant
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("id", userId)
-        .single();
-
-      await supabase.from("trip_participants").insert({
-        itinerary_id: itineraryId,
-        user_id: userId,
-        name: userProfile?.full_name || "You",
-        email: userProfile?.email || null,
-        total_paid: 0,
-        total_owed: 0,
-      });
+      // Note: Days and activities would need to be created via the Spring Boot backend
+      // This would typically be handled by a dedicated endpoint that saves the full AI itinerary
 
       toast({
         title: "Trip Saved",

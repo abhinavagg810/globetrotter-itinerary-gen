@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api, Participant as ApiParticipant, Settlement as ApiSettlement } from '@/services/api';
 import { toast } from 'sonner';
 
 export interface TripParticipant {
@@ -42,6 +42,31 @@ export interface CreateSettlementParams {
   notes?: string;
 }
 
+// Convert API response to legacy format
+const fromApiParticipant = (p: ApiParticipant): TripParticipant => ({
+  id: p.id,
+  itinerary_id: p.itineraryId,
+  user_id: p.userId,
+  name: p.name,
+  email: p.email,
+  avatar_url: p.avatarUrl,
+  total_paid: p.totalPaid,
+  total_owed: p.totalOwed,
+  created_at: p.createdAt,
+});
+
+const fromApiSettlement = (s: ApiSettlement): Settlement => ({
+  id: s.id,
+  itinerary_id: s.itineraryId,
+  from_participant_id: s.fromParticipantId,
+  to_participant_id: s.toParticipantId,
+  amount: s.amount,
+  currency: s.currency,
+  settled_at: s.settledAt,
+  notes: s.notes,
+  created_at: s.createdAt,
+});
+
 export function useTripParticipants(itineraryId?: string) {
   const [participants, setParticipants] = useState<TripParticipant[]>([]);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
@@ -52,24 +77,12 @@ export function useTripParticipants(itineraryId?: string) {
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('trip_participants')
-        .select('*')
-        .eq('itinerary_id', itineraryId)
-        .order('created_at', { ascending: true });
+      const { data, error } = await api.getParticipants(itineraryId);
 
-      if (error) throw error;
-      setParticipants(data as TripParticipant[]);
-
-      // Fetch settlements
-      const { data: settlementsData, error: settlementsError } = await supabase
-        .from('settlements')
-        .select('*')
-        .eq('itinerary_id', itineraryId)
-        .order('settled_at', { ascending: false });
-
-      if (settlementsError) throw settlementsError;
-      setSettlements(settlementsData as Settlement[]);
+      if (error) throw new Error(error);
+      
+      setParticipants((data?.participants || []).map(fromApiParticipant));
+      setSettlements((data?.settlements || []).map(fromApiSettlement));
     } catch (error) {
       console.error('Error fetching participants:', error);
       toast.error('Failed to load trip participants');
@@ -80,24 +93,20 @@ export function useTripParticipants(itineraryId?: string) {
 
   const addParticipant = useCallback(async (params: CreateParticipantParams): Promise<TripParticipant | null> => {
     try {
-      const { data, error } = await supabase
-        .from('trip_participants')
-        .insert({
-          itinerary_id: params.itinerary_id,
-          name: params.name,
-          email: params.email,
-          user_id: params.user_id,
-          total_paid: 0,
-          total_owed: 0,
-        })
-        .select()
-        .single();
+      const { data, error } = await api.addParticipant({
+        itineraryId: params.itinerary_id,
+        name: params.name,
+        email: params.email,
+        userId: params.user_id,
+      });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Failed to add participant');
 
-      setParticipants(prev => [...prev, data as TripParticipant]);
+      const legacyParticipant = fromApiParticipant(data);
+      setParticipants(prev => [...prev, legacyParticipant]);
       toast.success(`${params.name} added to the trip`);
-      return data as TripParticipant;
+      return legacyParticipant;
     } catch (error) {
       console.error('Error adding participant:', error);
       toast.error('Failed to add participant');
@@ -109,12 +118,9 @@ export function useTripParticipants(itineraryId?: string) {
     try {
       const participant = participants.find(p => p.id === participantId);
       
-      const { error } = await supabase
-        .from('trip_participants')
-        .delete()
-        .eq('id', participantId);
+      const { error } = await api.removeParticipant(participantId);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setParticipants(prev => prev.filter(p => p.id !== participantId));
       toast.success(`${participant?.name || 'Participant'} removed from the trip`);
@@ -132,12 +138,12 @@ export function useTripParticipants(itineraryId?: string) {
     totalOwed: number
   ): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('trip_participants')
-        .update({ total_paid: totalPaid, total_owed: totalOwed })
-        .eq('id', participantId);
+      const { error } = await api.updateParticipant(participantId, {
+        totalPaid,
+        totalOwed,
+      } as Parameters<typeof api.updateParticipant>[1]);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setParticipants(prev => prev.map(p => 
         p.id === participantId ? { ...p, total_paid: totalPaid, total_owed: totalOwed } : p
@@ -151,24 +157,22 @@ export function useTripParticipants(itineraryId?: string) {
 
   const createSettlement = useCallback(async (params: CreateSettlementParams): Promise<Settlement | null> => {
     try {
-      const { data, error } = await supabase
-        .from('settlements')
-        .insert({
-          itinerary_id: params.itinerary_id,
-          from_participant_id: params.from_participant_id,
-          to_participant_id: params.to_participant_id,
-          amount: params.amount,
-          currency: params.currency || 'USD',
-          notes: params.notes,
-        })
-        .select()
-        .single();
+      const { data, error } = await api.createSettlement({
+        itineraryId: params.itinerary_id,
+        fromParticipantId: params.from_participant_id,
+        toParticipantId: params.to_participant_id,
+        amount: params.amount,
+        currency: params.currency || 'USD',
+        notes: params.notes,
+      });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Failed to create settlement');
 
-      setSettlements(prev => [data as Settlement, ...prev]);
+      const legacySettlement = fromApiSettlement(data);
+      setSettlements(prev => [legacySettlement, ...prev]);
       toast.success('Settlement recorded');
-      return data as Settlement;
+      return legacySettlement;
     } catch (error) {
       console.error('Error creating settlement:', error);
       toast.error('Failed to record settlement');

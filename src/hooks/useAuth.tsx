@@ -1,125 +1,129 @@
-import { useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
+import { api, User } from '@/services/api';
 import { toast } from 'sonner';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('access_token');
+    
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+      // Verify token is still valid
+      api.getCurrentUser().then(({ data, error }) => {
+        if (error) {
+          api.clearAuthTokens();
+          setUser(null);
+        } else if (data) {
+          setUser(data);
+          localStorage.setItem('user', JSON.stringify(data));
+        }
+        setLoading(false);
+      });
+    } else {
       setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-        }
-      });
-      
+      const { data, error } = await api.register(email, password, fullName);
+
       if (error) {
-        toast.error('Failed to sign in with Google: ' + error.message);
+        toast.error(error);
         return { error };
+      }
+
+      if (data) {
+        setUser(data.user);
+        toast.success('Account created successfully!');
       }
       
       return { error: null };
-    } catch (error: any) {
-      toast.error('An unexpected error occurred');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
       return { error };
     }
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const { data, error } = await api.login(email, password);
+
+      if (error) {
+        toast.error(error);
+        return { error };
+      }
+
+      if (data) {
+        setUser(data.user);
+        toast.success('Signed in successfully!');
+      }
       
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName,
-          }
-        }
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return { error };
-      }
-
-      toast.success('Account created successfully!');
       return { error: null };
-    } catch (error: any) {
-      toast.error('An unexpected error occurred');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
       return { error };
     }
-  };
+  }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signInWithGoogle = useCallback(async () => {
+    // Google OAuth would need to be implemented on the Spring Boot side
+    // For now, show a message that this feature requires backend setup
+    toast.error('Google sign-in requires backend OAuth configuration');
+    return { error: new Error('Not implemented') };
+  }, []);
+
+  const signOut = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return { error };
-      }
-
-      toast.success('Signed in successfully!');
-      return { error: null };
-    } catch (error: any) {
-      toast.error('An unexpected error occurred');
-      return { error };
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error(error.message);
-        return { error };
-      }
+      api.clearAuthTokens();
+      setUser(null);
       toast.success('Signed out successfully');
       return { error: null };
-    } catch (error: any) {
-      toast.error('An unexpected error occurred');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
       return { error };
     }
-  };
+  }, []);
+
+  const updateProfile = useCallback(async (fullName: string, avatarUrl?: string) => {
+    try {
+      const { data, error } = await api.updateProfile(fullName, avatarUrl);
+
+      if (error) {
+        toast.error(error);
+        return { error };
+      }
+
+      if (data) {
+        setUser(data);
+        localStorage.setItem('user', JSON.stringify(data));
+        toast.success('Profile updated successfully');
+      }
+      
+      return { error: null, data };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
+      return { error };
+    }
+  }, []);
 
   return {
     user,
-    session,
+    session: user ? { user } : null, // Compatibility layer
     loading,
     signInWithGoogle,
     signUp,
     signIn,
     signOut,
+    updateProfile,
   };
 }

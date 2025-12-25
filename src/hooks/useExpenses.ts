@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api, Expense as ApiExpense, ExpenseSplit as ApiExpenseSplit } from '@/services/api';
 import { toast } from 'sonner';
 
 export interface Expense {
@@ -41,6 +41,29 @@ export interface CreateExpenseSplitParams {
   amount: number;
 }
 
+// Convert API response to legacy format
+const fromApiExpense = (expense: ApiExpense): Expense => ({
+  id: expense.id,
+  itinerary_id: expense.itineraryId,
+  paid_by_participant_id: expense.paidByParticipantId,
+  amount: expense.amount,
+  currency: expense.currency,
+  category: expense.category,
+  description: expense.description,
+  date: expense.date,
+  split_type: expense.splitType,
+  receipt_url: expense.receiptUrl,
+  created_at: expense.createdAt,
+});
+
+const fromApiExpenseSplit = (split: ApiExpenseSplit): ExpenseSplit => ({
+  id: split.id,
+  expense_id: split.expenseId,
+  participant_id: split.participantId,
+  amount: split.amount,
+  created_at: split.createdAt,
+});
+
 export function useExpenses(itineraryId?: string) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [expenseSplits, setExpenseSplits] = useState<ExpenseSplit[]>([]);
@@ -51,26 +74,21 @@ export function useExpenses(itineraryId?: string) {
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('itinerary_id', itineraryId)
-        .order('date', { ascending: false });
+      const { data, error } = await api.getExpenses(itineraryId);
 
-      if (error) throw error;
-      setExpenses(data as Expense[]);
+      if (error) throw new Error(error);
+      
+      const legacyExpenses = (data?.expenses || []).map(fromApiExpense);
+      setExpenses(legacyExpenses);
 
-      // Fetch all expense splits for these expenses
-      if (data && data.length > 0) {
-        const expenseIds = data.map(e => e.id);
-        const { data: splits, error: splitsError } = await supabase
-          .from('expense_splits')
-          .select('*')
-          .in('expense_id', expenseIds);
-
-        if (splitsError) throw splitsError;
-        setExpenseSplits(splits as ExpenseSplit[]);
-      }
+      // Extract splits from expenses
+      const allSplits: ExpenseSplit[] = [];
+      (data?.expenses || []).forEach(expense => {
+        expense.splits.forEach(split => {
+          allSplits.push(fromApiExpenseSplit(split));
+        });
+      });
+      setExpenseSplits(allSplits);
     } catch (error) {
       console.error('Error fetching expenses:', error);
       toast.error('Failed to load expenses');
@@ -81,26 +99,24 @@ export function useExpenses(itineraryId?: string) {
 
   const createExpense = useCallback(async (params: CreateExpenseParams): Promise<Expense | null> => {
     try {
-      const { data, error } = await supabase
-        .from('expenses')
-        .insert({
-          itinerary_id: params.itinerary_id,
-          paid_by_participant_id: params.paid_by_participant_id,
-          amount: params.amount,
-          currency: params.currency,
-          category: params.category,
-          description: params.description,
-          date: params.date,
-          split_type: params.split_type || 'equal',
-        })
-        .select()
-        .single();
+      const { data, error } = await api.createExpense({
+        itineraryId: params.itinerary_id,
+        paidByParticipantId: params.paid_by_participant_id,
+        amount: params.amount,
+        currency: params.currency,
+        category: params.category,
+        description: params.description,
+        date: params.date,
+        splitType: params.split_type || 'equal',
+      });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
+      if (!data) throw new Error('Failed to create expense');
 
-      setExpenses(prev => [data as Expense, ...prev]);
+      const legacyExpense = fromApiExpense(data);
+      setExpenses(prev => [legacyExpense, ...prev]);
       toast.success('Expense added');
-      return data as Expense;
+      return legacyExpense;
     } catch (error) {
       console.error('Error creating expense:', error);
       toast.error('Failed to add expense');
@@ -110,12 +126,17 @@ export function useExpenses(itineraryId?: string) {
 
   const updateExpense = useCallback(async (expenseId: string, updates: Partial<CreateExpenseParams>): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('expenses')
-        .update(updates)
-        .eq('id', expenseId);
+      const apiUpdates: Record<string, unknown> = {};
+      if (updates.amount !== undefined) apiUpdates.amount = updates.amount;
+      if (updates.currency) apiUpdates.currency = updates.currency;
+      if (updates.category) apiUpdates.category = updates.category;
+      if (updates.description) apiUpdates.description = updates.description;
+      if (updates.date) apiUpdates.date = updates.date;
+      if (updates.split_type) apiUpdates.splitType = updates.split_type;
 
-      if (error) throw error;
+      const { error } = await api.updateExpense(expenseId, apiUpdates as Parameters<typeof api.updateExpense>[1]);
+
+      if (error) throw new Error(error);
 
       setExpenses(prev => prev.map(e => 
         e.id === expenseId ? { ...e, ...updates } : e
@@ -131,12 +152,9 @@ export function useExpenses(itineraryId?: string) {
 
   const deleteExpense = useCallback(async (expenseId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('expenses')
-        .delete()
-        .eq('id', expenseId);
+      const { error } = await api.deleteExpense(expenseId);
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setExpenses(prev => prev.filter(e => e.id !== expenseId));
       setExpenseSplits(prev => prev.filter(s => s.expense_id !== expenseId));
@@ -151,26 +169,32 @@ export function useExpenses(itineraryId?: string) {
 
   const createExpenseSplits = useCallback(async (splits: CreateExpenseSplitParams[]): Promise<boolean> => {
     try {
-      // Delete existing splits for this expense
-      if (splits.length > 0) {
-        await supabase
-          .from('expense_splits')
-          .delete()
-          .eq('expense_id', splits[0].expense_id);
-      }
+      // Splits are created as part of expense creation in Spring Boot
+      // For now, we need to update the expense with splits
+      if (splits.length === 0) return true;
+      
+      const expenseId = splits[0].expense_id;
+      const { error } = await api.updateExpense(expenseId, {
+        splits: splits.map(s => ({
+          participantId: s.participant_id,
+          amount: s.amount,
+        })),
+      } as Parameters<typeof api.updateExpense>[1]);
 
-      const { data, error } = await supabase
-        .from('expense_splits')
-        .insert(splits)
-        .select();
-
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       // Update local state
-      const expenseId = splits[0]?.expense_id;
+      const newSplits: ExpenseSplit[] = splits.map((s, index) => ({
+        id: `temp-${index}`,
+        expense_id: s.expense_id,
+        participant_id: s.participant_id,
+        amount: s.amount,
+        created_at: new Date().toISOString(),
+      }));
+
       setExpenseSplits(prev => [
         ...prev.filter(s => s.expense_id !== expenseId),
-        ...(data as ExpenseSplit[])
+        ...newSplits
       ]);
       
       toast.success('Expense split saved');
