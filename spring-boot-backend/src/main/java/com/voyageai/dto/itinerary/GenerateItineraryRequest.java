@@ -28,4 +28,7 @@ public class GenerateItineraryRequest {
     private String travelType;
     private String preferences;
     private String budget;
+    private List<String> travelVibes;
+    private String travelingWith;
+    private String accommodationType;
 }
