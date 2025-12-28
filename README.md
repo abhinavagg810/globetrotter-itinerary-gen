@@ -1,73 +1,54 @@
-# Welcome to your Lovable project
+🌍 **About the Project – Travel Globe AI**
+Travel Globe AI is an open, AI-powered travel planning application built to explore how generative AI can simplify and improve real-world trip planning.
+The goal of this project is to create a simple, extensible, and collaborative travel planner that helps users generate personalized itineraries, manage trip details, and collaborate with fellow travelers—all in one place.
+This repository is open for learning, experimentation, and contributions. Whether you’re interested in frontend development, AI-driven UX, or building consumer-grade products, you’re welcome to explore, fork, and improve the project.
 
-## Project info
+🎯 **Project Goals**
+•	Make travel planning faster and less overwhelming
+•	Experiment with AI-generated, user-personalized itineraries
+•	Build a clean, intuitive UI with strong product thinking
+•	Keep the codebase easy to understand, extend, and contribute to
+•	Demonstrate how AI-first consumer applications can be built using modern tooling
 
-**URL**: https://lovable.dev/projects/238b5701-37da-44e5-bdf9-48cb78e23eeb
+**✨ Current Features**
+•	AI-Based Itinerary Generation
+o	Day-wise travel plans based on destination, duration, and preferences
+o	Smart suggestions for attractions, activities, and food
+•	Trip Collaboration
+o	Share trips with friends or co-travelers
+o	View and collaboratively update itineraries
+•	Travel Information Hub
+o	Central place for trip details, bookings, and notes
+o	Designed to support document uploads and OCR extraction
+•	Expense Tracking (Early Stage)
+o	Track shared expenses during trips
+o	Foundation for bill-splitting workflows
+•	AI-First Product Approach
+o	AI is a core capability, not an afterthought
+o	Built for fast iteration and experimentation
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/238b5701-37da-44e5-bdf9-48cb78e23eeb) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+**🧱 Project Structure & Philosophy**
+•	Modular, component-based frontend architecture
+•	Clear separation between UI, logic, and configuration
+•	Designed to support future backend and AI integrations
+•	Optimized for readability, learning, and iteration
+This project intentionally prioritizes clarity over complexity, making it friendly for new contributors.
+🧑‍💻 Running the Project Locally
+You can run this project locally using your preferred IDE.
+Prerequisites
+•	Node.js (recommended via nvm)
+•	npm
+Install Node.js using nvm:
+https://github.com/nvm-sh/nvm#installing-and-updating
+**Steps to Run Locally**
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
+# Step 2: Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 3: Install dependencies
+npm install
+# Step 4: Start the development server
 npm run dev
-```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/238b5701-37da-44e5-bdf9-48cb78e23eeb) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Once the server starts, you’ll get a local URL (usually http://localhost:5173) with hot reload enabled.
+Any changes you make will reflect instantly in the browser.
