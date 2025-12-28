@@ -2,7 +2,10 @@ package com.voyageai.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.voyageai.dto.ai.*;
+import com.voyageai.dto.itinerary.GenerateItineraryRequest;
+import com.voyageai.dto.itinerary.GeneratedItineraryDTO;
+import com.voyageai.dto.itinerary.RegenerateDayRequest;
+import com.voyageai.dto.itinerary.RegeneratedDayDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -130,6 +133,8 @@ public class AIService {
     }
 
     private String buildUserPrompt(GenerateItineraryRequest request) {
+        String travelVibes = request.getTravelVibes() != null ? String.join(", ", request.getTravelVibes()) : "Not specified";
+        
         return String.format("""
             Create a travel itinerary with the following details:
             
@@ -137,14 +142,20 @@ public class AIService {
             Start Date: %s
             End Date: %s
             Travel Type: %s
-            Budget: %s %s
-            Interests: %s
-            Accommodation Preference: %s
-            Pace: %s
+            Budget: %s
+            Preferences: %s
+            Travel Vibes: %s
+            Traveling With: %s
+            Accommodation Type: %s
             
             Return a JSON object with this structure:
             {
-              "tripName": "string",
+              "name": "string",
+              "destinations": ["string"],
+              "startDate": "YYYY-MM-DD",
+              "endDate": "YYYY-MM-DD",
+              "travelType": "string",
+              "imageUrl": "string or null",
               "days": [
                 {
                   "dayNumber": number,
@@ -169,21 +180,26 @@ public class AIService {
                 String.join(", ", request.getDestinations()),
                 request.getStartDate(),
                 request.getEndDate(),
-                request.getTravelType(),
-                request.getBudget(),
-                request.getCurrency(),
-                String.join(", ", request.getInterests()),
-                request.getAccommodationPreference(),
-                request.getPace()
+                request.getTravelType() != null ? request.getTravelType() : "Not specified",
+                request.getBudget() != null ? request.getBudget() : "Not specified",
+                request.getPreferences() != null ? request.getPreferences() : "Not specified",
+                travelVibes,
+                request.getTravelingWith() != null ? request.getTravelingWith() : "Not specified",
+                request.getAccommodationType() != null ? request.getAccommodationType() : "Not specified"
         );
     }
 
     private String buildRegenerateDayPrompt(RegenerateDayRequest request) {
+        String travelVibes = request.getTravelVibes() != null ? String.join(", ", request.getTravelVibes()) : "Not specified";
+        
         return String.format("""
             Regenerate activities for Day %d at %s.
             
-            Current activities:
-            %s
+            Destination: %s
+            Travel Vibes: %s
+            Traveling With: %s
+            Focus: %s
+            Preferences: %s
             
             User feedback/change request:
             %s
@@ -209,12 +225,16 @@ public class AIService {
             }
             """,
                 request.getDayNumber(),
-                request.getLocation(),
-                request.getCurrentActivities(),
-                request.getChangeRequest(),
+                request.getLocation() != null ? request.getLocation() : "Not specified",
+                request.getDestination() != null ? request.getDestination() : "Not specified",
+                travelVibes,
+                request.getTravelingWith() != null ? request.getTravelingWith() : "Not specified",
+                request.getFocus() != null ? request.getFocus() : "Not specified",
+                request.getPreferences() != null ? request.getPreferences() : "Not specified",
+                request.getChangeRequest() != null ? request.getChangeRequest() : "No specific changes requested",
                 request.getDayNumber(),
                 request.getDate(),
-                request.getLocation()
+                request.getLocation() != null ? request.getLocation() : ""
         );
     }
 }
