@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,9 +14,17 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RegenerateDayRequest {
     
-    @NotNull(message = "Day ID is required")
-    private UUID dayId;
+    @NotNull(message = "Day number is required")
+    private Integer dayNumber;
     
+    @NotNull(message = "Date is required")
+    private String date;
+    
+    private String location;
+    private String changeRequest;
+    private String destination;
+    private List<String> travelVibes;
+    private String travelingWith;
     private String preferences;
     private String focus;
 }
