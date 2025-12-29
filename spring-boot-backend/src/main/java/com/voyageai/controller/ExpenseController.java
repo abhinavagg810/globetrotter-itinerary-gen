@@ -30,7 +30,7 @@ public class ExpenseController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID itineraryId
     ) {
-        return ResponseEntity.ok(expenseService.getExpensesByItinerary(user, itineraryId));
+        return ResponseEntity.ok(expenseService.getExpensesByItinerary(itineraryId, user));
     }
 
     @GetMapping("/{id}")
@@ -39,16 +39,17 @@ public class ExpenseController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok(expenseService.getExpense(user, id));
+        return ResponseEntity.ok(expenseService.getExpense(id, user));
     }
 
-    @PostMapping
+    @PostMapping("/itinerary/{itineraryId}")
     @Operation(summary = "Create a new expense")
     public ResponseEntity<ExpenseDTO> createExpense(
             @AuthenticationPrincipal User user,
+            @PathVariable UUID itineraryId,
             @Valid @RequestBody CreateExpenseRequest request
     ) {
-        return ResponseEntity.ok(expenseService.createExpense(user, request));
+        return ResponseEntity.ok(expenseService.createExpense(itineraryId, request, user));
     }
 
     @PutMapping("/{id}")
@@ -56,9 +57,9 @@ public class ExpenseController {
     public ResponseEntity<ExpenseDTO> updateExpense(
             @AuthenticationPrincipal User user,
             @PathVariable UUID id,
-            @Valid @RequestBody CreateExpenseRequest request
+            @Valid @RequestBody UpdateExpenseRequest request
     ) {
-        return ResponseEntity.ok(expenseService.updateExpense(user, id, request));
+        return ResponseEntity.ok(expenseService.updateExpense(id, request, user));
     }
 
     @DeleteMapping("/{id}")
@@ -67,7 +68,7 @@ public class ExpenseController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        expenseService.deleteExpense(user, id);
+        expenseService.deleteExpense(id, user);
         return ResponseEntity.noContent().build();
     }
 
@@ -77,16 +78,17 @@ public class ExpenseController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID itineraryId
     ) {
-        return ResponseEntity.ok(expenseService.getSettlements(user, itineraryId));
+        return ResponseEntity.ok(expenseService.getSettlements(itineraryId, user));
     }
 
-    @PostMapping("/settlements")
+    @PostMapping("/itinerary/{itineraryId}/settlements")
     @Operation(summary = "Create a settlement")
     public ResponseEntity<SettlementDTO> createSettlement(
             @AuthenticationPrincipal User user,
+            @PathVariable UUID itineraryId,
             @Valid @RequestBody CreateSettlementRequest request
     ) {
-        return ResponseEntity.ok(expenseService.createSettlement(user, request));
+        return ResponseEntity.ok(expenseService.createSettlement(itineraryId, request, user));
     }
 
     @DeleteMapping("/settlements/{id}")
@@ -95,7 +97,7 @@ public class ExpenseController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        expenseService.deleteSettlement(user, id);
+        expenseService.deleteSettlement(id, user);
         return ResponseEntity.noContent().build();
     }
 
@@ -105,6 +107,15 @@ public class ExpenseController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID itineraryId
     ) {
-        return ResponseEntity.ok(expenseService.calculateBalances(user, itineraryId));
+        return ResponseEntity.ok(expenseService.calculateBalances(itineraryId, user));
+    }
+
+    @GetMapping("/itinerary/{itineraryId}/summary")
+    @Operation(summary = "Get expense summary for an itinerary")
+    public ResponseEntity<ExpenseSummaryDTO> getExpenseSummary(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID itineraryId
+    ) {
+        return ResponseEntity.ok(expenseService.getExpenseSummary(itineraryId, user));
     }
 }
