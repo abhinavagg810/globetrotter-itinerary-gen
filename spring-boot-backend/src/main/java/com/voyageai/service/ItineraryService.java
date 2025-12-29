@@ -110,40 +110,43 @@ public class ItineraryService {
 
         Itinerary itinerary = Itinerary.builder()
                 .user(user)
-                .name(request.getTripName())
+                .name(request.getName())
                 .destinations(request.getDestinations().toArray(new String[0]))
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .travelType(request.getTravelType())
+                .imageUrl(request.getImageUrl())
                 .status("planning")
                 .build();
 
         itinerary = itineraryRepository.save(itinerary);
 
-        // Save days and activities
-        for (GeneratedDayDTO dayDTO : request.getDays()) {
+        // Save days and activities from the days field
+        for (GeneratedItineraryDTO.GeneratedDayDTO dayDTO : request.getDays()) {
             ItineraryDay day = ItineraryDay.builder()
                     .itinerary(itinerary)
                     .dayNumber(dayDTO.getDayNumber())
-                    .date(dayDTO.getDate())
+                    .date(java.time.LocalDate.parse(dayDTO.getDate()))
                     .location(dayDTO.getLocation())
                     .notes(dayDTO.getNotes())
                     .build();
 
             day = itineraryDayRepository.save(day);
 
-            for (GeneratedActivityDTO actDTO : dayDTO.getActivities()) {
-                Activity activity = Activity.builder()
-                        .itineraryDay(day)
-                        .title(actDTO.getTitle())
-                        .description(actDTO.getDescription())
-                        .location(actDTO.getLocation())
-                        .category(actDTO.getCategory())
-                        .startTime(actDTO.getStartTime())
-                        .endTime(actDTO.getEndTime())
-                        .cost(actDTO.getCost())
-                        .build();
-                activityRepository.save(activity);
+            if (dayDTO.getActivities() != null) {
+                for (GeneratedItineraryDTO.GeneratedActivityDTO actDTO : dayDTO.getActivities()) {
+                    Activity activity = Activity.builder()
+                            .itineraryDay(day)
+                            .title(actDTO.getTitle())
+                            .description(actDTO.getDescription())
+                            .location(actDTO.getLocation())
+                            .category(actDTO.getCategory())
+                            .startTime(actDTO.getStartTime() != null ? java.time.LocalTime.parse(actDTO.getStartTime()) : null)
+                            .endTime(actDTO.getEndTime() != null ? java.time.LocalTime.parse(actDTO.getEndTime()) : null)
+                            .cost(actDTO.getCost() != null ? java.math.BigDecimal.valueOf(actDTO.getCost()) : null)
+                            .build();
+                    activityRepository.save(activity);
+                }
             }
         }
 
