@@ -31,6 +31,8 @@ public class SaveGeneratedItineraryRequest {
     private String travelType;
     private String imageUrl;
     
-    @NotNull(message = "Generated itinerary data is required")
+    @NotNull(message = "Days are required")
+    private List<GeneratedItineraryDTO.GeneratedDayDTO> days;
+    
     private GeneratedItineraryDTO generatedItinerary;
 }
