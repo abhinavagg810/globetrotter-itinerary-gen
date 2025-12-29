@@ -26,12 +26,20 @@ public class ExpenseService {
     private final TripParticipantRepository participantRepository;
     private final SettlementRepository settlementRepository;
 
-    public List<ExpenseDTO> getExpenses(UUID itineraryId, User user) {
+    public List<ExpenseDTO> getExpensesByItinerary(UUID itineraryId, User user) {
         validateAccess(itineraryId, user);
         return expenseRepository.findByItineraryIdOrderByDateDesc(itineraryId)
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public ExpenseDTO getExpense(UUID expenseId, User user) {
+        Expense expense = expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+        
+        validateAccess(expense.getItinerary().getId(), user);
+        return mapToDTO(expense);
     }
 
     @Transactional
@@ -53,6 +61,7 @@ public class ExpenseService {
                 .description(request.getDescription())
                 .date(request.getDate())
                 .splitType(request.getSplitType())
+                .receiptUrl(request.getReceiptUrl())
                 .build();
 
         expense = expenseRepository.save(expense);
@@ -63,7 +72,7 @@ public class ExpenseService {
 
         // Create splits
         if (request.getSplits() != null && !request.getSplits().isEmpty()) {
-            for (CreateExpenseSplitRequest splitReq : request.getSplits()) {
+            for (ExpenseSplitRequest splitReq : request.getSplits()) {
                 TripParticipant participant = participantRepository.findById(splitReq.getParticipantId())
                         .orElseThrow(() -> new ResourceNotFoundException("Participant not found"));
 
@@ -108,6 +117,28 @@ public class ExpenseService {
         
         validateOwnerAccess(expense.getItinerary().getId(), user);
 
+        // Revert old payer's total paid if payer is changing
+        TripParticipant oldPaidBy = expense.getPaidByParticipant();
+        BigDecimal oldAmount = expense.getAmount();
+
+        if (request.getPaidByParticipantId() != null && !request.getPaidByParticipantId().equals(oldPaidBy.getId())) {
+            // Revert old payer
+            oldPaidBy.setTotalPaid(oldPaidBy.getTotalPaid().subtract(oldAmount));
+            participantRepository.save(oldPaidBy);
+
+            // Set new payer
+            TripParticipant newPaidBy = participantRepository.findById(request.getPaidByParticipantId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Participant not found"));
+            expense.setPaidByParticipant(newPaidBy);
+            newPaidBy.setTotalPaid(newPaidBy.getTotalPaid().add(request.getAmount() != null ? request.getAmount() : oldAmount));
+            participantRepository.save(newPaidBy);
+        } else if (request.getAmount() != null && !request.getAmount().equals(oldAmount)) {
+            // Update payer's total paid with the difference
+            BigDecimal difference = request.getAmount().subtract(oldAmount);
+            oldPaidBy.setTotalPaid(oldPaidBy.getTotalPaid().add(difference));
+            participantRepository.save(oldPaidBy);
+        }
+
         if (request.getAmount() != null) {
             expense.setAmount(request.getAmount());
         }
@@ -123,8 +154,42 @@ public class ExpenseService {
         if (request.getDate() != null) {
             expense.setDate(request.getDate());
         }
+        if (request.getSplitType() != null) {
+            expense.setSplitType(request.getSplitType());
+        }
+        if (request.getReceiptUrl() != null) {
+            expense.setReceiptUrl(request.getReceiptUrl());
+        }
+
+        // Handle splits update
+        if (request.getSplits() != null) {
+            // Revert old splits
+            for (ExpenseSplit oldSplit : expenseSplitRepository.findByExpenseId(expenseId)) {
+                TripParticipant participant = oldSplit.getParticipant();
+                participant.setTotalOwed(participant.getTotalOwed().subtract(oldSplit.getAmount()));
+                participantRepository.save(participant);
+            }
+            expenseSplitRepository.deleteByExpenseId(expenseId);
+
+            // Create new splits
+            for (ExpenseSplitRequest splitReq : request.getSplits()) {
+                TripParticipant participant = participantRepository.findById(splitReq.getParticipantId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Participant not found"));
+
+                ExpenseSplit split = ExpenseSplit.builder()
+                        .expense(expense)
+                        .participant(participant)
+                        .amount(splitReq.getAmount())
+                        .build();
+                expenseSplitRepository.save(split);
+
+                participant.setTotalOwed(participant.getTotalOwed().add(splitReq.getAmount()));
+                participantRepository.save(participant);
+            }
+        }
 
         expense = expenseRepository.save(expense);
+        log.info("Expense updated: {}", expenseId);
         return mapToDTO(expense);
     }
 
@@ -135,17 +200,21 @@ public class ExpenseService {
         
         validateOwnerAccess(expense.getItinerary().getId(), user);
 
-        // Revert totals
+        // Revert payer's total paid
         TripParticipant paidBy = expense.getPaidByParticipant();
         paidBy.setTotalPaid(paidBy.getTotalPaid().subtract(expense.getAmount()));
         participantRepository.save(paidBy);
 
+        // Revert splits
         for (ExpenseSplit split : expenseSplitRepository.findByExpenseId(expenseId)) {
             TripParticipant participant = split.getParticipant();
             participant.setTotalOwed(participant.getTotalOwed().subtract(split.getAmount()));
             participantRepository.save(participant);
         }
 
+        // Delete splits first
+        expenseSplitRepository.deleteByExpenseId(expenseId);
+        
         expenseRepository.delete(expense);
         log.info("Expense deleted: {}", expenseId);
     }
@@ -180,6 +249,14 @@ public class ExpenseService {
     }
 
     // Settlements
+    public List<SettlementDTO> getSettlements(UUID itineraryId, User user) {
+        validateAccess(itineraryId, user);
+        return settlementRepository.findByItineraryIdOrderBySettledAtDesc(itineraryId)
+                .stream()
+                .map(this::mapSettlementToDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public SettlementDTO createSettlement(UUID itineraryId, CreateSettlementRequest request, User user) {
         validateAccess(itineraryId, user);
@@ -197,15 +274,15 @@ public class ExpenseService {
                 .fromParticipant(from)
                 .toParticipant(to)
                 .amount(request.getAmount())
-                .currency(request.getCurrency())
+                .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
                 .notes(request.getNotes())
                 .build();
 
         settlement = settlementRepository.save(settlement);
 
-        // Update balances
+        // Update balances - from pays to, so from's paid increases and to's owed decreases
         from.setTotalPaid(from.getTotalPaid().add(request.getAmount()));
-        to.setTotalOwed(to.getTotalOwed().add(request.getAmount()));
+        to.setTotalOwed(to.getTotalOwed().subtract(request.getAmount()));
         participantRepository.save(from);
         participantRepository.save(to);
 
@@ -213,11 +290,39 @@ public class ExpenseService {
         return mapSettlementToDTO(settlement);
     }
 
-    public List<SettlementDTO> getSettlements(UUID itineraryId, User user) {
+    @Transactional
+    public void deleteSettlement(UUID settlementId, User user) {
+        Settlement settlement = settlementRepository.findById(settlementId)
+                .orElseThrow(() -> new ResourceNotFoundException("Settlement not found"));
+        
+        validateOwnerAccess(settlement.getItinerary().getId(), user);
+
+        // Revert balances
+        TripParticipant from = settlement.getFromParticipant();
+        TripParticipant to = settlement.getToParticipant();
+        
+        from.setTotalPaid(from.getTotalPaid().subtract(settlement.getAmount()));
+        to.setTotalOwed(to.getTotalOwed().add(settlement.getAmount()));
+        participantRepository.save(from);
+        participantRepository.save(to);
+
+        settlementRepository.delete(settlement);
+        log.info("Settlement deleted: {}", settlementId);
+    }
+
+    public List<ParticipantBalanceDTO> calculateBalances(UUID itineraryId, User user) {
         validateAccess(itineraryId, user);
-        return settlementRepository.findByItineraryIdOrderBySettledAtDesc(itineraryId)
-                .stream()
-                .map(this::mapSettlementToDTO)
+        
+        List<TripParticipant> participants = participantRepository.findByItineraryId(itineraryId);
+        
+        return participants.stream()
+                .map(p -> ParticipantBalanceDTO.builder()
+                        .participantId(p.getId())
+                        .name(p.getName())
+                        .totalPaid(p.getTotalPaid())
+                        .totalOwed(p.getTotalOwed())
+                        .balance(p.getTotalPaid().subtract(p.getTotalOwed()))
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -256,6 +361,7 @@ public class ExpenseService {
                 .category(expense.getCategory())
                 .description(expense.getDescription())
                 .date(expense.getDate())
+                .receiptUrl(expense.getReceiptUrl())
                 .splitType(expense.getSplitType())
                 .splits(splits)
                 .createdAt(expense.getCreatedAt())
