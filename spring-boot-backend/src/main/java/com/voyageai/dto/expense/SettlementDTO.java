@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -23,5 +23,5 @@ public class SettlementDTO {
     private BigDecimal amount;
     private String currency;
     private String notes;
-    private LocalDateTime settledAt;
+    private OffsetDateTime settledAt;
 }

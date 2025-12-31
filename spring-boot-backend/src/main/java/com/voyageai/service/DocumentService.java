@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -105,7 +106,9 @@ public class DocumentService {
         }
 
         document.setOcrStatus(request.getStatus());
-        document.setOcrConfidence(request.getConfidence());
+        if (request.getConfidence() != null) {
+            document.setOcrConfidence(BigDecimal.valueOf(request.getConfidence()));
+        }
         document.setExtractedData(request.getExtractedData());
 
         if (request.getExtractedData() != null) {
