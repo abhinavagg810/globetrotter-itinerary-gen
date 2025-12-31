@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +28,6 @@ public class ExpenseDTO {
     private LocalDate date;
     private String receiptUrl;
     private String splitType;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     private List<ExpenseSplitDTO> splits;
 }
