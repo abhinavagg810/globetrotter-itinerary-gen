@@ -32,6 +32,13 @@ public class ParticipantService {
                 .collect(Collectors.toList());
     }
 
+    public ParticipantDTO getParticipant(UUID participantId, User user) {
+        TripParticipant participant = participantRepository.findById(participantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Participant not found"));
+        validateAccess(participant.getItinerary().getId(), user);
+        return mapToDTO(participant);
+    }
+
     @Transactional
     public ParticipantDTO addParticipant(UUID itineraryId, AddParticipantRequest request, User user) {
         validateOwnerAccess(itineraryId, user);
@@ -117,6 +124,7 @@ public class ParticipantService {
     private ParticipantDTO mapToDTO(TripParticipant participant) {
         return ParticipantDTO.builder()
                 .id(participant.getId())
+                .itineraryId(participant.getItinerary().getId())
                 .userId(participant.getUser() != null ? participant.getUser().getId() : null)
                 .name(participant.getName())
                 .email(participant.getEmail())

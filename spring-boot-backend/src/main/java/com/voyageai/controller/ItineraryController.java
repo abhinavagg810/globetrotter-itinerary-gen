@@ -27,7 +27,7 @@ public class ItineraryController {
     @GetMapping
     @Operation(summary = "Get all itineraries for current user")
     public ResponseEntity<List<ItineraryDTO>> getAllItineraries(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(itineraryService.getAllItineraries(user));
+        return ResponseEntity.ok(itineraryService.getUserItineraries(user));
     }
 
     @GetMapping("/{id}")
@@ -36,7 +36,7 @@ public class ItineraryController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok(itineraryService.getItinerary(user, id));
+        return ResponseEntity.ok(itineraryService.getItinerary(id, user));
     }
 
     @PostMapping
@@ -45,7 +45,7 @@ public class ItineraryController {
             @AuthenticationPrincipal User user,
             @Valid @RequestBody CreateItineraryRequest request
     ) {
-        return ResponseEntity.ok(itineraryService.createItinerary(user, request));
+        return ResponseEntity.ok(itineraryService.createItinerary(request, user));
     }
 
     @PutMapping("/{id}")
@@ -55,7 +55,7 @@ public class ItineraryController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateItineraryRequest request
     ) {
-        return ResponseEntity.ok(itineraryService.updateItinerary(user, id, request));
+        return ResponseEntity.ok(itineraryService.updateItinerary(id, request, user));
     }
 
     @DeleteMapping("/{id}")
@@ -64,45 +64,16 @@ public class ItineraryController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        itineraryService.deleteItinerary(user, id);
+        itineraryService.deleteItinerary(id, user);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/generate")
-    @Operation(summary = "Generate an AI-powered itinerary")
-    public ResponseEntity<ItineraryDTO> generateItinerary(
+    @PostMapping("/save-generated")
+    @Operation(summary = "Save a generated itinerary")
+    public ResponseEntity<ItineraryDTO> saveGeneratedItinerary(
             @AuthenticationPrincipal User user,
-            @Valid @RequestBody GenerateItineraryRequest request
+            @Valid @RequestBody SaveGeneratedItineraryRequest request
     ) {
-        return ResponseEntity.ok(itineraryService.generateItinerary(user, request));
-    }
-
-    @PostMapping("/days/{dayId}/regenerate")
-    @Operation(summary = "Regenerate a specific day using AI")
-    public ResponseEntity<ItineraryDayDTO> regenerateDay(
-            @AuthenticationPrincipal User user,
-            @PathVariable UUID dayId,
-            @Valid @RequestBody RegenerateDayRequest request
-    ) {
-        return ResponseEntity.ok(itineraryService.regenerateDay(user, dayId, request));
-    }
-
-    @PostMapping("/activities")
-    @Operation(summary = "Add an activity to a day")
-    public ResponseEntity<ActivityDTO> addActivity(
-            @AuthenticationPrincipal User user,
-            @Valid @RequestBody CreateActivityRequest request
-    ) {
-        return ResponseEntity.ok(itineraryService.addActivity(user, request));
-    }
-
-    @DeleteMapping("/activities/{activityId}")
-    @Operation(summary = "Delete an activity")
-    public ResponseEntity<Void> deleteActivity(
-            @AuthenticationPrincipal User user,
-            @PathVariable UUID activityId
-    ) {
-        itineraryService.deleteActivity(user, activityId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(itineraryService.saveGeneratedItinerary(request, user));
     }
 }

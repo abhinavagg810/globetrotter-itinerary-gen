@@ -30,7 +30,7 @@ public class ParticipantController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID itineraryId
     ) {
-        return ResponseEntity.ok(participantService.getParticipants(user, itineraryId));
+        return ResponseEntity.ok(participantService.getParticipants(itineraryId, user));
     }
 
     @GetMapping("/{id}")
@@ -39,16 +39,17 @@ public class ParticipantController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok(participantService.getParticipant(user, id));
+        return ResponseEntity.ok(participantService.getParticipant(id, user));
     }
 
-    @PostMapping
+    @PostMapping("/itinerary/{itineraryId}")
     @Operation(summary = "Add a participant to an itinerary")
     public ResponseEntity<ParticipantDTO> addParticipant(
             @AuthenticationPrincipal User user,
-            @Valid @RequestBody CreateParticipantRequest request
+            @PathVariable UUID itineraryId,
+            @Valid @RequestBody AddParticipantRequest request
     ) {
-        return ResponseEntity.ok(participantService.addParticipant(user, request));
+        return ResponseEntity.ok(participantService.addParticipant(itineraryId, request, user));
     }
 
     @PutMapping("/{id}")
@@ -58,7 +59,7 @@ public class ParticipantController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateParticipantRequest request
     ) {
-        return ResponseEntity.ok(participantService.updateParticipant(user, id, request));
+        return ResponseEntity.ok(participantService.updateParticipant(id, request, user));
     }
 
     @DeleteMapping("/{id}")
@@ -67,7 +68,7 @@ public class ParticipantController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        participantService.removeParticipant(user, id);
+        participantService.removeParticipant(id, user);
         return ResponseEntity.noContent().build();
     }
 }
