@@ -6,6 +6,7 @@ import com.voyageai.service.DocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,44 +33,38 @@ public class DocumentController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID itineraryId
     ) {
-        return ResponseEntity.ok(documentService.getDocumentsByItinerary(user, itineraryId));
+        return ResponseEntity.ok(documentService.getDocuments(itineraryId, user));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get document by ID")
-    public ResponseEntity<DocumentDTO> getDocument(
+    @GetMapping("/itinerary/{itineraryId}/type/{documentType}")
+    @Operation(summary = "Get documents by type for an itinerary")
+    public ResponseEntity<List<DocumentDTO>> getDocumentsByType(
             @AuthenticationPrincipal User user,
-            @PathVariable UUID id
+            @PathVariable UUID itineraryId,
+            @PathVariable String documentType
     ) {
-        return ResponseEntity.ok(documentService.getDocument(user, id));
+        return ResponseEntity.ok(documentService.getDocumentsByType(itineraryId, documentType, user));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/itinerary/{itineraryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload a document")
     public ResponseEntity<DocumentDTO> uploadDocument(
             @AuthenticationPrincipal User user,
+            @PathVariable UUID itineraryId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("itineraryId") UUID itineraryId,
-            @RequestParam("documentType") String documentType,
-            @RequestParam(value = "providerName", required = false) String providerName,
-            @RequestParam(value = "bookingReference", required = false) String bookingReference
-    ) {
-        UploadDocumentRequest request = UploadDocumentRequest.builder()
-                .itineraryId(itineraryId)
-                .documentType(documentType)
-                .providerName(providerName)
-                .bookingReference(bookingReference)
-                .build();
-        return ResponseEntity.ok(documentService.uploadDocument(user, file, request));
+            @RequestParam("documentType") String documentType
+    ) throws IOException {
+        return ResponseEntity.ok(documentService.uploadDocument(itineraryId, file, documentType, user));
     }
 
-    @PostMapping("/{id}/process-ocr")
-    @Operation(summary = "Process document with OCR")
-    public ResponseEntity<DocumentDTO> processOcr(
+    @PutMapping("/{id}/ocr-result")
+    @Operation(summary = "Update document OCR result")
+    public ResponseEntity<DocumentDTO> updateOcrResult(
             @AuthenticationPrincipal User user,
-            @PathVariable UUID id
+            @PathVariable UUID id,
+            @Valid @RequestBody OcrResultRequest request
     ) {
-        return ResponseEntity.ok(documentService.processOcr(user, id));
+        return ResponseEntity.ok(documentService.updateDocumentOcrResult(id, request, user));
     }
 
     @DeleteMapping("/{id}")
@@ -77,7 +73,7 @@ public class DocumentController {
             @AuthenticationPrincipal User user,
             @PathVariable UUID id
     ) {
-        documentService.deleteDocument(user, id);
+        documentService.deleteDocument(id, user);
         return ResponseEntity.noContent().build();
     }
 }
