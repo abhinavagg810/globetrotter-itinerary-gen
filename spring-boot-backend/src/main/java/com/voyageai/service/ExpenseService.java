@@ -234,7 +234,7 @@ public class ExpenseService {
         List<ParticipantBalanceDTO> balances = participants.stream()
                 .map(p -> ParticipantBalanceDTO.builder()
                         .participantId(p.getId())
-                        .name(p.getName())
+                        .participantName(p.getName())
                         .totalPaid(p.getTotalPaid())
                         .totalOwed(p.getTotalOwed())
                         .balance(p.getTotalPaid().subtract(p.getTotalOwed()))
@@ -242,8 +242,11 @@ public class ExpenseService {
                 .collect(Collectors.toList());
 
         return ExpenseSummaryDTO.builder()
+                .itineraryId(itineraryId)
                 .totalExpenses(total != null ? total : BigDecimal.ZERO)
-                .categoryBreakdown(categoryBreakdown)
+                .currency("INR")
+                .expenseCount(expenseRepository.findByItineraryIdOrderByDateDesc(itineraryId).size())
+                .expensesByCategory(categoryBreakdown)
                 .participantBalances(balances)
                 .build();
     }
@@ -318,7 +321,7 @@ public class ExpenseService {
         return participants.stream()
                 .map(p -> ParticipantBalanceDTO.builder()
                         .participantId(p.getId())
-                        .name(p.getName())
+                        .participantName(p.getName())
                         .totalPaid(p.getTotalPaid())
                         .totalOwed(p.getTotalOwed())
                         .balance(p.getTotalPaid().subtract(p.getTotalOwed()))
