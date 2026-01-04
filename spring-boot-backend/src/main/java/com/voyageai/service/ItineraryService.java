@@ -10,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,6 +26,7 @@ public class ItineraryService {
     private final ItineraryDayRepository itineraryDayRepository;
     private final ActivityRepository activityRepository;
     private final TripParticipantRepository participantRepository;
+    private final AIService aiService;
 
     public List<ItineraryDTO> getUserItineraries(User user) {
         log.info("Fetching itineraries for user: {}", user.getId());
@@ -161,6 +165,64 @@ public class ItineraryService {
         participantRepository.save(ownerParticipant);
 
         return mapToDetailedDTO(itineraryRepository.findById(itinerary.getId()).orElseThrow());
+    }
+
+    /**
+     * Generate a new itinerary using AI
+     */
+    public GeneratedItineraryDTO generateItinerary(GenerateItineraryRequest request) {
+        log.info("Generating AI itinerary for destinations: {}", request.getDestinations());
+        return aiService.generateItinerary(request);
+    }
+
+    /**
+     * Regenerate a specific day in an itinerary using AI
+     */
+    @Transactional
+    public RegeneratedDayDTO regenerateDay(UUID itineraryId, RegenerateDayRequest request, User user) {
+        Itinerary itinerary = findItineraryWithAccess(itineraryId, user);
+        log.info("Regenerating day {} for itinerary: {}", request.getDayNumber(), itineraryId);
+
+        // Call AI service to regenerate the day
+        RegeneratedDayDTO regeneratedDay = aiService.regenerateDay(request);
+
+        // Find and update the existing day
+        ItineraryDay existingDay = itineraryDayRepository
+                .findByItineraryIdOrderByDayNumber(itineraryId)
+                .stream()
+                .filter(d -> d.getDayNumber().equals(request.getDayNumber()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Day not found"));
+
+        // Update day properties
+        existingDay.setLocation(regeneratedDay.getLocation());
+        existingDay.setNotes(regeneratedDay.getNotes());
+
+        // Clear existing activities
+        activityRepository.deleteAll(existingDay.getActivities());
+        existingDay.getActivities().clear();
+
+        // Add new activities from regenerated day
+        if (regeneratedDay.getActivities() != null) {
+            for (ActivityDTO actDTO : regeneratedDay.getActivities()) {
+                Activity activity = Activity.builder()
+                        .itineraryDay(existingDay)
+                        .title(actDTO.getTitle())
+                        .description(actDTO.getDescription())
+                        .location(actDTO.getLocation())
+                        .category(actDTO.getCategory())
+                        .startTime(actDTO.getStartTime())
+                        .endTime(actDTO.getEndTime())
+                        .cost(actDTO.getCost())
+                        .build();
+                activityRepository.save(activity);
+            }
+        }
+
+        itineraryDayRepository.save(existingDay);
+        log.info("Day {} regenerated successfully", request.getDayNumber());
+
+        return regeneratedDay;
     }
 
     // Helper methods

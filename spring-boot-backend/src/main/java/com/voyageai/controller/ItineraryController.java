@@ -76,4 +76,23 @@ public class ItineraryController {
     ) {
         return ResponseEntity.ok(itineraryService.saveGeneratedItinerary(request, user));
     }
+
+    @PostMapping("/generate")
+    @Operation(summary = "Generate a new itinerary using AI")
+    public ResponseEntity<GeneratedItineraryDTO> generateItinerary(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody GenerateItineraryRequest request
+    ) {
+        return ResponseEntity.ok(itineraryService.generateItinerary(request));
+    }
+
+    @PostMapping("/{id}/regenerate-day")
+    @Operation(summary = "Regenerate a specific day using AI")
+    public ResponseEntity<RegeneratedDayDTO> regenerateDay(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID id,
+            @Valid @RequestBody RegenerateDayRequest request
+    ) {
+        return ResponseEntity.ok(itineraryService.regenerateDay(id, request, user));
+    }
 }
